@@ -1,0 +1,23 @@
+{
+  "name": "server",
+  "version": "2.0.0",
+  "description": "This is the Campus Safety Dispatch Server that handles all the database integration and resource storage.",
+  "license": "ISC",
+  "author": "Josh Eilu & Kuria Moses",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^6.3.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "nodemon": "^3.1.10",
+    "pg": "^8.16.3"
+  }
+}

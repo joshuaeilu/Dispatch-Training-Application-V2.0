@@ -1,0 +1,14 @@
+{
+  "type": "service_account",
+  "project_id": "halogen-lacing-394021",
+  "private_key_id": "4a38fb851c67190dce8dfefda72c9a5757027543",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDX5kRRAVoUFtrS\nQIeU8rFdnycxUdHPMyfv5lp43LP+IHk1xRcn3lbFADx/w189MCAX3t/paidTjShK\nSttbtlrYpx1t7kizPvKisKOS7GfMfKlXgxHEoVQMkwU1woXpcsu7T3nhKVmFGO4p\nruICmWesbo5q2FgPh4VN/wX2XDxbkK1yOKD2AMgMdYKh0t1S1Tm0mkdEArnlJcF+\npaoa58ssOA+08vNqXWtTM62OcOx67Sem06AoIb7VcAV38nzDhU2fFz/FPx1xn8ra\nqvA8MwKKFbkkcxSi8EUoMN/dNbV7CSZT3rDbD7Rvo9Cn6iCsxOCM8Qc4R+r32Krc\nAXgqIMm7AgMBAAECggEACPQ11R43PCoOfTXL6bN/A6D8ISGBkBRRDbQCAI02sc1q\n+X3pDfA8rQLrf2j85C7AxfyqUKXkZ6StDRe5rT4M2ntjzxFY1oY/zduBjTBcxbBN\n3aFD9WGzeKoIR0iAAUSPin8rUNlEKy7zgasNGIqAMDiNk4TRciNuteNjvenpXuq3\noTuGNkrAp+rN1kGXjnL+zTgMJvZ9s4l//fWgZyZ4TXNd78eXLg7fTpU1PF2WCde+\npCoda4ewBBOeqkbfKarJxFD/oKHuskdY6IFwBQclLWeYdueQ22cMvAgx+1sVS6Jz\nMt2NKLhj8Ard3gVpZvJnYFemQsoqP8DSWaN7E78HEQKBgQD2VB8M2FVQLHohBPO7\nR2MO2qlFk0qM3ISZcpi/7YaeFjC8qAq4bdH6KZtzrKxzrqc+NWcFdHWyein5wQsv\nW7uMQJwpSvdnVenuwsM7EP9pKcicjfUChhJm+pCzcuV+PWp0277LLsFpOpPguJcZ\nLk7apC5gcu/0FpBDqwtwICj3hQKBgQDgYEx957Q7iEApMGwN4oRSY8BG6q2Qfg/G\ntW82NQVNHfiwYDaA6AHM86vVhNJfnBHgCG3GD666b6b9B/KoVtbOc4GvqQnMsXak\niXZB1xO+n1VpleyrK2FXAydssWsXhruf05qGtQNyiWDCE49c+18C0zBqo2Vt8KDt\n1c3XInJgPwKBgC6WjGTWiZQnRVX3ZM2X29FUY81n5SKtFlsbRG6QUvSVR9R2h8iH\n5L3GnsMK9nbOoozudrSeaSA/YK7+5smnNNp64c4hgpdFtX/V0CzcsyHFqE6Lvroi\nd1qIq1N1OJher0K4yOYOyr/HN266GsHFc16AzNCrDF0C43gY4onrWzQtAoGBAI6g\nSB9EeQnaq0ZDdHxC/+/LXr71kEyoBWk/jaj8fRkvMxUSo7K/R927CwCYBI4oDCjH\n0teywlPag2CWe8ZMJRFo1QgPQJ5wNEWU56okiHWEnOuYFLAdzCteYuIxySxURdHr\n1W9Jgx58exgDDP+C/jsyebVflisTaYilfsoBKIlLAoGAXPgm7f3LuVP8g7vLsMgi\neckM1yTNlwlW1dwk0Tg0CMQ/6F3Oub+0EoQS2pKKYsKlnYaRxnh/aouF9VJDYDTc\nnbYO/08tYaT9VOFxg7EChODVpFTCOL6s4fmWqRJPwEMbiUrpVzKVqAfbHlwKMvlJ\na+rGdrvoJQmu/RS2+qeMvfU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "dispatch-training-app-418@halogen-lacing-394021.iam.gserviceaccount.com",
+  "client_id": "106672155815750081108",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dispatch-training-app-418%40halogen-lacing-394021.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
+
