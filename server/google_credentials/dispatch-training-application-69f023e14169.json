@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "dispatch-training-application",
+  "private_key_id": "69f023e1416991965aca028e25b5771a4a7a5c03",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpKYjrVzqKKklp\nqxXtH7xYuuaNT2ouKvl8MMLTmZ6MSQyCd8V6i0IqWPYp/3icslOi3rHaXvxsC3Pp\nXAYEsRwRnlFI+1HtyQA+Kt4brN4e3w1rAhUZ2WS8i3nsfty2mHkqc62eoNaAmSar\nKKX4Kxde6nsY5vNm8NwPDGNeWUcUya0bz+Gz1MgLaN0JyFjZnPLMKPygJWSFmWQ6\ndW7MY6P7FeoR0L+W5vozJyfcyp7ZkQHCdHuY4AXY0ILMoxdoR8SP/tu1b3hx7J1Z\nVQ35Aalie84fkSDOc51b/mcyxr/Tb1R3hnYDcAjcSXa3wNa0gyLGiQzkWzm4IBFu\nDkT7URInAgMBAAECggEAA7VuPov4M8JElMVUTZFrYt30zbam2HdHEVLNBVryBReu\n51yyiYLBwxrrNArZUpooR5hZTt/T6eyAWzvnbTU9gndgRy4suClhe3twyNY2kney\ncXJSExyB3w5ccHPBlAaYwCEEIUexHDr/WYj3xo6Z9xHt+/hIRYKqAxxy60UgJVOo\n0FTF1HqF/TdiKGonfrx9wFSL8hawR25mEpEJ3iRRtu6zVZrxMtKaD4SDHwWSgeXU\nWltt/b63fzPLwSO8EctUj3/DB+m9DoNmLQKyZS99bWq+skTigEKeN1wh8MYpkIe9\nmOHh7TXAKnF11InqDshqX6DT1x6ORZvSu3Xa4i6JOQKBgQDUSLQ7UeuQgpIiPV96\nsnceqni5/kWU1mSPDDDEzwqYcYCgWVR298tleS5dFfREKI25iOWb+5CSg6eReh1g\n4cd5quB8qKDc6KAiqHvqAiDr35U70TIOissqk5N9jDphdwWtS8rIbdEVwFOuy1Ax\nyOjKJ7H58hAS098lsmv/zITrOQKBgQDL/4QlupsvNPkrJANyLAUqmvgLDItStO9+\nkRpUrHSJ2DNlSE7iqUyJ/Dzqz72zyBXL+kmIfPcYPjaFXPJ6W7qFPwluV2mAcHtN\n3hilIOqq/48ZiMvqHt/dAW3bvYOMWpOecsRac61+GzmVzHlySPfySLBjGkBzkHee\nFu4jj8QIXwKBgCUScU8utjmtY8HQ//yYcA8N7Dlm+1XLvxHwKhAkrBAFOlZGY2bH\nTWDyMbOV4uuIPX/aNWbxHsVHcpsIPVsu8rv/qGZ8uGL7yQNkcwdhycgHarNgjCJY\nALT1wrsZIxTkSTyDUO2BqBLpXHPZE68uC+FJ313r9PykvYKCzzODzu6ZAoGAJNhg\nyOO8dblOq9EUYkG7KSfWV0CLxYNyolyY8eQ4JFGNbuSxgtTrQxzw78RX0in4beAl\n+eYARzutY0cXcKwyszBghrJ5Fr66NqU/tEuOtxXzhbwkgIPVETjZ28+N/AK8GOlH\nt8Ke+mD2dKz63n55ciRY3311WKomQMKJfpjP4mcCgYEApEo6B+dYdJQbU7J2Muh6\npBS6JSTCKUkpLHo2F32SsP+P6jp46soKmoreZ1y79l69bZasvUyVjzdrnyisecyh\nTBvhxmIVRSJFSz/8RbM2co5AmEPMSXbOIC9mlzpn9gIj3KwUIU2xy6Ou4JSi7nci\nsFmEXXdnIRV2occmYSG5G1c=\n-----END PRIVATE KEY-----\n",
+  "client_email": "dispatch-training-app@dispatch-training-application.iam.gserviceaccount.com",
+  "client_id": "100749609520479085698",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dispatch-training-app%40dispatch-training-application.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
