@@ -5,7 +5,7 @@ import { Protected } from './Protected'
 import ViewScenarios from './components/Administrator/ScenarioManager/ViewScenarios'
 import SituationSetterCard from './components/Administrator/ScenarioManager/AddScenario/SituationSetter'
 import SituationSetter from './components/Administrator/ScenarioManager/AddScenario/SituationSetter'
-import ScenarioEditor from './components/Administrator/ScenarioManager/AddScenario/ScenarioEditor'
+import ScenarioEditor from './components/Administrator/ScenarioManager/AddScenario/ScenarioEditor/ScenarioEditor'
 
 function App() {
 

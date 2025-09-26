@@ -1,5 +1,5 @@
 import { Card, Typography, Radio, Space, Tag, Popconfirm, Dropdown, Menu, Button } from "antd";
-import type { Scenario, Scene, SceneEditorProps } from "../../../../types/index.types";
+import type { Scenario, Scene, SceneEditorProps } from "../../../../../types/index.types";
 import { DeleteOutlined, MoreOutlined, UserOutlined } from "@ant-design/icons";
 import {
   DragDropContext,

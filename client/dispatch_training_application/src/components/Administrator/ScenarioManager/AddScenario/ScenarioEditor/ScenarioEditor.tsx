@@ -1,6 +1,6 @@
 import { Space, Button, Typography, Radio, Modal, Tooltip, Popconfirm } from "antd";
 import { ArrowLeftOutlined, CloseOutlined, DeleteOutlined, SaveOutlined } from "@ant-design/icons";
-import SceneEditor from "./MainContent/SceneEditor";
+import SceneEditor from "./SceneEditor";
 import 'antd/dist/reset.css'; // AntD v5
 import { Skeleton } from "antd";
 import { debounce } from "lodash"; // install with npm i lodash
@@ -8,14 +8,14 @@ import MOP2025 from "../../../../assets/MOP2025.pdf";
 import { v4 as uuidv4 } from 'uuid';
 
 import { useState, useRef, useEffect } from "react";
-import type { HighlightData, Scenario } from "../../../../types/index.types";
-import PdfViewer from "./MainContent/PdfViewer";
+import type { HighlightData, Scenario } from "../../../../../types/index.types";
+import PdfViewer from "./PdfViewer";
 import { useLocation } from "react-router-dom";
-import { toTitleCase } from "../../../../utils/tools";
+import { toTitleCase } from "../../../../../utils/tools";
 import SceneOverview from "./SceneOverview";
-import { api } from "../../../../utils/api";
+import { api } from "../../../../../utils/api";
 import { useContext } from "react";
-import { AuthContext } from "../../../../contexts/AuthProvider";
+import { AuthContext } from "../../../../../contexts/AuthProvider";
 import { Toaster, toast } from 'react-hot-toast';
 export default function ScenarioEditor() {
   const { Title } = Typography;
@@ -109,7 +109,7 @@ if (!scenarioDetails) {
       } catch (err) {
         console.error("❌ Autosave failed:", err);
       }
-    }, 2000) // save 2s after last change
+    }, 5000) // save 2s after last change
   ).current;
 
   useEffect(() => {

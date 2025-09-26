@@ -1,9 +1,9 @@
 import { Modal, Input, Select, Button, Typography, message } from "antd";
 import { PlayCircleFilled, PauseCircleFilled, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import type { Speaker } from "../../../../../types/index.types";
+import type { Speaker } from "../../../../../../types/index.types";
 import { v4 as uuidv4 } from 'uuid';
 import { useContext, useEffect, useRef, useState } from "react";
-import { AuthContext } from "../../../../../contexts/AuthProvider";
+import { AuthContext } from "../../../../../../contexts/AuthProvider";
 
 export default function AudioEditorModal({
   visible,

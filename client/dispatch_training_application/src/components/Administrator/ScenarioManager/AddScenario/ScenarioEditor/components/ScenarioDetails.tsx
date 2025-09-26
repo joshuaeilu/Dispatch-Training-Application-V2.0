@@ -1,12 +1,12 @@
 
 import { Button, Form, Input, Select, Space, TimePicker, Typography, message } from 'antd';
-import type { Scenario, SceneEditorProps } from '../../../../../types/index.types';
+import type { Scenario, SceneEditorProps } from '../../../../../../types/index.types';
 import { useContext, useMemo } from 'react';
-import { UniversalContext } from '../../../../../contexts/UniversalHelpers';
+import { UniversalContext } from '../../../../../../contexts/UniversalHelpers';
 import dayjs from 'dayjs';
 import { useState } from 'react';
-import { api } from '../../../../../utils/api';
-import { toTitleCase } from '../../../../../utils/tools';
+import { api } from '../../../../../../utils/api';
+import { toTitleCase } from '../../../../../../utils/tools';
 
 export interface ScenarioDetailsProps {
   scenario: Scenario;

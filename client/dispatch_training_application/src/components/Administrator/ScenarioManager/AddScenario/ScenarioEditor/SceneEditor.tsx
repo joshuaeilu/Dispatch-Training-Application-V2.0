@@ -1,7 +1,7 @@
 import { Button, Card, Divider, Empty, Input, Popover, Select, Space, Tabs, Typography } from "antd";
 import { useState } from "react";
-import SceneEditorPage from "./SceneEditorPage";
-import ScenarioDetails from "./ScenarioDetails";
+import SceneEditorPage from "./components/SceneEditorPage";
+import ScenarioDetails from "./components/ScenarioDetails";
 import type { Scenario, SceneEditorProps } from "../../../../../types/index.types";
 
 
