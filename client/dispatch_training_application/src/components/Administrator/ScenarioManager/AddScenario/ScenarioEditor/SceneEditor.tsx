@@ -6,7 +6,7 @@ import type { Scenario, SceneEditorProps } from "../../../../../types/index.type
 
 
 
-export default function SceneEditor({ scenario, setScenario, currentIndex, setCurrentIndex, scrollHighlight }: SceneEditorProps) {
+export default function SceneEditor({ scenario, setScenario, currentIndex, setCurrentIndex, scrollHighlight, playing, setPlaying, audioRef }: SceneEditorProps) {
     const [activeTab, setActiveTab] = useState('2');
     
     
@@ -43,7 +43,7 @@ onChange={key => setActiveTab(key)}
 )}
 
 {activeTab === '2' && (
-        <SceneEditorPage scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollHighlight={scrollHighlight} />
+        <SceneEditorPage scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollHighlight={scrollHighlight} playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
 )}
 
         </div>

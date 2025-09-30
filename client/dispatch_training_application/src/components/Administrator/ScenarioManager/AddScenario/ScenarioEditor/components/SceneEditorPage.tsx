@@ -1,7 +1,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { Button, Divider, Empty, Input, Popover, Select, Typography, message } from "antd";
 import { PauseCircleFilled, PlayCircleFilled, PlusOutlined } from "@ant-design/icons";
-import { useContext, useEffect, useRef, useState } from "react";
+import { use, useContext, useEffect, useRef, useState } from "react";
 import type { HighlightData, Scenario, SceneEditorProps } from "../../../../../../types/index.types";
 import SceneOptionsEditor from "./SceneOptionsEditor";
 import HighlightTagSection from "./HighlightTagSection";
@@ -19,15 +19,14 @@ export default function SceneEditorPage({
   setScenario,
   currentIndex,
   setCurrentIndex,
-  scrollHighlight,
+  scrollHighlight, audioRef,
+  playing, setPlaying
 }: SceneEditorProps) {
   const scene = scenario.scenes[currentIndex];
   const [messageApi, contextHolder] = message.useMessage();
   const [tipOpen, setTipOpen] = useState(false);
   const [loadingAudio, setLoadingAudio] = useState(false);
   const [showAudioEditor, setShowAudioEditor] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
 
   const {
@@ -55,11 +54,9 @@ export default function SceneEditorPage({
     const hasOptions = currentScene.options && currentScene.options.length > 0;
     const hasCorrect = !!currentScene.correctOption;
 
-    if (!hasOptions) {
-      return messageApi.error("Please add at least one scene option.");
-    }
+   
 
-    if (!hasCorrect) {
+    if (hasOptions && !hasCorrect) {
       return messageApi.error("Please mark the correct option.");
     }
 
@@ -167,13 +164,9 @@ export default function SceneEditorPage({
     }
   };
 
-  const handleStopDescription = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setPlaying(false);
-    }
-  };
+ 
+
+
 
 
 
@@ -237,7 +230,7 @@ export default function SceneEditorPage({
                 </Option>
               ))}
               <Option value="add_new_speaker" style={{ fontStyle: "italic" }}>
-                + Add New Speaker
+                + Add / Edit Speaker
               </Option>
             </Select>
           )}
@@ -262,6 +255,7 @@ export default function SceneEditorPage({
                 placeholder="Describe what is happening in this scene..."
                 style={{
                   width: "100%",
+                  minHeight: 100,
                   marginTop: 8,
                   marginBottom: errors.sceneDescription ? 4 : 16,
                   borderColor: errors.sceneDescription ? "#ff4d4f" : undefined,
@@ -376,7 +370,7 @@ export default function SceneEditorPage({
             <Button type="dashed">Add Tip</Button>
           </Popover>
 
-          <Button type="primary" htmlType="submit" icon={<PlusOutlined />} disabled={scenario.scenes[currentIndex].options.length === 0 || scenario.scenes[currentIndex].correctOption === null}>
+          <Button type="primary" htmlType="submit" icon={<PlusOutlined />} disabled={scenario.scenes[currentIndex].options.length > 0 && scenario.scenes[currentIndex].correctOption === null}>
             Add New Scene
           </Button>
           {contextHolder}

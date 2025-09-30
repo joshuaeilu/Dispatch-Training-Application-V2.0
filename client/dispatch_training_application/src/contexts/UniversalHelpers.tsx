@@ -6,16 +6,20 @@ import { api } from '../utils/api';
 type Context = {
     preferences: AdminPreferences | null;
     setPreferences: (prefs: AdminPreferences | null) => void;
+    selectedKey: string;
+    setSelectedKey: (key: string) => void;
 }
 
 export const UniversalContext = createContext<Context>({
     preferences: null,
-    setPreferences: () => {}
+    setPreferences: () => {},
+    selectedKey: '',
+    setSelectedKey: () => {},
 });
 
 export function UniversalProvider({ children }: { children: React.ReactNode }) {
     const [preferences, setPreferences] = useState<AdminPreferences | null>(null);
-
+    const [selectedKey, setSelectedKey] = useState<string>('dashboard');
 
      useEffect(() => {
         const fetchPreferences = async () => {
@@ -33,7 +37,7 @@ export function UniversalProvider({ children }: { children: React.ReactNode }) {
       }, []);
 
     return (
-        <UniversalContext.Provider value={{ preferences, setPreferences }}>
+        <UniversalContext.Provider value={{ preferences, setPreferences, selectedKey, setSelectedKey }}>
             {children}
         </UniversalContext.Provider>
     );

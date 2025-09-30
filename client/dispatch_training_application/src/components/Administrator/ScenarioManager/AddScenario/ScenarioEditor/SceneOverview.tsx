@@ -13,6 +13,7 @@ interface SceneOverviewProps{
   setScenario: React.Dispatch<React.SetStateAction<Scenario>>;
   currentIndex: number;
   setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
+  stopAudio: () => void;
 }
 
 // Reorder utility
@@ -30,6 +31,7 @@ export default function SceneOverview({
   setScenario,
   currentIndex,
   setCurrentIndex,
+  stopAudio,
 }: SceneOverviewProps) {
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -41,6 +43,7 @@ export default function SceneOverview({
   };
 
 const handleDeleteScene = (indexToDelete: number) => {
+  stopAudio();
   setScenario((prevScenario) => {
     const updatedScenes = [...prevScenario.scenes];
     if (indexToDelete < 0 || indexToDelete >= updatedScenes.length) {

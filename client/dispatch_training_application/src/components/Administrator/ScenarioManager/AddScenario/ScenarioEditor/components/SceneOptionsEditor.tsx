@@ -13,8 +13,13 @@ import {
   DeleteOutlined,
   CheckOutlined,
   EditOutlined,
+  DotChartOutlined,
+  RadiusUpleftOutlined,
+  CheckCircleFilled,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 import { useState } from 'react';
+import RadioButton from 'antd/es/radio/radioButton';
 
 interface SceneOptionsEditorProps {
   options: string[];
@@ -96,7 +101,7 @@ export default function SceneOptionsEditor({
                 <Tooltip title="Mark correct">
                   <Button
                     type="link"
-                    icon={<CheckOutlined />}
+                    icon={<CheckCircleOutlined />}
                     onClick={() => onCorrectChange(option)}
                   />
                 </Tooltip>

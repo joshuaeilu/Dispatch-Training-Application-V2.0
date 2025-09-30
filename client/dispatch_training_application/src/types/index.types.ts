@@ -32,6 +32,7 @@ export type HighlightData = {
   endOffset: number;          // End offset in the span
   rects: HighlightRect[];     // Bounding boxes of the highlighted area
 };
+
 export type PdfViewerProps = {
   // pdfUrl: string;
   highlights: HighlightData[];
@@ -84,6 +85,9 @@ export type AdminPreferences = {
 export interface SceneEditorProps {
   scenario: Scenario;
   setScenario: React.Dispatch<React.SetStateAction<Scenario>>;
+  playing: boolean;
+  setPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   currentIndex: number;
   setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
   scrollHighlight: (highlight: HighlightData) => void;

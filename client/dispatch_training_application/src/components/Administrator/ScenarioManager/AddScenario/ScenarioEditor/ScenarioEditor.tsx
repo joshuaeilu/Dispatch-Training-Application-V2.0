@@ -59,6 +59,20 @@ if (!scenarioDetails) {
   const [lastSavedScenario, setLastSavedScenario] = useState<Scenario | null>(scenario);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
+  // Audio playback ref
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [playing, setPlaying] = useState(false);
+
+
+     const stopAudio = () => {
+  if (audioRef.current) {
+    audioRef.current.pause();
+    audioRef.current = null;
+    setPlaying(false);
+  }
+};
+
+
 
   const scrollToHighlight = (h: HighlightData) => {
     const container = scrollContainerRef.current;
@@ -253,7 +267,7 @@ if (!scenarioDetails) {
 
         {/* Main Content Area */}
         <div style={{ height: '90%', display: 'flex', flexDirection: 'row' }}>
-          <SceneEditor scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollHighlight={(highlight: HighlightData) => scrollToHighlight(highlight)} />
+          <SceneEditor scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollHighlight={(highlight: HighlightData) => scrollToHighlight(highlight)} playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
           <PdfViewer highlights={scenario.scenes[currentIndex]?.highlights || []} setHighlights={(highlights) => {
             setScenario((prev) => ({
               ...prev,
@@ -263,7 +277,7 @@ if (!scenarioDetails) {
             }));
           }}
             scrollContainerRef={scrollContainerRef} pageRefs={pageRefs} />
-          <SceneOverview scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} />
+          <SceneOverview scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} stopAudio={stopAudio} />
         </div>
       </Skeleton>
 

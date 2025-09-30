@@ -85,6 +85,8 @@ const App: React.FC = () => {
       height: '100%',
     }}
   >
+
+    
     {/* Top section */}
     <div style={{ textAlign: 'center', marginBottom: 16 }}>
       <img
