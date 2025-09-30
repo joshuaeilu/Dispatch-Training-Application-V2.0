@@ -2,7 +2,12 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../../db'); // PostgreSQL pool
 const { auth } = require('../middleware/auth');
-
+const textToSpeech = require('@google-cloud/text-to-speech');
+const client = new textToSpeech.TextToSpeechClient({
+  keyFilename: "C:/Users/Josh Eilu/Downloads/dispatch-training-application-69f023e14169.json"
+});
+const path = require('path');
+const fs = require('fs');
 
 router.get("/", async (req, res) => {
   try {
@@ -115,5 +120,55 @@ router.delete("/:id",auth(['admin']), async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 });
+
+// POST /api/scenarios/:id/generate-audio
+router.post('/:id/generate-audio', auth(['admin']), async (req, res) => {
+  const scenarioId = req.params.id;
+  const { scenes, speakers } = req.body; // frontend sends scenario.scenes + scenario.speakers
+
+  // folder path
+  const audioDir = path.join(__dirname, '..', 'scenario_audios', scenarioId);
+
+  // remove old folder
+  fs.rmSync(audioDir, { recursive: true, force: true });
+  fs.mkdirSync(audioDir, { recursive: true });
+
+  const generatedFiles = [];
+
+  for (let i = 0; i < scenes.length; i++) {
+    const scene = scenes[i];
+    const speaker = speakers.find(s => s.name === scene.speaker);
+    if (!speaker?.voice || !scene.sceneDescription) continue;
+
+    // Google TTS request
+    const request = {
+      input: { text: scene.sceneDescription },
+      voice: {
+        languageCode: 'en-US',
+        name: speaker.voice, // e.g. en-US-Chirp3-HD-Achernar
+      },
+      audioConfig: {
+        audioEncoding: 'MP3',
+      },
+    };
+
+    try {
+      const [response] = await client.synthesizeSpeech(request);
+
+      const filename = `scene-${i}.mp3`;
+      const filepath = path.join(audioDir, filename);
+
+      fs.writeFileSync(filepath, response.audioContent, 'binary');
+      console.log(`✅ Generated audio: ${filepath}`);
+
+      generatedFiles.push(`/audio/${scenarioId}/${filename}`);
+    } catch (err) {
+      console.error(`❌ Error generating audio for scene ${i}: ${err.message}`);
+    }
+  }
+
+  res.json({ files: generatedFiles });
+});
+
 
 module.exports = router;

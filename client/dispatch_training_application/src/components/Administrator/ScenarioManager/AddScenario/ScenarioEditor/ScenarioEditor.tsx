@@ -32,6 +32,8 @@ if (!scenarioDetails) {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+
 
   const [scenario, setScenario] = useState<Scenario>({
   id: scenarioDetails.id || uuidv4(),
@@ -137,16 +139,32 @@ if (!scenarioDetails) {
   }, [scenario, user, lastSavedScenario, debouncedSave]);
 
   async function saveScenario() {
+    setIsPublishing(true);
     try {
-
       const response = await api.post("/scenarios", {
         scenario,
         authorId: user?.id,
         status: saveStatus, // ✅ explicit
       });
 
-      if (response.status === 200 || response.status === 201) {
+      if(saveStatus === 'published') {
+        // generate TTS for each scene
+      const audioResponse = await api.post(`/scenarios/${scenario.id}/generate-audio`, {
+        scenes: scenario.scenes,
+        speakers: scenario.speakers
+      });
+      if (audioResponse.status === 200) {
+        console.log("Audio generated successfully!");
+      } else {
+        console.log(`Audio generation failed. Status: ${audioResponse.status}`);
+      }
+      setIsPublishing(false);
+      }
+
+
+      if ((response.status  === 200) || (response.status  === 201)) {
         toast.success("Scenario saved successfully!");
+        setIsPublishing(false);
         window.history.back();
       } else {
         toast.error(`Failed to save scenario. Status: ${response.status}`);
@@ -281,22 +299,45 @@ if (!scenarioDetails) {
         </div>
       </Skeleton>
 
-      <Modal
-        open={isSaveModalOpen}
-        title="Save Scenario"
-        onCancel={() => setIsSaveModalOpen(false)}
-        onOk={saveScenario}
-        okText="Save"
-      >
-        <p>Would you like to save this scenario as:</p>
-        <Radio.Group
-          value={saveStatus}
-          onChange={(e) => setSaveStatus(e.target.value)}
-        >
-          <Radio value="draft">Draft</Radio>
-          <Radio value="published">Published</Radio>
-        </Radio.Group>
-      </Modal>
+  
+<Modal
+  open={isSaveModalOpen}
+  title="Save Scenario"
+  onCancel={() => setIsSaveModalOpen(false)}
+  footer={[
+    <Button
+      key="cancel"
+      onClick={() => setIsSaveModalOpen(false)}
+      disabled={isPublishing}
+      className="border-btn" // Calvin theme (outlined)
+    >
+      Cancel
+    </Button>,
+    <Button
+  key="save"
+  type="primary"
+  loading={isPublishing}
+  onClick={saveScenario}
+  className="regular-btn"
+>
+  {isPublishing
+    ? (saveStatus === 'published' ? 'Publishing Scenario...' : 'Saving Draft...')
+    : (saveStatus === 'published' ? 'Publish Scenario' : 'Save as Draft')}
+</Button>,
+
+  ]}
+>
+  <p>Would you like to save this scenario as:</p>
+  <Radio.Group
+    value={saveStatus}
+    onChange={(e) => setSaveStatus(e.target.value)}
+    disabled={isPublishing}
+  >
+    <Radio value="draft">Draft</Radio>
+    <Radio value="published">Published</Radio>
+  </Radio.Group>
+</Modal>
+
 
     </div>
 

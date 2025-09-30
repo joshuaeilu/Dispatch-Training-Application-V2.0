@@ -1,8 +1,9 @@
 
 
-import React, { createContext, useState, useEffect } from 'react';
-import type { AdminPreferences } from '../types/index.types';
+import React, { createContext, useState, useEffect, useMemo } from 'react';
+import type { AdminPreferences, Role, MenuItem } from '../types/index.types';
 import { api } from '../utils/api';
+import { AppstoreFilled, FileTextOutlined, QuestionCircleOutlined, ApartmentOutlined, VideoCameraOutlined, UserOutlined, QuestionCircleFilled, UploadOutlined } from '@ant-design/icons';
 type Context = {
     preferences: AdminPreferences | null;
     setPreferences: (prefs: AdminPreferences | null) => void;
@@ -17,10 +18,18 @@ export const UniversalContext = createContext<Context>({
     setSelectedKey: () => {},
 });
 
+
+
+
+
+
+
 export function UniversalProvider({ children }: { children: React.ReactNode }) {
     const [preferences, setPreferences] = useState<AdminPreferences | null>(null);
-    const [selectedKey, setSelectedKey] = useState<string>('dashboard');
 
+const [selectedKey, setSelectedKey] = useState<string>(() => {
+  return sessionStorage.getItem('selectedKey') || '/';
+});
      useEffect(() => {
         const fetchPreferences = async () => {
           try {

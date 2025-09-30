@@ -109,3 +109,9 @@ export type ScenarioTableType = {
   };
 };
 
+export type MenuItem = {
+  key: string;            // use route path
+  icon?: React.ReactNode;
+  label: string;
+};
+

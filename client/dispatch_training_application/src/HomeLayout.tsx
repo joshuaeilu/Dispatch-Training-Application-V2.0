@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 const { Header, Content, Footer, Sider } = Layout;
 
 import { Toaster } from 'react-hot-toast';
+import { UniversalContext } from './contexts/UniversalHelpers';
 
 type MenuItem = {
   key: string;            // use route path
@@ -45,7 +46,8 @@ const App: React.FC = () => {
   const screens = useBreakpoint();
   const isMobile = !screens.md; // true for <768px
 
-  const { logout, user, token } = useContext(AuthContext);
+  const { logout, user, token,  } = useContext(AuthContext);
+  const { selectedKey, setSelectedKey } = useContext(UniversalContext);
   const role = user?.role as Role;
   const navigate = useNavigate();
 
@@ -55,7 +57,6 @@ const App: React.FC = () => {
   }, [role]);
 
 
-  const [selectedKey, setSelectedKey] = React.useState(roleItems[0]?.key);
 
 
 
@@ -110,6 +111,7 @@ const App: React.FC = () => {
       onClick={({ key }) => {
         navigate(key);
         setSelectedKey(key);
+        sessionStorage.setItem('selectedKey', key);
       }}
     />
 
