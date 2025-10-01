@@ -33,13 +33,17 @@ export default function LoginPage() {
 
 
   return (
-    <div style={{ maxWidth: 300, margin: "80px auto", textAlign: "center" }}>
+    <div style={{  maxWidth: 300, margin: "80px auto", textAlign: "center" }}>
       {/* Logo */}
+      <div
+      style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
       <img
         src={CSLOGO}
         alt="Campus Safety App Logo"
         style={{ width: 150, marginBottom: 14 }}
-      />
+        />
+        
+              </div>
 
       <Title level={3}>Dispatch Training Application</Title>
 

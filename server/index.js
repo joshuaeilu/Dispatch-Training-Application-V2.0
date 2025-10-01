@@ -39,5 +39,6 @@ app.use('/api/scenarios', scenariosRoutes);
 app.use('/data/audio', auth(['admin']), express.static('voice_samples'));
 const audioDescriptionRoutes = require('./src/routes/audio');
 app.use('/api/tts', audioDescriptionRoutes);
+app.use('/data/scenario_audios', auth(['admin', 'trainee']), express.static('src/scenario_audios'));
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

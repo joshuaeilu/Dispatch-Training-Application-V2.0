@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useState, useRef, useEffect } from "react";
 import type { HighlightData, Scenario } from "../../../../../types/index.types";
-import PdfViewer from "./PdfViewer";
+import PdfViewer from "../../../../Shared/PdfViewer";
 import { useLocation } from "react-router-dom";
 import { toTitleCase } from "../../../../../utils/tools";
 import SceneOverview from "./SceneOverview";

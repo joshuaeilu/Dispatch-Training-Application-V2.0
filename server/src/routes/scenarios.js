@@ -9,7 +9,7 @@ const client = new textToSpeech.TextToSpeechClient({
 const path = require('path');
 const fs = require('fs');
 
-router.get("/", async (req, res) => {
+router.get("/", auth(['admin', 'trainee']), async (req, res) => {
   try {
     const result = await pool.query(
       `

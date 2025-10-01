@@ -6,6 +6,8 @@ import ViewScenarios from './components/Administrator/ScenarioManager/ViewScenar
 import SituationSetterCard from './components/Administrator/ScenarioManager/AddScenario/SituationSetter'
 import SituationSetter from './components/Administrator/ScenarioManager/AddScenario/SituationSetter'
 import ScenarioEditor from './components/Administrator/ScenarioManager/AddScenario/ScenarioEditor/ScenarioEditor'
+import UserViewScenarios from './components/Trainee/ScenarioWalkthrough/UserViewScenarios'
+import ScenarioWalkthrough from './components/Shared/ScenarioWalkthrough'
 
 function App() {
 
@@ -22,7 +24,10 @@ function App() {
             <Route index element={<ViewScenarios />} />
             <Route path="add-scenario" element={<SituationSetter />} />
             <Route path="edit-scenario" element={<ScenarioEditor  />} />
-
+          </Route>
+          <Route path="/scenario-walkthroughs" element={<Outlet />}>
+            <Route index element={<UserViewScenarios />} />
+            <Route path="view-scenario" element={<ScenarioWalkthrough />} />
           </Route>
         </Route>
       </Routes>

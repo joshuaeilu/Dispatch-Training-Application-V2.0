@@ -497,8 +497,9 @@ export default function SituationSetterCard() {
                   {/* Play Button */}
                   <Button
                     disabled={!speaker.voice}
-                    shape="circle"
+                    type="default"
                     size="middle"
+                    className="!p-0 !h-auto !bg-transparent hover:!bg-transparent shadow-none !border-none"
                     icon={
                       playingId === speaker.id ? (
                         <PauseCircleFilled style={{ fontSize: 24 }} />

@@ -1,12 +1,12 @@
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
-import MOP2025 from "../../../../../assets/MOP2025.pdf"
+import MOP2025 from "../../assets/MOP2025.pdf"
 import { useEffect, useRef, useState } from 'react';
 import { Button, Form, Input, Space, Spin, Tooltip, Typography } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { ZoomInOutlined, ZoomOutOutlined, ReloadOutlined, HighlightOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import type { PdfViewerProps, HighlightData } from '../../../../../types/index.types';
+import type { PdfViewerProps, HighlightData } from '../../types/index.types';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -108,8 +108,8 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
         const match = matchArray[index];
         if (!match) return;
 
-        const pageEl = pageRefs.current[match.page - 1];
-        if (pageEl && scrollContainerRef.current) {
+        const pageEl = pageRefs?.current[match.page - 1];
+        if (pageEl && scrollContainerRef?.current) {
             scrollContainerRef.current.scrollTo({
                 top: pageEl.offsetTop - 20,
                 behavior: 'smooth'
@@ -256,7 +256,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                     zIndex: 10,
                 }}
             >
-      
+
 
                 <Space>
                     <Input.Search
@@ -380,7 +380,12 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                             <div
                                 key={`page_${index + 1}`}
                                 id={`pdf-page-${index + 1}`}
-                                ref={(el) => { (pageRefs.current[index] = el) }}
+
+                                ref={(el) => {
+                                    if (pageRefs && pageRefs.current) {
+                                        pageRefs.current[index] = el;
+                                    }
+                                }}
                                 style={{ marginBottom: '1rem', position: 'relative' }}
                             >
                                 <Page
@@ -401,8 +406,8 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                 {highlights
                                     .filter((h) => h.page === index + 1)
                                     .flatMap((h, hi) => {
-                                        const pageWidth = pageRefs.current[index]?.offsetWidth ?? 0;
-                                        const pageHeight = pageRefs.current[index]?.offsetHeight ?? 0;
+                                        const pageWidth = pageRefs?.current[index]?.offsetWidth ?? 0;
+                                        const pageHeight = pageRefs?.current[index]?.offsetHeight ?? 0;
 
                                         return h.rects.map((rect, ri) => (
                                             <div
@@ -426,8 +431,8 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                 {matches
                                     .filter(m => m.page === index + 1)
                                     .flatMap((m, mi) => {
-                                        const pageWidth = pageRefs.current[index]?.offsetWidth ?? 0;
-                                        const pageHeight = pageRefs.current[index]?.offsetHeight ?? 0;
+                                        const pageWidth = pageRefs?.current[index]?.offsetWidth ?? 0;
+                                        const pageHeight = pageRefs?.current[index]?.offsetHeight ?? 0;
                                         const isActive = matches[activeMatchIndex]?.id === m.id;
 
                                         return m.rects.map((rect, ri) => (
@@ -456,8 +461,8 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                         ref={popupRef}
                                         style={{
                                             position: 'absolute',
-                                            top: selectedHighlight.rects[0].y * (pageRefs.current[index]?.offsetHeight ?? 0) - 8,
-                                            left: selectedHighlight.rects[0].x * (pageRefs.current[index]?.offsetWidth ?? 0),
+                                            top: selectedHighlight.rects[0].y * (pageRefs?.current[index]?.offsetHeight ?? 0) - 8,
+                                            left: selectedHighlight.rects[0].x * (pageRefs?.current[index]?.offsetWidth ?? 0),
                                             transform: `scale(${1 / zoom})`,
                                             transformOrigin: 'top left',
                                             backgroundColor: '#fff',
@@ -474,7 +479,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                                     const name = highlightName.trim();
                                                     if (!name) return;
 
-                                                    setHighlights([...highlights, { ...selectedHighlight, name }]);
+                                                    setHighlights?.([...highlights, { ...selectedHighlight, name }]);
                                                     setSelectedHighlight(null);
                                                     setShowInput(false);
                                                     window.getSelection()?.removeAllRanges();

@@ -19,7 +19,7 @@ type MenuItem = {
 
 const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   admin: [
-    { key: '/', icon: <AppstoreFilled />, label: 'Dashboard' },
+    { key: '/dashboard', icon: <AppstoreFilled />, label: 'Dashboard' },
     { key: '/resources', icon: <FileTextOutlined />, label: 'Resources' },
     { key: '/knowledge-check', icon: <QuestionCircleOutlined />, label: 'Knowledge Checks' },
     { key: '/scenario-manager', icon: <ApartmentOutlined />, label: 'Scenario Manager' },
@@ -33,9 +33,9 @@ const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   ],
   trainee: [
     { key: '/dashboard', icon: <UserOutlined />, label: 'Dashboard' },
-    { key: '/my-exercises', icon: <VideoCameraOutlined />, label: 'My Exercises' },
-    { key: '/knowledge-check', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
     { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
+    { key: '/knowledge-check', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
+    { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
   ],
 };
 
@@ -89,7 +89,7 @@ const App: React.FC = () => {
 
     
     {/* Top section */}
-    <div style={{ textAlign: 'center', marginBottom: 16 }}>
+    <div style={{ textAlign: 'center', marginBottom: 16, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",}}>
       <img
         src={CSLOGO}
         alt="Calvin Logo"

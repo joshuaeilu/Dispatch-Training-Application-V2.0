@@ -5,7 +5,7 @@ const { auth } = require('../middleware/auth');
 
 
 // Get the admin preferences
-router.get('/', auth(['admin']), async (req, res) => {
+router.get('/', auth(['admin', 'trainee']), async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM admin_preferences LIMIT 1');
     if (rows.length === 0) return res.status(404).json({ error: 'No preferences found' });

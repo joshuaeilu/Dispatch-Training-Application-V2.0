@@ -28,7 +28,7 @@ export function UniversalProvider({ children }: { children: React.ReactNode }) {
     const [preferences, setPreferences] = useState<AdminPreferences | null>(null);
 
 const [selectedKey, setSelectedKey] = useState<string>(() => {
-  return sessionStorage.getItem('selectedKey') || '/';
+  return sessionStorage.getItem('selectedKey') || '/dashboard';
 });
      useEffect(() => {
         const fetchPreferences = async () => {

@@ -36,9 +36,9 @@ export type HighlightData = {
 export type PdfViewerProps = {
   // pdfUrl: string;
   highlights: HighlightData[];
-  setHighlights: (highlights: HighlightData[]) => void;
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
-  pageRefs: React.RefObject<(HTMLDivElement | null)[]>;
+  setHighlights?: (highlights: HighlightData[]) => void;
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
+  pageRefs?: React.RefObject<(HTMLDivElement | null)[]>;
 };
 
 export interface HighlightTagListProps {
