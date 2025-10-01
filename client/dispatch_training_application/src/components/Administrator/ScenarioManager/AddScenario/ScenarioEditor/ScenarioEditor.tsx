@@ -286,7 +286,8 @@ if (!scenarioDetails) {
         {/* Main Content Area */}
         <div style={{ height: '90%', display: 'flex', flexDirection: 'row' }}>
           <SceneEditor scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollHighlight={(highlight: HighlightData) => scrollToHighlight(highlight)} playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
-          <PdfViewer highlights={scenario.scenes[currentIndex]?.highlights || []} setHighlights={(highlights) => {
+          <div style={{width:'35%'}}>
+            <PdfViewer highlights={scenario.scenes[currentIndex]?.highlights || []} setHighlights={(highlights) => {
             setScenario((prev) => ({
               ...prev,
               scenes: prev.scenes.map((scene, index) =>
@@ -295,6 +296,7 @@ if (!scenarioDetails) {
             }));
           }}
             scrollContainerRef={scrollContainerRef} pageRefs={pageRefs} />
+          </div>
           <SceneOverview scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} stopAudio={stopAudio} />
         </div>
       </Skeleton>

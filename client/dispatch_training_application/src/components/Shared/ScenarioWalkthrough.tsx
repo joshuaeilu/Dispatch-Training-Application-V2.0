@@ -47,6 +47,8 @@ export default function ScenarioWalkthrough() {
   const textAreaRef = useRef<any>(null);
   const { token } = useContext(AuthContext);
   const completionRef = useRef<HTMLDivElement | null>(null);
+    const [pdfViewerKey, setPdfViewerKey] = useState(0); 
+
 
   const progress = (answeredQuestions.size / scenarioData.scenes.length) * 100;
 
@@ -113,36 +115,46 @@ export default function ScenarioWalkthrough() {
   };
 
   const scrollToHighlight = (h: HighlightData) => {
+    console.log('Scrolling to highlight:', h);
+    
     // First open the PDF drawer if it's not already open
-    if (!pdfOpen) {
+    const wasOpen = pdfOpen;
+    if (!wasOpen) {
       setPdfOpen(true);
     }
 
     // Wait for drawer to open and PDF to render before scrolling
+    const delay = wasOpen ? 300 : 1000; // Longer delay if drawer needs to open
+    
     setTimeout(() => {
       const container = scrollContainerRef.current;
       const pageEl = pageRefs.current[h.page - 1];
       
-      if (!container || !pageEl || !h.rects?.length) return;
+      console.log('Container:', container);
+      console.log('Page element:', pageEl);
+      console.log('Highlight rects:', h.rects);
+      
+      if (!container || !pageEl || !h.rects?.length) {
+        console.log('Missing required elements for scrolling');
+        return;
+      }
 
       const pageTop = pageEl.offsetTop;
-      const pageLeft = pageEl.offsetLeft;
       const r = h.rects[0];
 
       const highlightTop = pageTop + r.y * pageEl.offsetHeight;
-      const highlightLeft = pageLeft + r.x * pageEl.offsetWidth;
       const highlightHeight = r.height * pageEl.offsetHeight;
-      const highlightWidth = r.width * pageEl.offsetWidth;
 
+      // Center the highlight vertically in the container
       const targetTop = highlightTop - (container.clientHeight / 2) + (highlightHeight / 2);
-      const targetLeft = highlightLeft - (container.clientWidth / 2) + (highlightWidth / 2);
+
+      console.log('Scrolling to top:', targetTop);
 
       container.scrollTo({
-        top: targetTop,
-        left: targetLeft,
+        top: Math.max(0, targetTop),
         behavior: 'smooth',
       });
-    }, pdfOpen ? 100 : 500); // Longer delay if drawer needs to open
+    }, delay);
   };
 
   return (
@@ -325,12 +337,14 @@ export default function ScenarioWalkthrough() {
       </div>
 
       <Drawer
-        title="📑 Scenario Reference"
+      
+        key={pdfViewerKey}
+        title="📑 MANUAL OF PROCEDURES"
         placement="right"
-        width="35%"
+        width="40%"
         onClose={() => setPdfOpen(false)}
         open={pdfOpen}
-        bodyStyle={{ padding: 0, display: "flex", flexDirection: "column" }}
+        bodyStyle={{ padding: 0, display: "flex", flexDirection: "column", height: '100%' }}
       >
         <PdfViewer
           highlights={scenarioData.scenes.flatMap((scene: Scene) => scene.highlights || [])}

@@ -3,7 +3,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import MOP2025 from "../../assets/MOP2025.pdf"
 import { useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, Space, Spin, Tooltip, Typography } from 'antd';
+import { Button, Input, Space, Spin, Tooltip, Typography } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { ZoomInOutlined, ZoomOutOutlined, ReloadOutlined, HighlightOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import type { PdfViewerProps, HighlightData } from '../../types/index.types';
@@ -25,7 +25,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
     const [matches, setMatches] = useState<HighlightData[]>([]);
     const [activeMatchIndex, setActiveMatchIndex] = useState(0);
 
-    const { Title, Text } = Typography;
+    const { Text } = Typography;
 
     const handleZoomIn = () => {
         setLoading(true);
@@ -41,6 +41,8 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
 
     // Track highlight selection
     useEffect(() => {
+        if (!setHighlights) return; // Only enable if editing is allowed
+
         const handleMouseUp = () => {
             const selection = window.getSelection()
             if (!selection || selection.isCollapsed) return
@@ -88,7 +90,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
         return () => {
             document.removeEventListener('mouseup', handleMouseUp);
         };
-    }, []);
+    }, [setHighlights]);
 
     // Close highlight popup on outside click
     useEffect(() => {
@@ -135,7 +137,6 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                 const textContent = await page.getTextContent();
                 const viewport = page.getViewport({ scale: 1 });
 
-                // Combine all text items into a single string with position tracking
                 let fullText = '';
                 const textItems: any[] = [];
 
@@ -150,12 +151,10 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                     });
                 });
 
-                // Find all occurrences of search term in the full text
                 let searchIndex = 0;
                 while ((searchIndex = fullText.toLowerCase().indexOf(searchTerm, searchIndex)) !== -1) {
                     const matchEnd = searchIndex + searchTerm.length;
 
-                    // Find which text items contain this match
                     const startItem = textItems.find(item =>
                         searchIndex >= item.startIndex && searchIndex < item.endIndex
                     );
@@ -164,27 +163,22 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                     );
 
                     if (startItem && endItem) {
-                        // Calculate bounding box for the match
                         const startItemIndex = textItems.indexOf(startItem);
                         const endItemIndex = textItems.indexOf(endItem);
-
-                        // Get all items that are part of this match
                         const matchItems = textItems.slice(startItemIndex, endItemIndex + 1);
 
                         if (matchItems.length > 0) {
-                            // Calculate combined bounding box
                             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
                             matchItems.forEach(item => {
                                 const transform = item.transform;
-                                const [scaleX, skewX, skewY, scaleY, translateX, translateY] = transform;
+                                const [scaleX, , , scaleY, translateX, translateY] = transform;
 
-                                // Calculate item bounds
                                 const itemWidth = item.width || (item.str.length * Math.abs(scaleX));
                                 const itemHeight = Math.abs(scaleY);
 
                                 const x = translateX;
-                                const y = viewport.height - translateY - itemHeight; // Flip Y coordinate
+                                const y = viewport.height - translateY - itemHeight;
 
                                 minX = Math.min(minX, x);
                                 minY = Math.min(minY, y);
@@ -192,7 +186,6 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                 maxY = Math.max(maxY, y + itemHeight);
                             });
 
-                            // Normalize coordinates to page dimensions
                             const rect = {
                                 x: minX / viewport.width,
                                 y: minY / viewport.height,
@@ -243,22 +236,16 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', width: '35%', marginRight: 10, marginLeft: 10 }}>
+        <div style={{ display: 'flex', width:"100%", flexDirection: 'column', height: '100%' }}>
             <div
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    padding: "0px 12px 8px 1px",
                     backgroundColor: "var(--color-bg-base)",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 10,
+                    padding: "4px 12px",
                 }}
             >
-
-
-                <Space>
                     <Input.Search
                         placeholder="Search PDF"
                         allowClear
@@ -266,23 +253,19 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                         onChange={(e) => {
                             const val = e.target.value;
                             setSearchQuery(val);
-
-                            // remove highlights when cleared
                             if (val.trim() === "") {
                                 setMatches([]);
                                 setActiveMatchIndex(0);
                             }
                         }}
                         onSearch={(value) => {
-                            // Only search if there's actually a search term
                             if (value && value.trim()) {
                                 handleSearch();
                             }
                         }}
-                        style={{ width: 200 }}
+                        style={{ width: "50%" }}
                         enterButton={<SearchOutlined />}
                     />
-
 
                     {matches.length > 0 && (
                         <>
@@ -291,7 +274,6 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                             <Button icon={<ArrowRightOutlined />} onClick={handleNextMatch} />
                         </>
                     )}
-                </Space>
 
                 <Space align="center" size="middle">
                     <Text strong style={{ width: 60, textAlign: "right" }}>
@@ -331,13 +313,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                 </Space>
             </div>
 
-            <div
-                style={{
-                    height: '100%',
-                    overflow: 'auto',
-                    position: 'relative',
-                }}
-            >
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
                 {loading && (
                     <div
                         style={{
@@ -364,13 +340,12 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                         width: '100%',
                         height: '100%',
                         overflow: 'auto',
-                        position: 'relative',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                     }}
                 >
-                    <Document scale={zoom}
+                    <Document
                         file={MOP2025}
                         onLoadSuccess={({ numPages }) => {
                             setNumPages(numPages);
@@ -380,22 +355,21 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                             <div
                                 key={`page_${index + 1}`}
                                 id={`pdf-page-${index + 1}`}
-
                                 ref={(el) => {
                                     if (pageRefs && pageRefs.current) {
                                         pageRefs.current[index] = el;
                                     }
                                 }}
-                                style={{ marginBottom: '1rem', position: 'relative' }}
+                                style={{ marginBottom: '20px', position: 'relative' }}
                             >
                                 <Page
-                                    key={`page_${index + 1}`}
                                     pageNumber={index + 1}
+                                    scale={zoom}
                                     onRenderSuccess={() => {
                                         setPagesRendered((prev) => {
                                             const next = prev + 1;
                                             if (next === numPages) {
-                                                setTimeout(() => setLoading(false), 1500);
+                                                setTimeout(() => setLoading(false), 100);
                                             }
                                             return next;
                                         });
@@ -455,8 +429,8 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                         ));
                                     })}
 
-                                {/* Show highlight name input */}
-                                {selectedHighlight?.page === index + 1 && (
+                                {/* Show highlight name input - only if setHighlights is provided */}
+                                {setHighlights && selectedHighlight?.page === index + 1 && (
                                     <div
                                         ref={popupRef}
                                         style={{
@@ -473,40 +447,39 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                         }}
                                     >
                                         {showInput ? (
-                                            <Form
-                                                layout="inline"
-                                                onFinish={({ highlightName }) => {
-                                                    const name = highlightName.trim();
-                                                    if (!name) return;
+                                            <Space>
+                                                <Input
+                                                    placeholder="Name highlight"
+                                                    size="small"
+                                                    autoFocus
+                                                    style={{ minWidth: 140 }}
+                                                    onPressEnter={(e) => {
+                                                        const name = (e.target as HTMLInputElement).value.trim();
+                                                        if (!name) return;
 
-                                                    setHighlights?.([...highlights, { ...selectedHighlight, name }]);
-                                                    setSelectedHighlight(null);
-                                                    setShowInput(false);
-                                                    window.getSelection()?.removeAllRanges();
-                                                }}
-                                            >
-                                                <Form.Item
-                                                    name="highlightName"
-                                                    rules={[{ required: true, message: "Please enter a name" }]}
+                                                        setHighlights([...highlights, { ...selectedHighlight, name }]);
+                                                        setSelectedHighlight(null);
+                                                        setShowInput(false);
+                                                        window.getSelection()?.removeAllRanges();
+                                                    }}
+                                                />
+                                                <Button
+                                                    type="primary"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        const input = document.querySelector('input[placeholder="Name highlight"]') as HTMLInputElement;
+                                                        const name = input?.value.trim();
+                                                        if (!name) return;
+
+                                                        setHighlights([...highlights, { ...selectedHighlight, name }]);
+                                                        setSelectedHighlight(null);
+                                                        setShowInput(false);
+                                                        window.getSelection()?.removeAllRanges();
+                                                    }}
                                                 >
-                                                    <Input
-                                                        placeholder="Name highlight"
-                                                        size="small"
-                                                        autoFocus
-                                                        style={{ minWidth: 140 }}
-                                                    />
-                                                </Form.Item>
-
-                                                <Form.Item>
-                                                    <Button
-                                                        type="primary"
-                                                        htmlType="submit"
-                                                        size="small"
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                </Form.Item>
-                                            </Form>
+                                                    Save
+                                                </Button>
+                                            </Space>
                                         ) : (
                                             <Button
                                                 type="primary"
