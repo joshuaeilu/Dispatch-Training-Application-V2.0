@@ -11,8 +11,9 @@ function parseJwt(token: string) {
 }
 
 
+
 export const AuthContext = createContext<Ctx>({
-  user: null, token: null, setAuth: () => {}, logout: () => {}, 
+  user: null, token: null, setAuth: () => {}, logout: () => {}, isMobile: false
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -22,6 +23,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('accessToken'));
   const expiryTimer = useRef<number | null>(null);
+   // Check if the screen is mobile
+    const { useBreakpoint } = Grid;
+    const screens = useBreakpoint();
+    const isMobile = !screens.md; // true for <768px
 
   const clearTimer = () => { if (expiryTimer.current) window.clearTimeout(expiryTimer.current); expiryTimer.current = null; };
 
@@ -62,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return clearTimer;
   }, [token, logout]);
 
-  const value = useMemo(() => ({ user, token, setAuth, logout }), [user, token, setAuth, logout]);
+  const value = useMemo(() => ({ user, token, setAuth, logout, isMobile }), [user, token, setAuth, logout, isMobile ]);
 
 
   return <AuthContext.Provider value={{ ...value}}>{children}</AuthContext.Provider>;

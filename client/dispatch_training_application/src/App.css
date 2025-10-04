@@ -11,3 +11,13 @@ body{
   background: yellow;
   color: black; /* optional for contrast */
 }
+/* tailwind.css */
+.question-card-selected {
+  @apply border-2 border-[#8C2131] bg-white shadow-md scale-[1.01] transition-all duration-200 ease-in-out rounded-lg;
+}
+
+/* Disable text caret globally unless it's an input or textarea */
+*:not(input):not(textarea) {
+  caret-color: transparent;
+}
+

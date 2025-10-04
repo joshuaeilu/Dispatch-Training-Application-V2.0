@@ -1,10 +1,9 @@
 import { Space, Button, Typography, Radio, Modal, Tooltip, Popconfirm } from "antd";
-import { ArrowLeftOutlined, CloseOutlined, DeleteOutlined, SaveOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined,  DeleteOutlined, SaveOutlined } from "@ant-design/icons";
 import SceneEditor from "./SceneEditor";
 import 'antd/dist/reset.css'; // AntD v5
 import { Skeleton } from "antd";
 import { debounce } from "lodash"; // install with npm i lodash
-import MOP2025 from "../../../../assets/MOP2025.pdf";
 import { v4 as uuidv4 } from 'uuid';
 
 import { useState, useRef, useEffect } from "react";

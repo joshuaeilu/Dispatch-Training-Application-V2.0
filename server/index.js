@@ -17,19 +17,20 @@ app.use('/api/auth', authRoutes);
 // // User Routes
 const usersRoutes = require('./src/routes/users');
 app.use('/api/users', usersRoutes);
+app.use('/data/profile_pics', auth(['admin', 'trainee']), express.static('profile_pics'));
 
 // // Resource Routes
-// const resourcesRoutes = require('./src/routes/resources');
-// app.use('/api/resources', resourcesRoutes);
-// app.use('/data/resources', auth(['admin']), express.static('resources'));
+const resourcesRoutes = require('./src/routes/resources');
+app.use('/api/resources', resourcesRoutes);
+app.use('/data/resources', auth(['admin']), express.static('resources'));
 
 // Preference Routes
 const preferencesRoutes = require('./src/routes/preferences');
 app.use('/api/preferences', preferencesRoutes);
 
-// // Exercise Routes
-// const exercisesRoutes = require('./src/routes/exercises');
-// app.use('/api/exercises', exercisesRoutes);
+// Exercise Routes
+const exercisesRoutes = require('./src/routes/exercises');
+app.use('/api/exercises', exercisesRoutes);
 
 // Scenario Routes
 const scenariosRoutes = require('./src/routes/scenarios');

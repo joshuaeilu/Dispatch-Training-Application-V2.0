@@ -8,6 +8,7 @@ export type Ctx = {
   token: string | null;
   setAuth: (token: string, user: NonNullable<User>) => void;
   logout: () => void;
+  isMobile: boolean;
 };
 
 export type Speaker = {
@@ -114,4 +115,118 @@ export type MenuItem = {
   icon?: React.ReactNode;
   label: string;
 };
+export interface ResourcePreview{
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  mimeType: string;
+  url: string;
+}
 
+export type Option = { id: number; text: string; isCorrect: boolean };
+
+export interface Question {
+  id: string;
+  question: string;
+  resource?: ResourcePreview | null;
+  questionCategory?: string;
+  answerType: "text-area" | "multiple-choice";
+  correctAnswer?: string;
+  options: Option[];
+  correctOptions: string[];
+  tip?: string;
+}
+export interface Exercise{
+  id: string;
+  name: string;
+  type: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  audience: "All" | "Dispatchers" | "Trainees";
+  status: "Draft" | "Published";
+  visibility?: boolean;
+  createdBy: string | created_by;
+  questions: Question[];
+
+}
+interface created_by {
+  id: string;
+  name: string;
+  avatar_url: string;
+}
+
+export interface ExerciseTableType{
+  id: string;
+  name: string;
+  type: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  questionCount: number;
+  audience: "All" | "Dispatchers" | "Trainees";
+  status: "Draft" | "Published";
+  visibility: boolean;
+  created_by: created_by;
+  questions: Question[];
+
+}
+
+
+export type ResourceKey =
+  | "all"
+  | "maps"
+  | "documents"
+  | "videos"
+  | "audio"
+  | "images";
+
+export interface ResourceCategory {
+  key: ResourceKey;
+  label: string;
+  icon: React.ReactNode;
+}
+
+export interface ResourceTableType{
+  id: string;
+  name: string;
+  type: ResourceKey;
+  mime_type: string;
+  url: string;
+  size: number;
+  description: string;
+  created_at: string;
+  visibility: boolean;
+  created_by: {
+    id: string;
+    name: string;
+    avatar_url: string;
+  };
+
+}
+
+
+export interface AddQuestionsSectionsProps {
+  selectedIndex: number;
+  setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
+  exercise: Exercise;
+  setExercise: (exercise: Exercise) => void;
+}
+
+export interface ResourcePayload {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
+  size: number;
+  mime_type: string;
+  file: File;
+  visibility: boolean;
+}
+
+export interface ResourceFile{
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  mime_type: string;
+  createdAt: string;
+  createdBy: string;
+}

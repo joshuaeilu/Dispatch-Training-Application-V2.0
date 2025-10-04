@@ -20,10 +20,9 @@ type MenuItem = {
 const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   admin: [
     { key: '/dashboard', icon: <AppstoreFilled />, label: 'Dashboard' },
-    { key: '/resources', icon: <FileTextOutlined />, label: 'Resources' },
-    { key: '/knowledge-check', icon: <QuestionCircleOutlined />, label: 'Knowledge Checks' },
+    { key: '/resource-manager', icon: <FileTextOutlined />, label: 'Resources' },
+    { key: '/knowledge-checks', icon: <QuestionCircleOutlined />, label: 'Knowledge Checks' },
     { key: '/scenario-manager', icon: <ApartmentOutlined />, label: 'Scenario Manager' },
-    { key: '/video-walkthroughs', icon: <VideoCameraOutlined />, label: 'Video Walkthroughs' },
   ],
   dispatcher: [
     { key: '/dashboard', icon: <UserOutlined />, label: 'Dashboard' },
@@ -50,6 +49,7 @@ const App: React.FC = () => {
   const { selectedKey, setSelectedKey } = useContext(UniversalContext);
   const role = user?.role as Role;
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = React.useState(false);
 
   // Build menu items once per role change
   const roleItems = useMemo<MenuItem[]>(() => {
@@ -69,14 +69,12 @@ const App: React.FC = () => {
       <Toaster position="top-center" />
 
    <Sider
+   collapsible
+   collapsed={collapsed}
+   onCollapse={(value) => setCollapsed(value)}
   theme="light"
   breakpoint="lg"
-  collapsedWidth="0"
   width={250}
-  style={{
-    height: '100%',
-    padding: '16px 0 16px 0px',
-  }}
 >
   {/* Flex column wrapper */}
   <div
@@ -99,9 +97,11 @@ const App: React.FC = () => {
           filter: "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4))",
         }}
       />
-      <Typography.Title level={4} style={{ margin: 0 }}>
+      {!collapsed && (
+        <Typography.Title level={4} style={{ margin: 0 }}>
         Dispatch Training Application
       </Typography.Title>
+      )}
     </div>
 
     <Menu
@@ -127,7 +127,7 @@ const App: React.FC = () => {
       onClick={logout}
       style={{ width: isMobile ? '90%' : '80%' }}
     >
-      Logout
+      {!collapsed && 'Logout'}
     </Button>
  </div>
   </div>

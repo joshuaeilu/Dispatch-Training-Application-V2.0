@@ -1,94 +1,50 @@
-
-import { Button, Card, Col, Row, Space, Form, Select, Input, Typography, Table, type TableColumnType, Tag, Tooltip, Popconfirm } from "antd";
-import { PageHeader } from "../../Shared/PageHeader"
-import { useNavigate } from "react-router-dom"
 import { useContext, useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { Card, Row, Col, Form, Select, Input, Button, Table, Tag, Space, Tooltip, Popconfirm, message, type TableColumnType, Switch, Typography } from "antd";
+import { ReloadOutlined, SearchOutlined, EditOutlined,  FileTextOutlined, DeleteOutlined, SnippetsOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { api } from "../../../utils/api";
-import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
-import type { Scenario, ScenarioTableType } from "../../../types/index.types";
+import type { Exercise, ExerciseTableType } from "../../../types/index.types";
+import {  AUDIENCE_COLORS, PROFILE_PIC_URL, STATUS_COLORS } from "../../../data/data";
+import ViewExerciseModal from "./AddExercise/components/ViewExerciseModal";
+import { PageHeader } from "../../Shared/PageHeader";
+import {  exerciseDifficultyOptions, exerciseStatusOptions } from "../../../data/data";
 import { UniversalContext } from "../../../contexts/UniversalHelpers";
-import { PROFILE_PIC_URL } from "../../../data/data";
 import { AuthContext } from "../../../contexts/AuthProvider";
 import { toTitleCase } from "../../../utils/tools";
-export default function ViewScenarios() {
+
+
+export default function KnowledgeCheckViewExercises() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [selectedScenarioType, setSelectedScenarioType] = useState<string | null>("All Types");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [exerciseFiles, setExerciseFiles] = useState<ExerciseTableType[]>([]);
+  const [selectedExerciseType, setSelectedExerciseType] = useState<string>("All Types");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | undefined>(undefined);
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [scenarioFiles, setScenarioFiles] = useState<ScenarioTableType[]>([]);
+  const [viewExerciseModal, setViewExerciseModal] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
-  const handleResetFilteredFields = () => {
-    form.resetFields();
-    setSelectedScenarioType("All Types");
-    setSelectedDifficulty(null);
-    setSelectedStatus(null);
-    setSearchQuery("");
-  };
-
-  // Get all scenarios from the database
-  useEffect(() => {
-    async function fetchScenarios() {
-      try {
-        const { data } = await api.get('/scenarios');
-        setScenarioFiles(data.scenarios.map((scenario: any) => ({
-          id: scenario.id,
-          authorId: scenario.author_id,
-          name: scenario.scenario_data?.name || "Untitled",
-          type: scenario.scenario_data?.type || "Unknown",
-          difficulty: scenario.scenario_data?.difficulty || "N/A",
-          questionsCount: scenario.scenario_data?.scenes?.length || 0,
-          status: scenario.status,
-          audience: scenario.scenario_data?.audience || "N/A",
-          created_by: {
-            name: scenario.author_name || "Unknown",
-            avatar_url: scenario.author_avatar || "/assets/avatars/avatar1.svg",
-          },
-        })));
-
-        console.log("✅ Fetched scenarios from DB.");
-      } catch (error) {
-        console.error("❌ Failed to fetch scenarios:", error);
-      }
-    }
-
-    fetchScenarios();
-  }, []);
-
-  const { preferences } = useContext(UniversalContext);
+  
+  const [messageApi, contextHolder] = message.useMessage();
   const { token } = useContext(AuthContext);
 
-  const scenarioTypes = (["All Types", preferences?.scenario_types].flat()).filter(t => t !== "Custom")
-  const scenarioDifficultyOptions = [
-    { label: "Easy", value: "easy" },
-    { label: "Medium", value: "medium" },
-    { label: "Hard", value: "hard" },
-  ];
-  const scenarioStatusOptions = [
-    { label: "Draft", value: "draft" },
-    { label: "Published", value: "published" },
-  ];
 
-
-
-
-  const scenarioData: ScenarioTableType[] = scenarioFiles.map(file => ({
+// Create a version of exerciseFiles that matches the TableType
+  const exerciseData: ExerciseTableType[] = exerciseFiles.map(file => ({
     id: file.id,
-    authorId: file.authorId,
     name: file.name,
     type: file.type,
     difficulty: file.difficulty,
-    questionsCount: file.questionsCount,
+    questionCount: file.questions.length,
     status: file.status,
     audience: file.audience,
-    created_by: file.created_by
+    visibility: file.visibility,
+    created_by: file.created_by,
+    questions: file.questions,
   }));
 
-
-  // Helper to match the name or type
-  const matchesQuery = (ex: ScenarioTableType) => {
+  // Filter function that checks if an exercise matches the search query
+  const matchesQuery = (ex: ExerciseTableType) => {
     const query = searchQuery.toLowerCase();
     return (
       ex.name.toLowerCase().includes(query) ||
@@ -96,11 +52,12 @@ export default function ViewScenarios() {
     );
   };
 
-  const searchFilteredScenarios = scenarioData.filter(matchesQuery);
-
-  const filteredData = searchFilteredScenarios.filter(ex => {
+  // First filter by search query
+  const searchFilteredExercises = exerciseData.filter(matchesQuery);
+// Then apply type, difficulty, and status filters
+  const filteredData = searchFilteredExercises.filter(ex => {
     const matchesType =
-      selectedScenarioType === "All Types" || ex.type === selectedScenarioType;
+      selectedExerciseType === "All Types" || ex.type === selectedExerciseType;
 
     const matchesDifficulty =
       !selectedDifficulty || ex.difficulty?.toLowerCase() === selectedDifficulty.toLowerCase();
@@ -111,8 +68,41 @@ export default function ViewScenarios() {
     return matchesType && matchesDifficulty && matchesStatus;
   });
 
+// Reset all filters and search
+  function handleResetFilteredFields() {
+    form.resetFields();
+    setSelectedExerciseType("All Types");
+    setSelectedDifficulty(undefined);
+    setSelectedStatus(undefined);
+    setSearchQuery("");
 
-  const scenarioTableColumns: TableColumnType<ScenarioTableType>[] = [
+  }
+
+
+
+
+
+
+  // Get all exercise data from the database
+  useEffect(() => {
+    async function init() {
+      try {
+        const { data } = await api.get("/exercises");
+        setExerciseFiles(data);
+      } catch (error) {
+        console.error("Failed to fetch exercises:", error);
+      }
+
+    }
+
+    init(); // call the async function
+  }, []);
+
+
+
+
+
+  const exerciseTableColumns: TableColumnType<ExerciseTableType>[] = [
     {
       title: "Name",
       dataIndex: "name",
@@ -137,9 +127,9 @@ export default function ViewScenarios() {
         <Tag
           className="table-tag"
           color={
-            difficulty === "Easy"
+            difficulty === "easy"
               ? "green"
-              : difficulty === "Medium"
+              : difficulty === "medium"
                 ? "orange"
                 : "red"
           }
@@ -154,14 +144,13 @@ export default function ViewScenarios() {
       dataIndex: "questionCount",
       key: "questionCount",
       align: "center",
-      render: (_: any, record: ScenarioTableType) => (
+      render: (_: any, record: ExerciseTableType) => (
         <Tag
           className="table-tag"
 
         >
-          {record.questionsCount}{" "}
-          {record.questionsCount === 1 ? "question" : "questions"}
-
+          {record.questionCount}{" "}
+          {record.questionCount === 1 ? "question" : "questions"}
         </Tag>
       ),
     },
@@ -173,8 +162,7 @@ export default function ViewScenarios() {
       render: (status: string) => (
         <Tag
           className="table-tag"
-
-          color={status === "published" ? "blue" : "default"}
+          color={STATUS_COLORS[status] || "blue"}
 
         >
           {status}
@@ -189,7 +177,7 @@ export default function ViewScenarios() {
       render: (audience: string) => (
         <Tag
           className="table-tag"
-          color={"default"}
+          color={AUDIENCE_COLORS[audience] || "default"}
 
         >
           {audience}
@@ -212,10 +200,40 @@ export default function ViewScenarios() {
       ),
     },
     {
+      title: "Visibility",
+      dataIndex: "visibility",
+      align: "center",
+      key: "visibility",
+      render: (visibility: boolean, record) => (
+        <>
+          <Switch
+            size="small"
+            checked={visibility}
+            onChange={async (checked) => {
+              try {
+                const response = await api.patch(`/exercises/${record.id}`, { visibility: checked });
+                if (response.status === 200) {
+                  setExerciseFiles((prev) =>
+                    prev.map((file) =>
+                      file.id === record.id ? { ...file, visibility: checked } : file
+                    )
+                  );
+                  messageApi.success("Visibility updated");
+                }
+              } catch (error) {
+                messageApi.error("Failed to update visibility");
+              }
+            }}
+          />
+          <span>{visibility}</span>
+        </>
+      ),
+    },
+    {
       title: "Actions",
       key: "actions",
       align: "center",
-      render: (_: any, record: ScenarioTableType) => (
+      render: (_: any, record: ExerciseTableType) => (
         <Space>
           <Tooltip title="View">
             <Button
@@ -225,7 +243,20 @@ export default function ViewScenarios() {
               color="geekblue"
 
               onClick={() => {
-                navigate(`/scenario-manager/view-scenario/`, { state: { scenario: record } });
+                const exercise: Exercise = {
+                  id: record.id,
+                  name: record.name,
+                  type: record.type,
+                  difficulty: record.difficulty,
+                  questions: record.questions,
+                  audience: record.audience,
+                  createdBy: record.created_by.name,
+                  status: record.status,
+                  visibility: record.visibility,
+                };
+                setSelectedExercise(exercise);
+                setViewExerciseModal(true);
+
               }}
             />
           </Tooltip>
@@ -236,31 +267,27 @@ export default function ViewScenarios() {
               variant="filled"
               color="blue"
               onClick={() => {
-                navigate(`/scenario-manager/edit-scenario/`, {
-                  state: { scenario: record },
+                navigate(`/knowledge-check/edit-exercise/`, {
+                  state: { exercise: record },
                 });
               }}
             />
           </Tooltip>
           <Tooltip title="Delete">
             <Popconfirm
-              title="Are you sure to delete this scenario?"
+              title="Are you sure to delete this exercise?"
               okText="Delete"
               okButtonProps={{ danger: true }}
               cancelText="Cancel"
               onConfirm={async () => {
-
                 try {
-                  const response = await api.delete(`/scenarios/${record.id}`, {
-                    data: { authorId: record.authorId }, // optional: verify ownership
-                  });
-                  if (response.status === 200) {
-                    setScenarioFiles(prev => prev.filter(s => s.id !== record.id));
-                    toast.success("Scenario deleted successfully.");
-                  }
+                  await api.delete(`/exercises/${record.id}`);
+                  messageApi.success("Exercise deleted");
+                  setExerciseFiles((prev) =>
+                    prev.filter((file) => file.id !== record.id)
+                  );
                 } catch (error) {
-                  console.error("Error deleting scenario:", error);
-                  toast.error("Failed to delete scenario");
+                  messageApi.error("Failed to delete exercise");
                 }
               }}
             >
@@ -272,34 +299,42 @@ export default function ViewScenarios() {
     },
   ];
 
+  
+const { preferences } = useContext(UniversalContext);
+
+
+const exerciseTypes = (["All Types", preferences?.exercise_types].flat()).filter(t => t !== "Custom")
+
+
+
   return (
-    <div style={{ padding: 18, maxWidth: "100%", background: "#f5f5f5" }}>
-      
-        <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios" showAddButton addButtonText="Add Scenario" onAdd={() => navigate("/scenario-manager/add-scenario")} />
-      
+    <div  style={{ padding: 18, maxWidth: "100%", background: "#f5f5f5" }} >
+      {/* Page Header */}
+             <PageHeader title="View Exercises" subtitle="Filter, search and manager exercises" showAddButton addButtonText="Add Exercise" onAdd={() => navigate("/knowledge-checks/add-exercise")} />
+     
+
       {/* Filters */}
       <Card className="shadow-soft mb-4">
         <Form
           form={form}
           layout="vertical"
-        // onValuesChange={() => setPage(1)}
         >
           <Row gutter={[16, 12]}>
             <Col xs={24} sm={12} md={4}>
               <Form.Item label="Type" name="type">
-                <Select defaultValue={selectedScenarioType} options={scenarioTypes?.map(type => ({ label: type, value: type }))} onChange={(value) => setSelectedScenarioType(value)} />
+                <Select defaultValue={selectedExerciseType} options={exerciseTypes?.map(type => ({ label: type, value: type }))} onChange={(value) => setSelectedExerciseType(value)} />
               </Form.Item>
             </Col>
 
             <Col xs={24} sm={12} md={4}>
               <Form.Item label="Difficulty" name="difficulty">
-                <Select placeholder="Select difficulty" options={scenarioDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
+                <Select placeholder="Select difficulty" options={exerciseDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
               </Form.Item>
             </Col>
 
             <Col xs={24} sm={12} md={4}>
               <Form.Item label="Status" name="status">
-                <Select placeholder="Select status" options={scenarioStatusOptions} onChange={(value) => setSelectedStatus(value)} />
+                <Select placeholder="Select status" options={exerciseStatusOptions} onChange={(value) => setSelectedStatus(value)} />
               </Form.Item>
             </Col>
 
@@ -329,7 +364,6 @@ export default function ViewScenarios() {
         </Form>
       </Card>
 
-
       <Card
         style={{
           marginTop: 16,
@@ -357,7 +391,7 @@ export default function ViewScenarios() {
                 color: "var(--color-heading, #1f1f1f)",
               }}
             >
-              {selectedScenarioType === "All Types" ? "All Scenarios" : selectedScenarioType}
+              {selectedExerciseType === "All Types" ? "All Exercises" : selectedExerciseType}
             </Typography.Title>
           </Space>
 
@@ -368,14 +402,14 @@ export default function ViewScenarios() {
               color: "var(--color-text-secondary, #888)",
             }}
           >
-            {filteredData.length} {filteredData.length === 1 ? "scenario" : "scenarios"} found
+            {filteredData.length} {filteredData.length === 1 ? "exercise" : "exercises"} found
           </Typography.Text>
         </Space>
 
         <div className="overflow-auto mt-2" style={{ maxHeight: "60vh" }}>
           <Table
             rowKey="id"
-            columns={scenarioTableColumns}
+            columns={exerciseTableColumns}
             dataSource={filteredData}
             pagination={false}
           >
@@ -384,6 +418,14 @@ export default function ViewScenarios() {
         </div>
       </Card>
 
+
+      {/* View Exercise Modal */}
+      {selectedExercise && (
+        <ViewExerciseModal exercise={selectedExercise} setViewExerciseModal={setViewExerciseModal} viewExerciseModal={viewExerciseModal} />
+      )}
+
+
+      {contextHolder}
     </div>
-  )
+  );
 }
