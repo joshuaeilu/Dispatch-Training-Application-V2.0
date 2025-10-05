@@ -24,6 +24,8 @@ import {
   SearchOutlined,
   UploadOutlined,
   LockOutlined,
+  BackwardOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { api } from "../../../../utils/api";
 import { PageHeader } from "../../../Shared/PageHeader";
@@ -209,7 +211,13 @@ export default function ManageUsers() {
 
   return (
     <div className="px-8 py-6">
-     <div>
+  <PageHeader
+    title="User Management"
+    subtitle="Manage users, roles, and permissions"
+    showBackButton
+    onBack={() => window.history.back()}
+  />
+  
 
       {/* Search + Filter */}
       <div className="flex flex-col md:flex-row md:items-center mb-6 gap-3">
