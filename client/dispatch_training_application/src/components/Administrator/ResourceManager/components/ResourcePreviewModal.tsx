@@ -96,14 +96,15 @@ export default function ResourcePreviewModal({
     </Button>
   ): (
     <Button
-  type="text"
+    type="primary"
   aria-label="Close"
   onClick={onClose}
   icon={<CloseOutlined />}
   variant="filled"
+  size="large"
   style={{
-    color: "var(--color-white)",
-    backgroundColor: "var(--color-primary)",
+    color: "#fff",
+    backgroundColor: "#8C2131",
   }}
 >
 </Button>
@@ -149,11 +150,11 @@ export default function ResourcePreviewModal({
           src={url}
           title="PDF Viewer"
           width="100%"
-          height="600px"
           style={{
             border: "1px solid var(--color-border)",
             borderRadius: 8,
             backgroundColor: "white",
+            height: "70vh",
           }}
         />
       )}

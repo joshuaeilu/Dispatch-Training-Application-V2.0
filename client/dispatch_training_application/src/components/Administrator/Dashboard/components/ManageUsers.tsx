@@ -24,34 +24,30 @@ import {
   SearchOutlined,
   UploadOutlined,
   LockOutlined,
-  BackwardOutlined,
-  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { api } from "../../../../utils/api";
 import { PageHeader } from "../../../Shared/PageHeader";
 import { toTitleCase } from "../../../../utils/tools";
 import { PROFILE_PIC_URL } from "../../../../data/data";
 import { AuthContext } from "../../../../contexts/AuthProvider";
+import { getUsers } from "../../../../contexts/UniversalHelpers";
+import type { GetUser } from "../../../../types/index.types";
+
 
 const { Title } = Typography;
 const { Option } = Select;
 
-interface EditUser {
-  id: string;
-  name: string;
-  avatar: string;
-  role: string;
-}
+
 
 export default function ManageUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [allUsers, setAllUsers] = useState<EditUser[]>([]);
-  const [users, setUsers] = useState<EditUser[]>([]);
+  const [allUsers, setAllUsers] = useState<GetUser[]>([]);
+  const { users, setUsers, refreshUsers } = getUsers();
 
   // === Edit Modal State ===
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<EditUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<GetUser | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -63,21 +59,7 @@ export default function ManageUsers() {
   const { token } = useContext(AuthContext);
   const [form] = Form.useForm();
 
-  // Fetch all users
-  const fetchUsers = async () => {
-    try {
-      const response = await api.get("/users");
-      setAllUsers(response.data);
-      setUsers(response.data);
-    } catch (err) {
-      console.error("Failed to fetch users:", err);
-      toast.error("Failed to load users");
-    }
-  };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   // Search + Filter logic
   useEffect(() => {
@@ -113,7 +95,7 @@ export default function ManageUsers() {
   };
 
   // === Edit User Modal ===
-  const handleEdit = (user: EditUser) => {
+  const handleEdit = (user: GetUser) => {
     setSelectedUser(user);
     setPreview(`${PROFILE_PIC_URL}${user.avatar}?token=${token}`);
     form.setFieldsValue({
@@ -143,7 +125,7 @@ export default function ManageUsers() {
 
       toast.success("User updated successfully");
       setIsModalOpen(false);
-      fetchUsers();
+      refreshUsers();
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || "Failed to update user.";
       toast.error(errorMsg);
@@ -159,7 +141,7 @@ export default function ManageUsers() {
   };
 
   // === Delete User Modal ===
-  const handleDeleteClick = (user: EditUser) => {
+  const handleDeleteClick = (user: GetUser) => {
     setSelectedUser(user);
     setDeletePassword("");
     setIsDeleteModalOpen(true);
@@ -189,7 +171,7 @@ export default function ManageUsers() {
   };
 
   // === Menu Actions ===
-  const actionMenu = (user: EditUser) => (
+  const actionMenu = (user: GetUser) => (
     <Menu>
       <Menu.Item
         key="edit"
@@ -390,3 +372,4 @@ export default function ManageUsers() {
     </div>
   );
 }
+

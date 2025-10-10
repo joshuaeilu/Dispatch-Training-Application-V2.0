@@ -61,7 +61,7 @@ router.post('/', auth(['admin']), upload.single('file'), async(req, res) => {
   }
 })
 
-router.get('/', auth(['admin']), async (req, res) => {
+router.get('/', auth(['admin', 'trainee', 'dispatcher']), async (req, res) => {
   try {
     const result = await pool.query(`SELECT
   resources.id, resources.name, resources.type, resources.mime_type, resources.url, resources.size,

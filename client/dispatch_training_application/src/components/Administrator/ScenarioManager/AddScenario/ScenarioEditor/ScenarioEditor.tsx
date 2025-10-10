@@ -15,7 +15,7 @@ import SceneOverview from "./SceneOverview";
 import { api } from "../../../../../utils/api";
 import { useContext } from "react";
 import { AuthContext } from "../../../../../contexts/AuthProvider";
-import { Toaster, toast } from 'react-hot-toast';
+import {  toast } from 'react-hot-toast';
 export default function ScenarioEditor() {
   const { Title } = Typography;
   const location = useLocation();
@@ -135,7 +135,7 @@ if (!scenarioDetails) {
     if (!hasChanged) return;
 
     debouncedSave(scenario, user.id, setLastSavedScenario);
-  }, [scenario, user, lastSavedScenario, debouncedSave]);
+  }, [scenario, user, lastSavedScenario]);
 
   async function saveScenario() {
     setIsPublishing(true);

@@ -8,12 +8,17 @@ import ScenarioEditor from './components/Administrator/ScenarioManager/AddScenar
 import UserViewScenarios from './components/Trainee/ScenarioWalkthrough/UserViewScenarios'
 import ScenarioWalkthrough from './components/Shared/ScenarioWalkthrough'
 import ViewKnowledgeChecks from './components/Administrator/KnowledgeCheckManager/ViewKnowledgeChecks'
-import AddExercise from './components/Administrator/KnowledgeCheckManager/AddExercise/AddExercise'
+import AddExercise from './components/Administrator/KnowledgeCheckManager/AddExercise/EditExercise'
 import AdminDashboard from './components/Administrator/Dashboard/AdminDashboard'
 import CreateUserPage from './components/Administrator/Dashboard/components/CreateUserPage'
 import ManageUsers from './components/Administrator/Dashboard/components/ManageUsers'
 import ResourceManager from './components/Administrator/ResourceManager/ResourceManager'
-
+import DispatchersSection from './components/Administrator/Dashboard/Dispatchers/DispatchersSection'
+import TraineesSection from './components/Administrator/Dashboard/Trainees/TraineesSection'
+import AdminSection from './components/Administrator/Dashboard/Admins/AdminSection'
+import UserViewKnowledgeChecks from './components/Trainee/KnowledgeChecks/UserViewKnowledgeChecks'
+import ViewKnowledgeCheck from './components/Trainee/KnowledgeChecks/ViewKnowledgeCheck'
+import UserResourcesPage from './components/Shared/Resources/UserResourcesPage'
 function App() {
 
   return (
@@ -36,14 +41,22 @@ function App() {
           </Route>
           <Route path="/knowledge-checks" element={<Outlet />} >
             <Route index element={<ViewKnowledgeChecks />} />
-            <Route path="add-exercise" element={<AddExercise />} />
+            <Route path="edit-exercise" element={<AddExercise />} />
           </Route>
           <Route path="/dashboard" element={<Outlet />} >
           <Route index element={<AdminDashboard />} />
           <Route path="create-user" element={<CreateUserPage />} />
           <Route path="manage-users" element={<ManageUsers/>} />
+          <Route path="dispatchers" element={<DispatchersSection />} />
+          <Route path="trainees" element={<TraineesSection />} />
+          <Route path="admins" element={<AdminSection />} />
           </Route>
           <Route path="resource-manager" element={<ResourceManager />} />
+          <Route path="/trainee-knowledge-checks" element={<Outlet />} >
+            <Route index element={<UserViewKnowledgeChecks />} />
+            <Route path="view-exercise" element={<ViewKnowledgeCheck />} />
+          </Route>
+          <Route path="/resources" element={<UserResourcesPage />} />
         </Route>
       </Routes>
     </Router>

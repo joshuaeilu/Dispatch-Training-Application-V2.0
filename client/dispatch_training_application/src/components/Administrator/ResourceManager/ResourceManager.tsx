@@ -58,10 +58,10 @@ const [resourceFiles, setResourceFiles] = useState<ResourceTableType[]>([]);
 
 
     return (
-        <div style={{ padding: '20px', overflow: 'auto', height: '100%' }}>
+        <div>
       {/* Page Header */}
       
-      <PageHeader title="Resource Management" subtitle="Manage dispatch resources, documents and materials" showAddButton onAdd={() => setResourceModalOpen(true)} addButtonText="Add Resource"/>
+      <PageHeader title="Resource Management" subtitle="Manage dispatch resources, documents and materials" showButton onButtonPress={() => setResourceModalOpen(true)} buttonText="Add Resource"/>
 
       <ResourceSection resources={resourceFiles} fetchResources={fetchResources} />
 

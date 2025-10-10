@@ -13,12 +13,13 @@ import { PROFILE_PIC_URL, RESOURCE_CATEGORIES } from "../../../../data/data";
 import { formatFileSize, formatDateOnly, toTitleCase } from "../../../../utils/tools";
 import { RESOURCE_URL } from "../../../../data/data";
 
+const { Title } = Typography;
 
 export default function ResourceSection({ resources, fetchResources }: { resources: ResourceTableType[]; fetchResources: () => void }) {
     const [selectedResource, setSelectedResource] = useState<ResourceCategory>({
         key: "all",
         label: "All Resources",
-        icon: <FileTextOutlined />,
+        icon: <FileTextOutlined  style={{ fontSize: 18 }} />,
     });
     const { isMobile } = useContext(AuthContext);
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -47,7 +48,6 @@ export default function ResourceSection({ resources, fetchResources }: { resourc
         actions: [
             {
                 label: "View",
-                color: "green",
                 resourceId: resource.id,
                 resourcePreview: {
                     name: resource.name,
@@ -69,136 +69,144 @@ export default function ResourceSection({ resources, fetchResources }: { resourc
 
 
 
-    const columns: TableColumnType<ResourceTableType>[] = [
-        {
-            title: "Name",
-            dataIndex: "name",
-            key: "name",
-        },
-        {
-            title: "Type",
-            dataIndex: "type",
-            key: "type",
-            sorter: (a, b) => a.type.localeCompare(b.type),
-            render: (type: ResourceKey) => {
-                const category = RESOURCE_CATEGORIES.find(cat => cat.key === type);
-                return (
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                        {category?.icon}
-                        <span>{category?.label}</span>
-                    </span>
-                );
-            },
-        },
-        {
-            title: "Size",
-            dataIndex: "size",
-            key: "size",
-            align: "left",
-            render: (bytes) => (
-                <span style={{ whiteSpace: "nowrap" }}>
-                    {formatFileSize(bytes)}
-                </span>
-            )
-        },
-        {
-            title: "Description",
-            dataIndex: "description",
-            key: "description",
-        },
-        {
-            title: "Created At",
-            dataIndex: "created_at",
-            key: "created_at",
-            sorter: (a, b) =>
-                new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-            render: (date: string) => formatDateOnly(date),
-        },
-        {
-            title: "Created By",
-            dataIndex: "created_by",
-            key: "created_by",
-            render: (created_by: { id: string; name: string; avatar_url: string }) => (
-                <Space>
-                    <img
-                        // src={created_by.avatar_url}
-                        src={PROFILE_PIC_URL + created_by.avatar_url + "?token=" + token}
-                        alt={created_by.name}
-                        style={{ width: 32, height: 32, borderRadius: "50%" }}
-                    />
-                    <span>{toTitleCase(created_by.name)}</span>
-                </Space>
-            ),
-        },
-        {
-            title: "Actions",
-            dataIndex: "actions",
-            key: "actions",
-            align: "center",
-            render: (actions: { label: string; color: string; resourceId: string; resourcePreview: { name: string; description: string; type: string; url: string; }; }[]) => (
-                <Space>
-                    <Button
-                        key="view"
-                        color="geekblue"
-                        variant="filled"
-                        icon={<SnippetsOutlined />}
-                        onClick={() => {
-                            handleResourcePreview({
-                                id: actions[0].resourceId,
-                                ...actions[0].resourcePreview
-                            });
-                        }}
-                    />
-                    <Popconfirm
-                        title="Delete this exercise?"
-                        description="This action cannot be undone."
-                        okText="Delete"
-                        cancelText="Cancel"
-                        okButtonProps={{ danger: true }}
-                        onConfirm={() => handleResourceDelete(actions[1].resourceId)}
-                    >
-                        <Tooltip title="Delete">
-                            <Button
-                                key="delete"
-                                variant="filled"
-                                color="red"
-                                icon={<DeleteOutlined />}
-                            />
-                        </Tooltip>
-                    </Popconfirm>
-                </Space>
-            ),
+const columns: TableColumnType<ResourceTableType>[] = [
+  {
+    title: "Name",
+    dataIndex: "name",
+    key: "name",
+    render: (name: string) => (
+      <Typography.Text style={{ fontSize: 14, color: "#262626", whiteSpace: "nowrap"  }}>
+        {name}
+      </Typography.Text>
+    ),
+  },
+  {
+    title: "Description",
+    dataIndex: "description",
+    key: "description",
+    render: (description: string) => (
+      <Typography.Paragraph
+        ellipsis={{ rows: 2 }}
+        style={{
+          marginBottom: 0,
+          color: "#595959",
+          fontSize: 13,
+        }}
+      >
+        {description}
+      </Typography.Paragraph>
+    ),
+  },
+  {
+    title: "Type",
+    dataIndex: "type",
+    key: "type",
+    sorter: (a, b) => a.type.localeCompare(b.type),
+    render: (type: ResourceKey) => {
+      const category = RESOURCE_CATEGORIES.find((cat) => cat.key === type);
+      return (
+        <Space size={6}>
+          {category?.icon}
+          <Typography.Text style={{ fontSize: 13, color: "#434343", whiteSpace: "nowrap" }}>
+            {category?.label}
+          </Typography.Text>
+        </Space>
+      );
+    },
+  },
 
-        },
-        {
-            title: "Toggle Visibility",
-            dataIndex: "visibility",
-            key: "visibility",
-            align: "center",
-            showSorterTooltip: true,
-            render: (visibility: boolean, record) => (
-                <Switch
-                    size="small"
-                    checked={visibility}
-                    onChange={async (checked) => {
-                        try {
-                            const response = await api.patch(`/resources/${record.id}`, { visibility: checked });
-                            messageApi.open({
-                                type: 'success',
-                                content: `Resource visibility updated to ${checked ? 'visible' : 'hidden'}.`,
-                            });
-                            fetchResources(); // Refresh the resource list
-                        } catch (error) {
-                            messageApi.open({
-                                type: 'error',
-                                content: error instanceof Error ? error.message : 'Failed to update visibility',
-                            });
-                        }
-                    }}
-                />
-            ),
-        },
-    ];
+  {
+    title: "Actions",
+    dataIndex: "actions",
+    key: "actions",
+    align: "center",
+    render: (
+      actions: {
+        label: string;
+        color: string;
+        resourceId: string;
+        resourcePreview: {
+          name: string;
+          description: string;
+          type: string;
+          url: string;
+        };
+      }[]
+    ) => (
+      <Space>
+        <Tooltip title="View resource">
+          <Button
+            variant="filled"
+            color="geekblue"
+            icon={<SnippetsOutlined />}
+            onClick={() =>
+              handleResourcePreview({
+                id: actions[0].resourceId,
+                ...actions[0].resourcePreview,
+              })
+            }
+          >
+            View
+          </Button>
+        </Tooltip>
+        <Popconfirm
+          title="Delete this resource?"
+          description="This action cannot be undone."
+          okText="Delete"
+          cancelText="Cancel"
+          okButtonProps={{ danger: true }}
+          onConfirm={() => handleResourceDelete(actions[1].resourceId)}
+        >
+          <Tooltip title="Delete resource">
+            <Button variant="filled" color="red" icon={<DeleteOutlined />}>
+              Delete
+            </Button>
+          </Tooltip>
+        </Popconfirm>
+      </Space>
+    ),
+  },
+  {
+    title: "Visibility",
+    dataIndex: "visibility",
+    key: "visibility",
+    align: "center",
+    render: (visibility: boolean, record) => (
+      <Switch
+        size="small"
+        checked={visibility}
+        onChange={async (checked) => {
+          try {
+            await api.patch(`/resources/${record.id}`, { visibility: checked });
+            messageApi.success(
+              `Resource visibility updated to ${checked ? "visible" : "hidden"}.`
+            );
+            fetchResources();
+          } catch (error) {
+            messageApi.error(
+              error instanceof Error
+                ? error.message
+                : "Failed to update visibility"
+            );
+          }
+        }}
+      />
+    ),
+  },
+    {
+    title: "Created At",
+    dataIndex: "created_at",
+    key: "created_at",
+    sorter: (a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    render: (date: string) => (
+      <Typography.Text style={{ fontSize: 13, color: "#8c8c8c", whiteSpace: "nowrap" }}>
+        {formatDateOnly(date)}
+      </Typography.Text>
+    ),
+  },
+];
+
 
     async function handleResourceDelete(resourceId: string) {
         try {
@@ -275,18 +283,27 @@ export default function ResourceSection({ resources, fetchResources }: { resourc
     const { token } = useContext(AuthContext);
 
     return (
-        <div>
+        <div style={{ padding: isMobile ? "0 1rem": "0 1.5rem", overflow: "auto" }}> 
             <Card>
 
-                <h3 >Search & Filter</h3 >
-                <Row gutter={[8, 8]} align="middle" className="mt-4">
+ <Title
+    level={4}
+    style={{
+      marginBottom: 16,
+      fontWeight: 600,
+      color: "#1f1f1f",
+      fontSize: 18,
+    }}
+  >
+    Search & Filter Resources
+  </Title>                <Row gutter={[8, 8]} align="middle" className="mt-4">
                     {/* Input - full width on mobile, 70% on desktop */}
                     <Col xs={24} sm={16} lg={20} >
                         <Input
                             placeholder="Search for resources..."
                             prefix={<SearchOutlined />}
                             allowClear
-                            size="middle"
+                            size="large"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             onPressEnter={(e) => setQuery((e.target as HTMLInputElement).value)}
@@ -297,9 +314,8 @@ export default function ResourceSection({ resources, fetchResources }: { resourc
                     {/* Select - full width on mobile, 30% on desktop */}
                     <Col xs={24} sm={8} lg={4}>
                         <Select
-                            defaultValue="all"
                             value={selectedResource.key}
-                            size="middle"
+                            size="large"
                             style={{ width: "100%" }} // always full width in its column
                             onChange={(newValue) => setSelectedResource(RESOURCE_CATEGORIES.find(category => category.key === newValue) || RESOURCE_CATEGORIES[0])}
                         >
@@ -312,83 +328,19 @@ export default function ResourceSection({ resources, fetchResources }: { resourc
                     </Col>
                 </Row>
             </Card>
-            <div className="scrollable-x"
-                style={{
-                    width: "100%",
-                    overflowX: "auto",
-                }}
-            >
-                <div
-                    style={{
-                        width: "100%",
-                        minWidth: "max-content", // allows scrolling if buttons overflow
-                    }}
-                >
-                    <Segmented
-                        block
-                        value={selectedResource.key}
-                        onChange={(newValue) =>
-                            setSelectedResource(
-                                RESOURCE_CATEGORIES.find((cat) => cat.key === newValue) || RESOURCE_CATEGORIES[0]
-                            )
-                        }
-                        style={{
-                            marginTop: 16,
-                            marginBottom: 16,
-                            width: "100%",
-                            backgroundColor: "var(--color-bg-muted)",
-                            borderRadius: "var(--border-radius)",
-                            boxShadow: "var(--shadow)",
-                            padding: 4,
-                            border: `1px solid var(--color-border)`,
-                        }}
-                        options={RESOURCE_CATEGORIES.map(({ key, label, icon }) => ({
-                            value: key,
-                            label: (
-                                <div
-                                    style={{
-                                        display: "inline-flex",
-                                        alignItems: "center",
-                                        gap: 6,
-                                        whiteSpace: "nowrap",
-                                        fontWeight: 500,
-                                        color: "var(--color-text)",
-                                    }}
-                                >
-                                    {icon}
-                                    {!isMobile && <span>{label}</span>}
-                                    {!isMobile && (
-                                        <Tag
-                                            style={{
-                                                backgroundColor: "var(--color-primary)",
-                                                color: "var(--color-white)",
-                                                fontWeight: 600,
-                                                border: "none",
-                                                borderRadius: 6,
-                                                height: 20,
-                                                lineHeight: "20px",
-                                            }}
-                                        >
-                                            {counts[key] || 0}
-                                        </Tag>
-                                    )}
-                                </div>
-                            ),
-                        }))}
-                    />
+           
+         
 
-                </div>
-            </div>
             <Card
                 style={{
-                    width: "100%",
+                    width: "100%",marginTop: 12,
 
                 }}
                 bodyStyle={{ padding: 16 }}
             >
                 <Space direction="vertical" size={4} style={{ width: "100%" }}>
                     <Space align="center" size={8}>
-                        <FileTextOutlined style={{ fontSize: 20, color: "var(--color-primary)" }} />
+                        {selectedResource.icon}
                         <Typography.Title
                             level={4}
                             style={{ margin: 0, }}
@@ -397,7 +349,7 @@ export default function ResourceSection({ resources, fetchResources }: { resourc
                         </Typography.Title>
                     </Space>
 
-                    <Typography.Text type="secondary">
+                    <Typography.Text  type="secondary">
                         {filteredData.length || 0} {filteredData.length === 1 ? "resource" : "resources"} found
                     </Typography.Text>
                 </Space>

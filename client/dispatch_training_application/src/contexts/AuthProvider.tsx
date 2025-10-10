@@ -72,3 +72,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return <AuthContext.Provider value={{ ...value}}>{children}</AuthContext.Provider>;
 }
+
+
+export function getToken(){
+  const { token } = React.useContext(AuthContext);
+  return token;
+}
+
+export function checkIsMobile(){
+  const { isMobile } = React.useContext(AuthContext);
+  return isMobile;
+}

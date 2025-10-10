@@ -12,59 +12,74 @@ import {
 import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import { PageHeader } from "../../Shared/PageHeader";
-import ScenarioCard from "../../Shared/ListCard";
+import ListCard from "../../Shared/ListCard";
 import { UniversalContext } from "../../../contexts/UniversalHelpers";
 import { api } from "../../../utils/api";
-import type { Scenario } from "../../../types/index.types";
+import type {  Exercise,  } from "../../../types/index.types";
+import { AuthContext } from "../../../contexts/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { set } from "lodash";
 
 const { Title } = Typography;
 
-export default function UserViewScenarios() {
+export default function UserViewKnowledgeChecks() {
   const [form] = Form.useForm();
   const { preferences } = useContext(UniversalContext);
 
-  const [selectedScenarioType, setSelectedScenarioType] = useState("All");
+  const [selectedExerciseType, setSelectedExerciseType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
 
-  const scenarioTypes = preferences?.scenario_types || ["No types found"];
+  const exerciseTypes = preferences?.exercise_types || ["No types found"];
 
   const navigate = useNavigate();
-  // Fetch scenarios from database
-  useEffect(() => {
-    const fetchScenarios = async () => {
-      try {
-        const response = await api.get("/scenarios");
-        const data = response.data.scenarios.map((s: any) => ({
-          ...s.scenario_data,
-        }));
-        setScenarios(data);
-      } catch (err) {
-        console.error("Failed to fetch scenarios", err);
-      }
-    };
+    const { user } = useContext(AuthContext);
+  // Fetch exercises from database
 
-    fetchScenarios();
-  }, []);
+  const [completedExercises, setCompletedExercises] = useState<string[]>([]);
+useEffect(() => {
+  const fetchCompletedExercises = async () => {
+    if (!user) return;
+
+    try {
+      const response = await api.get(`/submissions/${user.id}`);
+      setCompletedExercises(response.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch completed exercises:", err);
+    }
+  };
+
+  const fetchExercises = async () => {
+    try {
+      const response = await api.get("/exercises");
+      setExercises(response.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch exercises:", err);
+    }
+  };
+
+  fetchCompletedExercises();
+  fetchExercises();
+}, [user]);
+
 
   // Apply filters (type + search)
-  const filteredScenarios = scenarios.filter((s) => {
+  const filteredExercises = exercises.filter((e) => {
     const matchesType =
-      selectedScenarioType === "All" || s.type === selectedScenarioType;
+      selectedExerciseType === "All" || e.type === selectedExerciseType;
     const matchesSearch =
       searchQuery === "" ||
-      s.name.toLowerCase().includes(searchQuery.toLowerCase());
+      e.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesType && matchesSearch;
   });
 
-  // Group scenarios by type
-  const grouped = filteredScenarios.reduce(
-    (acc: Record<string, Scenario[]>, scenario) => {
-      if (!acc[scenario.type]) {
-        acc[scenario.type] = [];
+  // Group exercises by type
+  const grouped = filteredExercises.reduce(
+    (acc: Record<string, Exercise[]>, exercise) => {
+      if (!acc[exercise.type]) {
+        acc[exercise.type] = [];
       }
-      acc[scenario.type].push(scenario);
+      acc[exercise.type].push(exercise);
       return acc;
     },
     {}
@@ -76,25 +91,25 @@ export default function UserViewScenarios() {
   return (
     <div className="p-5">
       <PageHeader
-        title="Scenario Walkthroughs"
-        subtitle="Explore and complete available scenarios"
+        title="Knowledge Checks"
+        subtitle="Explore and complete available exercises"
       />
 
       {/* Filters */}
       <Form form={form} layout="vertical">
         <Row gutter={[16, 12]}>
           <Col xs={24} sm={12} md={4}>
-            <Form.Item label="Scenario Type" name="type">
+            <Form.Item label="Exercise Type" name="type">
               <Select
-                defaultValue={selectedScenarioType}
+                defaultValue={selectedExerciseType}
                 options={[
                   { label: "All", value: "All" },
-                  ...scenarioTypes.map((type) => ({
+                  ...exerciseTypes.map((type) => ({
                     label: type,
                     value: type,
                   })),
                 ]}
-                onChange={(value) => setSelectedScenarioType(value)}
+                onChange={(value) => setSelectedExerciseType(value)}
               />
             </Form.Item>
           </Col>
@@ -129,7 +144,7 @@ export default function UserViewScenarios() {
                 icon={<ReloadOutlined />}
                 onClick={() => {
                   form.resetFields();
-                  setSelectedScenarioType("All");
+                  setSelectedExerciseType("All");
                   setSearchQuery("");
                 }}
               >
@@ -140,24 +155,26 @@ export default function UserViewScenarios() {
         </Row>
       </Form>
 
-      <p>{filteredScenarios.length} scenarios found</p>
+      <p>{filteredExercises.length} exercises found</p>
 
-      {/* Grouped Scenarios */}
+      {/* Grouped Exercises */}
       {sortedTypes.map((type) => (
         <div key={type} style={{ marginBottom: 32 }}>
           <Title level={4}>{type}</Title>
           <Divider style={{ margin: "8px 0 16px" }} />
           <Space wrap size="large">
-            {grouped[type].map((scenario, index) => (
-              <ScenarioCard
-                key={`${type}-${index}`}
-                name={scenario.name}
-                description={scenario.description}
-                type={scenario.type}
-                completed={ false}
-                onClick={() => navigate("view-scenario", { state: { scenario } })}
+            {grouped[type].map((exercise, index) => (
+            <ListCard
+  key={`${type}-${index}`}
+  name={exercise.name}
+  description={"test"}
+  type={exercise.type}
+  completed={completedExercises.includes(exercise.id)} // ✅ ✅
+  onClick={() =>
+    navigate("view-exercise", { state: { exerciseId: exercise.id } })
+  }
+/>
 
-              />
             ))}
           </Space>
         </div>

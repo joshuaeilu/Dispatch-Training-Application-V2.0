@@ -143,7 +143,7 @@ export interface Exercise{
   type: string;
   difficulty: "Easy" | "Medium" | "Hard";
   audience: "All" | "Dispatchers" | "Trainees";
-  status: "Draft" | "Published";
+  status: "draft" | "published";
   visibility?: boolean;
   createdBy: string | created_by;
   questions: Question[];
@@ -162,7 +162,7 @@ export interface ExerciseTableType{
   difficulty: "Easy" | "Medium" | "Hard";
   questionCount: number;
   audience: "All" | "Dispatchers" | "Trainees";
-  status: "Draft" | "Published";
+  status: "draft" | "published";
   visibility: boolean;
   created_by: created_by;
   questions: Question[];
@@ -229,4 +229,10 @@ export interface ResourceFile{
   mime_type: string;
   createdAt: string;
   createdBy: string;
+}
+export interface GetUser {
+  id: string;
+  name: string;
+  avatar: string;
+  role: string;
 }

@@ -17,7 +17,32 @@ body{
 }
 
 /* Disable text caret globally unless it's an input or textarea */
-*:not(input):not(textarea) {
+/* *:not(input):not(textarea) {
   caret-color: transparent;
+} */
+
+
+
+/* Base style for the segmented control */
+.ant-segmented {
+  background-color: #FAF7F7;
+  padding: 4px;
+  border: 1px solid #E0E0E0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
+/* Selected item label text color */
+.ant-segmented-item-selected .ant-segmented-item-label {
+  background-color: #8C2131 !important; /* or var(--color-accent), or any Calvin color */
+  font-weight: 600;
+  color: #fff !important;
+  border-radius: 5px;
+}
+
+.ant-segmented-thumb {
+  background-color: #8C2131 !important;
+  border-radius: 16;
+  color: #fff !important;
+
+  transition: all 0.3s ease;
+}

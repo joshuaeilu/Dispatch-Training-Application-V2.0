@@ -62,7 +62,7 @@ export default function AddExerciseModal({ exercise, setExercise, setupOpen, set
       type: values.type,
       difficulty: values.difficulty,
       audience: values.audience,
-      status: "Draft",
+      status: "draft",
       createdBy: user?.id || "Unknown",
       questions: [{
         id: uuidv4(),

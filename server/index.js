@@ -22,7 +22,7 @@ app.use('/data/profile_pics', auth(['admin', 'trainee']), express.static('profil
 // // Resource Routes
 const resourcesRoutes = require('./src/routes/resources');
 app.use('/api/resources', resourcesRoutes);
-app.use('/data/resources', auth(['admin']), express.static('resources'));
+app.use('/data/resources', auth(['admin', 'trainee']), express.static('resources'));
 
 // Preference Routes
 const preferencesRoutes = require('./src/routes/preferences');
@@ -31,6 +31,9 @@ app.use('/api/preferences', preferencesRoutes);
 // Exercise Routes
 const exercisesRoutes = require('./src/routes/exercises');
 app.use('/api/exercises', exercisesRoutes);
+
+const submissionsRoutes = require('./src/routes/submissions');
+app.use('/api/submissions', submissionsRoutes);
 
 // Scenario Routes
 const scenariosRoutes = require('./src/routes/scenarios');

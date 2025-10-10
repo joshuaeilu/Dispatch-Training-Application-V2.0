@@ -1,16 +1,20 @@
-// components/Shared/PageHeader.tsx
 import React from "react";
 import { Button, Typography } from "antd";
-import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  HistoryOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { checkIsMobile } from "../../contexts/AuthProvider";
 
-const { Title, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  showAddButton?: boolean;
-  addButtonText?: string;
-  onAdd?: () => void;
+  showButton?: boolean;
+  buttonText?: string;
+  onButtonPress?: () => void;
   showBackButton?: boolean;
   onBack?: () => void;
 }
@@ -18,71 +22,103 @@ interface PageHeaderProps {
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   subtitle,
-  showAddButton = false,
-  addButtonText = "Add",
-  onAdd,
+  buttonText = "Add",
+  showButton,
+  onButtonPress,
   showBackButton = false,
   onBack,
 }) => {
+  const isMobile = checkIsMobile();
+
   return (
-   <div style={{ marginBottom: 24 }}>
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      flexWrap: "wrap",
-    }}
-  >
-    
-    {/* Left side (Title + Subtitle + optional Back Btn) */}
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      {showBackButton && (
-        <Button
-          type="primary"
-          icon={<ArrowLeftOutlined />}
-          onClick={onBack}
+    <div style={{ padding: isMobile ? "1rem": "1.5rem"}}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: isMobile ? "flex-start" : "space-between",
+          alignItems: isMobile ? "flex-start" : "center",
+          flexWrap: "wrap",
+          rowGap: 12,
+        }}
+      >
+        {/* Left side (Back + Title [+ Subtitle]) */}
+        <div
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 6,
-            marginRight: 4,
+            gap: 10,
+            flex: 1,
+            flexWrap: "wrap",
           }}
-        />
-      )}
-
-
-      <div>
-        <Title
-          level={3}
-          style={{ marginBottom: subtitle ? 4 : 0, color: "#8C2131" }}
         >
-          {title}
-        </Title>
-        {subtitle && (
-          <Text
-            style={{
-              fontSize: "16px",
-              color: "var(--color-heading)",
-              fontWeight: 400,
-              margin: 0,
-            }}
+          {showBackButton && (
+            <Button
+              type="primary"
+              icon={<ArrowLeftOutlined />}
+              onClick={onBack}
+              style={{
+                borderRadius: 6,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: isMobile ? 40 : undefined,
+                height: isMobile ? 40 : undefined,
+              }}
+            />
+          )}
+
+          <div>
+            <Title
+              level={isMobile ? 3 : 2}
+              style={{
+                marginBottom: subtitle && !isMobile ? 4 : 0,
+                color: !isMobile ? "#8C2131" : "#000",
+              }}
+            >
+              {title}
+            </Title>
+
+            {!isMobile && subtitle && (
+              <Paragraph
+                style={{
+                  fontSize: 16,
+                  color: "rgba(60, 60, 60, 0.75)",
+                  fontWeight: 500,
+                  margin: 0,
+                }}
+              >
+                {subtitle}
+              </Paragraph>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop: Button on right */}
+        {showButton && !isMobile && (
+          <Button
+            type="primary"
+            size="large"
+            icon={buttonText === "History" ? <HistoryOutlined /> : <PlusOutlined />}
+            onClick={onButtonPress}
           >
-            {subtitle}
-          </Text>
+            {buttonText}
+          </Button>
         )}
       </div>
+
+      {/* Mobile: Button below title */}
+      {isMobile && showButton && (
+        <Button
+          type="primary"
+          block
+          size="large"
+          icon={buttonText === "History" ? <HistoryOutlined /> : <PlusOutlined />}
+          onClick={onButtonPress}
+          style={{ marginTop: 12 }}
+        >
+          {buttonText}
+        </Button>
+      )}
     </div>
-
-    {/* Right side (optional Add Btn) */}
-    {showAddButton && (
-      <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-        {addButtonText}
-      </Button>
-    )}
-  </div>
-</div>
-
   );
 };

@@ -1,6 +1,6 @@
 import React, { useContext, useMemo } from 'react';
-import { ApartmentOutlined, AppstoreFilled, FileTextOutlined, LogoutOutlined, QuestionCircleFilled, QuestionCircleOutlined, UploadOutlined, UserOutlined, VideoCameraOutlined } from '@ant-design/icons';
-import { Button, Grid, Layout, Menu, Typography, } from 'antd';
+import { ApartmentOutlined, AppstoreFilled, FileTextOutlined, LogoutOutlined, MenuOutlined, QuestionCircleFilled, QuestionCircleOutlined, UploadOutlined, UserOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import { Button, Drawer, Grid, Layout, Menu, Typography, } from 'antd';
 import { Outlet } from 'react-router-dom';
 import CSLOGO from './assets/cs_logo.png';
 import type { Role } from './types/index.types';
@@ -25,15 +25,14 @@ const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { key: '/scenario-manager', icon: <ApartmentOutlined />, label: 'Scenario Manager' },
   ],
   dispatcher: [
-    { key: '/dashboard', icon: <UserOutlined />, label: 'Dashboard' },
+    { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
     { key: '/video-walkthroughs', icon: <VideoCameraOutlined />, label: 'Video Walkthroughs' },
     { key: '/reports', icon: <UploadOutlined />, label: 'Reports' },
     { key: '/settings', icon: <UserOutlined />, label: 'Settings' },
   ],
   trainee: [
-    { key: '/dashboard', icon: <UserOutlined />, label: 'Dashboard' },
     { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
-    { key: '/knowledge-check', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
+    { key: '/trainee-knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
     { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
   ],
 };
@@ -45,11 +44,12 @@ const App: React.FC = () => {
   const screens = useBreakpoint();
   const isMobile = !screens.md; // true for <768px
 
-  const { logout, user, token,  } = useContext(AuthContext);
+  const { logout, user,  } = useContext(AuthContext);
   const { selectedKey, setSelectedKey } = useContext(UniversalContext);
   const role = user?.role as Role;
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   // Build menu items once per role change
   const roleItems = useMemo<MenuItem[]>(() => {
@@ -67,7 +67,7 @@ const App: React.FC = () => {
   return (
     <Layout style={{ height: '100vh' }}>
       <Toaster position="top-center" />
-
+{!isMobile && (
    <Sider
    collapsible
    collapsed={collapsed}
@@ -82,6 +82,11 @@ const App: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
+      
+      paddingTop: "24px",
+      paddingRight: "4px",
+      paddingLeft: "4px",
+      
     }}
   >
 
@@ -93,7 +98,7 @@ const App: React.FC = () => {
         alt="Calvin Logo"
         style={{
           height: 64,
-          marginBottom: 8,
+          marginBottom: 16,
           filter: "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4))",
         }}
       />
@@ -106,8 +111,9 @@ const App: React.FC = () => {
 
     <Menu
       mode="inline"
-      selectedKeys={[selectedKey]} // highlight first item by default
+      selectedKeys={[selectedKey]} 
       items={roleItems}
+      style={{ flex: 1, borderRight: 0 }}
       onClick={({ key }) => {
         navigate(key);
         setSelectedKey(key);
@@ -132,11 +138,144 @@ const App: React.FC = () => {
  </div>
   </div>
 </Sider>
-
+)}
       <Layout>
-        {isMobile && <Header style={{ padding: 0 }} />}
+        {isMobile && (
+  <>
+<Header
+  style={{
+    position: "fixed",
+    zIndex: 1,
+    width: "100%",
+    background: "#fff",
+    padding: "0 16px",
+    height: 64,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+  }}
+>
+  {/* Left side - Title */}
+  <Typography.Title
+    level={3}
+    style={{
+      margin: 0,
+      fontWeight: 600,
+    }}
+  >
+    Dispatch Training
+  </Typography.Title>
 
-        <Content style={{ margin: 0, padding: 0 }}>
+  {/* Right side - Menu Button */}
+  <Button
+    type="text"
+    icon={
+      <MenuOutlined
+        style={{
+          color: "#fff",
+          scale: 1.5,
+        }}
+      />
+    }
+    onClick={() => setDrawerOpen(true)}
+    style={{
+      backgroundColor: "#8C2131",
+      borderRadius: 12,
+      width: 44,
+      height: 44,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+      transition: "all 0.25s ease-in-out",
+      margin: 0, // ensures perfect centering
+    }}
+  />
+</Header>
+
+
+
+    <Drawer
+      placement="left"
+      closable={false}
+      onClose={() => setDrawerOpen(false)}
+      open={drawerOpen}
+      width={300}
+      bodyStyle={{ padding: 0 }}
+    >
+      {/* Move your sidebar content inside here */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          paddingTop: "24px",
+          paddingRight: "4px",
+          paddingLeft: "4px",
+        }}
+      >
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: 16,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <img
+            src={CSLOGO}
+            alt="Calvin Logo"
+            style={{
+              height: 64,
+              marginBottom: 16,
+              filter: "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4))",
+            }}
+          />
+          <Typography.Title level={3} style={{ margin: 0 }}>
+            Dispatch Training Application
+          </Typography.Title>
+        </div>
+
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedKey]}
+          items={roleItems}
+          style={{ flex: 1, borderRight: 0, fontSize: 16 }}
+          onClick={({ key }) => {
+            navigate(key);
+            setSelectedKey(key);
+            sessionStorage.setItem("selectedKey", key);
+            setDrawerOpen(false); // close menu when clicked
+          }}
+        />
+
+        <div
+          style={{
+            marginTop: "auto",
+            display: "flex",
+            justifyContent: "center",
+            paddingBottom: 16,
+          }}
+        >
+          <Button
+            icon={<LogoutOutlined />}
+            type="primary"
+            onClick={logout}
+            style={{ width: "80%" }}
+          >
+            Logout
+          </Button>
+        </div>
+      </div>
+    </Drawer>
+  </>
+)}
+
+
+        <Content style={{ margin: 0, padding: 0, paddingTop: isMobile ? 64 : 0, overflow: 'auto' }}>
           <Outlet />
         </Content>
 

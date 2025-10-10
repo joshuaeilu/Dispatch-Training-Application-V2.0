@@ -1,14 +1,16 @@
 
 
-import React, { createContext, useState, useEffect, useMemo } from 'react';
-import type { AdminPreferences, Role, MenuItem } from '../types/index.types';
+import React, { createContext, useState, useEffect, useContext, useCallback,  } from 'react';
+import type { AdminPreferences,  } from '../types/index.types';
+import type { GetUser } from '../types/index.types'
 import { api } from '../utils/api';
-import { AppstoreFilled, FileTextOutlined, QuestionCircleOutlined, ApartmentOutlined, VideoCameraOutlined, UserOutlined, QuestionCircleFilled, UploadOutlined } from '@ant-design/icons';
 type Context = {
     preferences: AdminPreferences | null;
     setPreferences: (prefs: AdminPreferences | null) => void;
     selectedKey: string;
     setSelectedKey: (key: string) => void;
+    users: GetUser[];
+    setUsers: React.Dispatch<React.SetStateAction<GetUser[]>>;
 }
 
 export const UniversalContext = createContext<Context>({
@@ -16,6 +18,8 @@ export const UniversalContext = createContext<Context>({
     setPreferences: () => {},
     selectedKey: '',
     setSelectedKey: () => {},
+    users: [] as GetUser[],
+    setUsers: () => {},
 });
 
 
@@ -26,6 +30,7 @@ export const UniversalContext = createContext<Context>({
 
 export function UniversalProvider({ children }: { children: React.ReactNode }) {
     const [preferences, setPreferences] = useState<AdminPreferences | null>(null);
+    const [users, setUsers] = useState<GetUser[]>([]);
 
 const [selectedKey, setSelectedKey] = useState<string>(() => {
   return sessionStorage.getItem('selectedKey') || '/dashboard';
@@ -41,13 +46,46 @@ const [selectedKey, setSelectedKey] = useState<string>(() => {
             console.error('Error fetching admin preferences:', error);
           }
         };
+
+        const fetchUsers = async () => {
+          try{
+            const response = await api.get('/users');
+            setUsers(response.data);
+          } catch (error) {
+            console.error('Error fetching users:', error);
+          }
+        }
     
         fetchPreferences();
+        fetchUsers();
       }, []);
 
     return (
-        <UniversalContext.Provider value={{ preferences, setPreferences, selectedKey, setSelectedKey }}>
+        <UniversalContext.Provider value={{ preferences, setPreferences, selectedKey, setSelectedKey, users, setUsers }}>
             {children}
         </UniversalContext.Provider>
     );
+}
+
+export function getUsers() {
+  const { users, setUsers } = useContext(UniversalContext);
+
+  const refreshUsers = useCallback(async () => {
+    try {
+      const res = await api.get<GetUser[]>('/users');
+      setUsers(res.data);
+    } catch (error) {
+      console.error('Failed to refresh users:', error);
+    }
+  }, [setUsers]);
+  useEffect(() => {
+    refreshUsers();
+  }, [refreshUsers]);
+
+  return {
+    users,
+    setUsers,
+    refreshUsers,
+
+  };
 }

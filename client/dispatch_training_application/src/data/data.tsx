@@ -17,32 +17,32 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     {
         key: "all",
         label: "All Resources",
-        icon: <FileTextOutlined />,
+        icon: <FileTextOutlined style={{ fontSize: 18 }} />,
     },
     {
         key: "maps",
         label: "Maps",
-        icon: <EnvironmentOutlined />,
+        icon: <EnvironmentOutlined style={{ fontSize: 18 }} />,
     },
     {
         key: "documents",
         label: "Documents",
-        icon: <FileTextOutlined />,
+        icon: <FileTextOutlined style={{ fontSize: 18 }} />,
     },
     {
         key: "videos",
         label: "Videos",
-        icon: <PlaySquareOutlined />,
+        icon: <PlaySquareOutlined style={{ fontSize: 18 }} />,
     },
     {
         key: "audio",
         label: "Audio",
-        icon: <AudioOutlined />,
+        icon: <AudioOutlined style={{ fontSize: 18 }} />,
     },
     {
         key: "images",
         label: "Images",
-        icon: <PictureOutlined />,
+        icon: <PictureOutlined style={{ fontSize: 18 }} />,
     },
 ];
 

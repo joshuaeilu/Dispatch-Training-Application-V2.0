@@ -267,8 +267,8 @@ export default function KnowledgeCheckViewExercises() {
               variant="filled"
               color="blue"
               onClick={() => {
-                navigate(`/knowledge-check/edit-exercise/`, {
-                  state: { exercise: record },
+                navigate(`/knowledge-checks/edit-exercise/`, {
+                  state: { exerciseId: record.id },
                 });
               }}
             />
@@ -310,7 +310,7 @@ const exerciseTypes = (["All Types", preferences?.exercise_types].flat()).filter
   return (
     <div  style={{ padding: 18, maxWidth: "100%", background: "#f5f5f5" }} >
       {/* Page Header */}
-             <PageHeader title="View Exercises" subtitle="Filter, search and manager exercises" showAddButton addButtonText="Add Exercise" onAdd={() => navigate("/knowledge-checks/add-exercise")} />
+             <PageHeader title="View Exercises" subtitle="Filter, search and manager exercises" showButton buttonText="Add Exercise" onButtonPress={() => navigate("/knowledge-checks/edit-exercise")} />
      
 
       {/* Filters */}

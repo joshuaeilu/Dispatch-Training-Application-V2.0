@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 const { Text, Title } = Typography;
 
-export interface ScenarioCardProps {
+export interface ListCardProps {
   name: string;
   completed?: boolean;
   description: string;
@@ -12,13 +12,13 @@ export interface ScenarioCardProps {
   onClick: () => void;
 }
 
-export default function ScenarioCard({
+export default function ListCard({
   name,
   completed = false,
   description,
   type,
   onClick,
-}: ScenarioCardProps) {
+}: ListCardProps) {
   return (
     <Card
       hoverable

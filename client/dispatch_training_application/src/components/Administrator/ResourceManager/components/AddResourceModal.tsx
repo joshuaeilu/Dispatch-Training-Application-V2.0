@@ -80,16 +80,36 @@ export default function AddResourceModal({
         form.resetFields();
         onCancel();
       }}
-      title={
-        <div className="py-2">
-          <h3>
-            Add New Resource
-          </h3>
-          <Typography.Text type="secondary">
-            Upload a new resource to the dispatch system.
-          </Typography.Text>
-        </div>
-      }
+  title={
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      padding: "8px 0",
+    }}
+  >
+    <div style={{ fontSize: 24, color: "#8C2131" }}>
+      <FileTextOutlined />
+    </div>
+    <div>
+      <Typography.Title
+        level={4}
+        style={{
+          margin: 0,
+          fontWeight: 600,
+          color: "#1f1f1f",
+        }}
+      >
+        Add New Resource
+      </Typography.Title>
+      <Typography.Text type="secondary">
+        Upload a new resource to the dispatch system.
+      </Typography.Text>
+    </div>
+  </div>
+}
+
       maskClosable={false}
       destroyOnClose
       footer={
