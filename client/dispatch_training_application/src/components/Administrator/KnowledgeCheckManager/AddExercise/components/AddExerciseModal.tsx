@@ -1,26 +1,24 @@
-import { useContext, useEffect, useState } from "react";
 import {
-  Button,
-  Card,
+  Modal,
   Form,
   Input,
-  Modal,
   Select,
+  Button,
   Space,
-  Tag,
+  Typography,
   Popconfirm,
   message,
-  Typography,
-  
 } from "antd";
-import { useNavigate } from "react-router-dom";
-import type { Exercise } from "../../../../../types/index.types";
-import { UniversalContext } from "../../../../../contexts/UniversalHelpers";
+import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { api } from "../../../../../utils/api";
+import { useNavigate } from "react-router-dom";
+import { UniversalContext } from "../../../../../contexts/UniversalHelpers";
 import { AuthContext } from "../../../../../contexts/AuthProvider";
+import type { Exercise } from "../../../../../types/index.types";
+import { api } from "../../../../../utils/api";
+import { FileAddOutlined } from "@ant-design/icons";
 
-
+const { Text } = Typography;
 
 interface AddExerciseModalProps {
   exercise: Exercise;
@@ -29,228 +27,180 @@ interface AddExerciseModalProps {
   setSetupOpen: (open: boolean) => void;
 }
 
+const difficultyOptions = ["Easy", "Medium", "Hard"].map((d) => ({ label: d, value: d }));
+const audienceOptions = ["All", "Trainees", "Dispatchers"].map((a) => ({ label: a, value: a }));
 
-
-const difficultyOptions = [
-    { label: "Easy", value: "Easy" },
-    { label: "Medium", value: "Medium" },
-    { label: "Hard", value: "Hard" },
-  ];
-
-const audienceOptions = [
-    { label: "All", value: "All" },
-    { label: "Trainees", value: "Trainees" },
-    { label: "Dispatchers", value: "Dispatchers" },
-  ];
-
-
-export default function AddExerciseModal({ exercise, setExercise, setupOpen, setSetupOpen }: AddExerciseModalProps) {
-  const [setupForm] = Form.useForm();
-  const navigate = useNavigate();
+export default function AddExerciseModal({
+  exercise,
+  setExercise,
+  setupOpen,
+  setSetupOpen,
+}: AddExerciseModalProps) {
+  const [form] = Form.useForm();
   const { preferences, setPreferences } = useContext(UniversalContext);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [messageApi, contextHolder] = message.useMessage();
-
-  const [customInputVisible, setCustomInputVisible] = useState(false);
+  const [customTypeVisible, setCustomTypeVisible] = useState(false);
   const [customType, setCustomType] = useState("");
-  const submitSetupForm = async () => {
-    const values = await setupForm.validateFields();
-    setExercise({
-      id: uuidv4(),
-      name: values.name,
-      type: values.type,
-      difficulty: values.difficulty,
-      audience: values.audience,
-      status: "draft",
-      createdBy: user?.id || "Unknown",
-      questions: [{
-        id: uuidv4(),
-        question: "",
-        resource: undefined,
-        questionCategory: "",
-        answerType: "text-area",
-        options: [],
-        correctOptions: [],
-        tip: "",
-      }],
-    });
-    setSetupOpen(false);
-    // Proceed with form submission logic
-  };
-  async function handleCustomTypeSave() {
-    const newType = customType.trim();
-    if (!newType) {
-      messageApi.warning("Please enter a valid type");
-      return;
-    }
 
-    if (!(preferences?.exercise_types ?? []).includes(newType)) {
-      setPreferences({
-        ...preferences,
-        exercise_types: [...(preferences?.exercise_types ?? []), newType],
-      });
-    }
+  useEffect(() => {
+    if (setupOpen) form.resetFields();
+  }, [setupOpen]);
 
-    const field = 'exercise_types' as const;
-
+  const onContinue = async () => {
     try {
-      const current = preferences?.[field] ?? [];
-
-      if (current.includes(newType)) {
-        messageApi.warning("Exercise type already exists");
-        return;
-      }
-
-      const payload = { value: [...current, newType] };
-
-      const { data } = await api.patch(`/preferences/${field}`, payload);
-
-      // assuming `setPreferences` updates your local AdminPreferences state
-      if (data) {
-        messageApi.success("Custom exercise type added successfully");
-      }
-    } catch (error: any) {
-      messageApi.error(`Failed to add custom exercise type: ${error?.message ?? String(error)}`);
+      const values = await form.validateFields();
+      const newExercise: Exercise = {
+        ...exercise,
+        id: uuidv4(),
+        name: values.name,
+        type: values.type,
+        difficulty: values.difficulty,
+        audience: values.audience,
+        status: "draft",
+        createdBy: user?.id || "Unknown",
+      };
+      setExercise(newExercise);
+      setSetupOpen(false);
+    } catch (err) {
+      // Validation errors handled by AntD
     }
+  };
 
+  const handleAddCustomType = async () => {
+    const newType = customType.trim();
+    if (!newType) return messageApi.warning("Enter a valid type");
 
-    setupForm.setFieldsValue({ type: newType });
-    setCustomInputVisible(false);
-    setCustomType("");
-  }
+    const currentTypes = preferences?.exercise_types ?? [];
+    if (currentTypes.includes(newType)) return messageApi.warning("Type already exists");
+
+    const updatedTypes = [...currentTypes, newType];
+    try {
+      await api.patch(`/preferences/exercise_types`, { value: updatedTypes });
+      setPreferences({ ...preferences, exercise_types: updatedTypes });
+      form.setFieldValue("type", newType);
+      setCustomTypeVisible(false);
+      setCustomType("");
+      messageApi.success("Type added");
+    } catch (err: any) {
+      messageApi.error("Failed to save custom type");
+    }
+  };
 
   return (
-    <>
-
-
-
-      {/* --- Setup Modal (cannot be closed except Cancel & Exit) --- */}
-      <Modal
-        title={
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <h3>Create Exercise</h3>
-            <Typography.Text type="secondary" >
-              Fill in the form below to create a new exercise.
-            </Typography.Text>
-          </div>
-        }
-        open={setupOpen}
-        onCancel={() => null}       // block default close
-        closable={false}            // no X
-        maskClosable={false}        // click outside won’t close
-        keyboard={false}            // ESC won’t close
-        footer={
-          <Space style={{ width: "100%", justifyContent: "space-between" }}>
-            <Popconfirm
-              title="Cancel exercise creation?"
-              description="All progress will be discarded."
-              okText="Cancel and Exit"
-              onConfirm={() => {
-                setSetupOpen(false);
-                navigate("/knowledge-check");
-              }}
-              okButtonProps={{ danger: true }}
-              cancelText="Back"
-            >
-              <Button className="border-btn">Cancel</Button>
-            </Popconfirm>
-
-            <Space>
-              <Button className="regular-btn" onClick={submitSetupForm} type="primary" >
-                Continue
-              </Button>
-            </Space>
-          </Space>
-        }
-      >
-        <Form
-          layout="vertical"
-          form={setupForm}
-          initialValues={{ type: undefined, difficulty: undefined }}
-          requiredMark={false}
-        >
-
-
-
-          <Form.Item
-            label="Exercise Name"
-            name="name"
-            rules={[{ required: true, message: "Please enter exercise name" }]}
-          >
-            <Input placeholder="Enter exercise name" />
-          </Form.Item>
-
-
-          <Form.Item
-            label="Exercise Type"
-            name="type"
-            rules={[{ required: true, message: "Please select exercise type" }]}
-          >
-            <Select
-              placeholder="Select type"
-              onChange={(value) => {
-                if (value === "Custom") {
-                  setCustomInputVisible(true);
-                  setupForm.setFieldsValue({ type: undefined }); // reset type until custom is saved
-                } else {
-                  setCustomInputVisible(false);
-                }
-              }}
-options={
-  [...(preferences?.exercise_types ?? []).map((type) => ({
-    value: type,
-    label: type,
-  })), { value: "Custom", label: "+ Custom Type" }]
+    <Modal
+ title={
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      minHeight: 48,
+    }}
+  >
+    <FileAddOutlined style={{ fontSize: 36, color: "#8C2131" }} />
+    <div style={{ lineHeight: 1.3 }}>
+      <Typography.Title level={4} style={{ margin: 0 }}>
+        Create Exercise
+      </Typography.Title>
+      <Typography.Text type="secondary">
+        Fill in the form below to continue
+      </Typography.Text>
+    </div>
+  </div>
 }
-            />
-          </Form.Item>
 
-          {customInputVisible && (
-            <div className="flex gap-4 mb-2">
-              <Input
-                placeholder="Enter new custom exercise type"
-                value={customType}
-                onChange={(e) => setCustomType(e.target.value)}
-                onPressEnter={() => handleCustomTypeSave()}
-                style={{ marginBottom: 8 }}
-              />
-              <Button
-                className="regular-btn"
-                type="primary"
-                onClick={() => handleCustomTypeSave()}
-              >
-                Save
-              </Button>
-            </div>
-          )}
-
-          <Form.Item
-            label="Difficulty"
-            name="difficulty"
-            rules={[{ required: true, message: "Please select difficulty" }]}
+centered
+      open={setupOpen}
+      closable={false}
+      keyboard={false}
+      maskClosable={false}
+      footer={
+        <Space style={{ justifyContent: "space-between", width: "100%" }}>
+          <Popconfirm
+            title="Cancel exercise creation?"
+            description="All progress will be discarded."
+            okText="Cancel and Exit"
+            cancelText="Back"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => {
+              setSetupOpen(false);
+              navigate("/knowledge-checks");
+            }}
           >
-            <Select
-              placeholder="Select difficulty"
-              options={difficultyOptions}
+            <Button className="border-btn">Cancel</Button>
+          </Popconfirm>
+
+          <Button className="regular-btn" type="primary" onClick={onContinue}>
+            Continue
+          </Button>
+        </Space>
+      }
+    >
+      <Form form={form} layout="vertical" requiredMark={false}>
+        <Form.Item
+          name="name"
+          label="Exercise Name"
+          rules={[{ required: true, message: "Please enter a name" }]}
+        >
+          <Input placeholder="e.g. CPR Protocol Review" />
+        </Form.Item>
+
+        <Form.Item
+          name="type"
+          label="Exercise Type"
+          rules={[{ required: true, message: "Please select a type" }]}
+        >
+          <Select
+            placeholder="Select type"
+            options={[
+              ...(preferences?.exercise_types ?? []).map((t) => ({ label: t, value: t })),
+              { label: "+ Custom Type", value: "Custom" },
+            ]}
+            onChange={(val) => {
+              if (val === "Custom") {
+                setCustomTypeVisible(true);
+                form.setFieldValue("type", undefined);
+              } else {
+                setCustomTypeVisible(false);
+              }
+            }}
+          />
+        </Form.Item>
+
+        {customTypeVisible && (
+          <div className="flex gap-3 mb-3">
+            <Input
+              placeholder="Enter new type"
+              value={customType}
+              onChange={(e) => setCustomType(e.target.value)}
+              onPressEnter={handleAddCustomType}
             />
-          </Form.Item>
+            <Button type="primary" onClick={handleAddCustomType}>
+              Save
+            </Button>
+          </div>
+        )}
 
-          <Form.Item
-            label="Audience"
-            name="audience"
-            rules={[{ required: true, message: "Please select audience" }]}
-          >
-            <Select
-              placeholder="Select audience"
-              options={audienceOptions }
-            />
-          </Form.Item>
-        </Form>
-        {contextHolder}
-      </Modal>
+        <Form.Item
+          name="difficulty"
+          label="Difficulty"
+          rules={[{ required: true, message: "Please select a difficulty" }]}
+        >
+          <Select placeholder="Select difficulty" options={difficultyOptions} />
+        </Form.Item>
 
-
-    </>
+        <Form.Item
+          name="audience"
+          label="Target Audience"
+          rules={[{ required: true, message: "Please select an audience" }]}
+        >
+          <Select placeholder="Select audience" options={audienceOptions} />
+        </Form.Item>
+      </Form>
+      {contextHolder}
+    </Modal>
   );
 }

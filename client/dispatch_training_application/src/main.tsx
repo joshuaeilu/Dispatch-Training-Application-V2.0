@@ -21,6 +21,13 @@ createRoot(document.getElementById('root')!).render(
         itemSelectedColor: "#8C2131",
         itemHoverColor: "#8C2131",
       },
+        Segmented: {
+          itemSelectedBg: "rgba(140,33,49,0.1)",
+          itemSelectedColor: "#8C2131",
+itemHoverColor: "rgb(130,28,49)"
+
+
+    }
     },
   }}
 >

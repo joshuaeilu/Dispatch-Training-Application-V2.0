@@ -22,7 +22,7 @@ app.use('/data/profile_pics', auth(['admin', 'trainee']), express.static('profil
 // // Resource Routes
 const resourcesRoutes = require('./src/routes/resources');
 app.use('/api/resources', resourcesRoutes);
-app.use('/data/resources', auth(['admin', 'trainee']), express.static('resources'));
+app.use('/data/resources', auth(['admin', 'trainee', 'dispatcher']), express.static('resources'));
 
 // Preference Routes
 const preferencesRoutes = require('./src/routes/preferences');

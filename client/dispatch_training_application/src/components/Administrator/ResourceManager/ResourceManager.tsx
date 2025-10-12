@@ -16,7 +16,6 @@ const [resourceFiles, setResourceFiles] = useState<ResourceTableType[]>([]);
     try {
       const { data } = await api.get('/resources');
       setResourceFiles(data);
-      console.log('Fetched resources:', data);
     } catch (error) {
       console.error('Error fetching resources:', error);
     }

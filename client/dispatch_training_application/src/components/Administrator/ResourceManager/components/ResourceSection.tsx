@@ -8,7 +8,7 @@ import { AuthContext } from "../../../../contexts/AuthProvider";
 import { useContext } from "react";
 const { Option } = Select;
 import { api } from "../../../../utils/api";
-import ResourcePreviewModal from "./ResourcePreviewModal";
+import ResourcePreviewModal from "../../../Shared/Resources/ResourcePreviewModal";
 import { PROFILE_PIC_URL, RESOURCE_CATEGORIES } from "../../../../data/data";
 import { formatFileSize, formatDateOnly, toTitleCase } from "../../../../utils/tools";
 import { RESOURCE_URL } from "../../../../data/data";
@@ -331,38 +331,58 @@ const columns: TableColumnType<ResourceTableType>[] = [
            
          
 
-            <Card
-                style={{
-                    width: "100%",marginTop: 12,
+           <Card
+  style={{ marginTop: "1.5rem", overflowX: "auto" }}
+  bodyStyle={{ padding: 16 }}
+>
+  <div style={{ marginBottom: 12 }}>
+    <Space align="center" size="small">
+      <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
+      <Typography.Title
+        level={4}
+        style={{
+          margin: 0,
+          fontWeight: 600,
+          fontSize: "20px",
+          color: " #1f1f1f)",
+        }}
+      >
+        {selectedResource.key === "all"
+          ? "All Resources"
+          : selectedResource.label}
+      </Typography.Title>
+    </Space>
+    <Typography.Text
+      type="secondary"
+      style={{
+        display: "block",
+        marginTop: 4,
+        fontSize: "14px",
+        color: "var(--color-text-secondary, #888)",
+      }}
+    >
+      {filteredData.length}{" "}
+      {filteredData.length === 1 ? "exercise" : "exercises"} found
+    </Typography.Text>
+  </div>
 
-                }}
-                bodyStyle={{ padding: 16 }}
-            >
-                <Space direction="vertical" size={4} style={{ width: "100%" }}>
-                    <Space align="center" size={8}>
-                        {selectedResource.icon}
-                        <Typography.Title
-                            level={4}
-                            style={{ margin: 0, }}
-                        >
-                            {selectedResource.label}
-                        </Typography.Title>
-                    </Space>
-
-                    <Typography.Text  type="secondary">
-                        {filteredData.length || 0} {filteredData.length === 1 ? "resource" : "resources"} found
-                    </Typography.Text>
-                </Space>
-                <div className="overflow-auto mt-2" style={{ maxHeight: "60vh" }}>
-                    <Table
-
-                        columns={columns}
-                        dataSource={filteredData}
-                        pagination={false}
-                        rowKey="name"
-                    />
-                </div>
-            </Card>
+  <Table
+    rowKey="id"
+    columns={columns}
+    dataSource={filteredData}
+    pagination={{
+      pageSize: 10,
+      showQuickJumper: true,
+      showTotal: (total) => `Total ${total} resources`,
+    }}
+    scroll={{
+      y: 400,
+      x: "max-content",
+    }}
+    sticky
+    bordered
+  />
+</Card>
 
             <ResourcePreviewModal
                 open={previewOpen}

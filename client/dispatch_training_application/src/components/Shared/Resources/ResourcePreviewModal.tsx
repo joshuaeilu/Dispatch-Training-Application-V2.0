@@ -9,7 +9,7 @@ interface ResourcePreviewModalProps {
   onClose: () => void;
   isExercise?: boolean;
   useResource?: () => void;
-  resource: {
+  resource?: {
     name: string;
     description: string;
     type: string; // e.g. "video/mp4"
@@ -58,6 +58,10 @@ export default function ResourcePreviewModal({
       }
     }
   }, [open]);
+
+  useEffect(() =>{
+    console.log(resource);
+  }, [resource]);
 
   return (
     <Modal

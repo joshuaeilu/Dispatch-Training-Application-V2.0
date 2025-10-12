@@ -1,5 +1,5 @@
 // types (keep your server/persisted shape clean)
-import type { Option } from "../../../../../types/index.types";
+import type { Option } from "../../../../../../types/index.types";
 
 type OptionsEditorProps = {
   options: Option[];
@@ -114,10 +114,10 @@ const removeOption = (id: number) => {
          return (
   <div
     key={option.id}
-    className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-lg bg-[var(--color-bg-alt)] shadow-sm"
+    className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-lg  shadow-sm"
   >
     {/* Option letter */}
-    <span className="font-semibold text-[var(--color-muted)] ">
+    <span className="font-semibold  ">
       {String.fromCharCode(65 + index).toLowerCase()}.
     </span>
 
@@ -130,9 +130,7 @@ const removeOption = (id: number) => {
           className="flex-1"
           autoFocus
           style={{
-            backgroundColor: "var(--color-bg)",
             borderRadius: 6,
-            borderColor: "var(--color-border)",
           }}
         />
         <Space size="small">
@@ -142,7 +140,7 @@ const removeOption = (id: number) => {
               size="small"
               icon={<CheckOutlined />}
               onClick={saveEditOption}
-              style={{ backgroundColor: "var(--color-primary)" }}
+              style={{ backgroundColor: "#8C2131"}}
             />
           </Tooltip>
           <Tooltip title="Cancel editing">
@@ -151,7 +149,7 @@ const removeOption = (id: number) => {
               size="small"
               icon={<CloseOutlined />}
               onClick={cancelEditOption}
-              style={{ color: "var(--color-error)" }}
+              style={{ color: "#8C2131" }}
             />
           </Tooltip>
         </Space>

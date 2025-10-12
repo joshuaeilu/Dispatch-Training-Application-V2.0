@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../../utils/api";
 import type { Exercise, ExerciseTableType } from "../../../types/index.types";
 import {  AUDIENCE_COLORS, PROFILE_PIC_URL, STATUS_COLORS } from "../../../data/data";
-import ViewExerciseModal from "./AddExercise/components/ViewExerciseModal";
+import ViewExerciseModal from "./AddExercise/ViewQuestions/components/ViewExerciseModal";
 import { PageHeader } from "../../Shared/PageHeader";
 import {  exerciseDifficultyOptions, exerciseStatusOptions } from "../../../data/data";
 import { UniversalContext } from "../../../contexts/UniversalHelpers";
@@ -108,8 +108,9 @@ export default function KnowledgeCheckViewExercises() {
       dataIndex: "name",
       key: "name",
       render: (text: string) => (
-        <span style={{ fontWeight: 500, fontSize: "16px" }}>{text}</span>
-      ),
+ <Typography.Text style={{ fontSize: 14, color: "#262626", whiteSpace: "nowrap"  }}>
+        {text}
+      </Typography.Text>      ),
     },
     {
       title: "Type",
@@ -127,9 +128,9 @@ export default function KnowledgeCheckViewExercises() {
         <Tag
           className="table-tag"
           color={
-            difficulty === "easy"
+            difficulty === "Easy"
               ? "green"
-              : difficulty === "medium"
+              : difficulty === "Medium"
                 ? "orange"
                 : "red"
           }
@@ -165,7 +166,7 @@ export default function KnowledgeCheckViewExercises() {
           color={STATUS_COLORS[status] || "blue"}
 
         >
-          {status}
+          {toTitleCase(status)}
         </Tag>
       ),
     },
@@ -184,25 +185,12 @@ export default function KnowledgeCheckViewExercises() {
         </Tag>
       ),
     },
-    {
-      title: "Created By",
-      dataIndex: "created_by",
-      key: "created_by",
-      render: (created_by: { id: string; name: string; avatar_url: string }) => (
-        <Space>
-          <img
-            src={PROFILE_PIC_URL+created_by.avatar_url + "?token=" + token}
-            alt={created_by.name}
-            style={{ width: 32, height: 32, borderRadius: "50%" }}
-          />
-          <span>{toTitleCase(created_by.name)}</span>
-        </Space>
-      ),
-    },
+   
     {
       title: "Visibility",
       dataIndex: "visibility",
       align: "center",
+      fixed: 'right',
       key: "visibility",
       render: (visibility: boolean, record) => (
         <>
@@ -233,6 +221,7 @@ export default function KnowledgeCheckViewExercises() {
       title: "Actions",
       key: "actions",
       align: "center",
+      fixed: 'right',
       render: (_: any, record: ExerciseTableType) => (
         <Space>
           <Tooltip title="View">
@@ -258,20 +247,19 @@ export default function KnowledgeCheckViewExercises() {
                 setViewExerciseModal(true);
 
               }}
-            />
+            >View</Button>  
           </Tooltip>
           <Tooltip title="Edit">
             <Button
               type="text"
               icon={<EditOutlined />}
               variant="filled"
-              color="blue"
               onClick={() => {
                 navigate(`/knowledge-checks/edit-exercise/`, {
                   state: { exerciseId: record.id },
                 });
               }}
-            />
+            >Edit</Button>
           </Tooltip>
           <Tooltip title="Delete">
             <Popconfirm
@@ -291,7 +279,7 @@ export default function KnowledgeCheckViewExercises() {
                 }
               }}
             >
-              <Button type="text" variant="filled" color="red" icon={<DeleteOutlined />} />
+              <Button type="text" variant="filled" color="red" icon={<DeleteOutlined />} >Delete</Button>
             </Popconfirm>
           </Tooltip>
         </Space>
@@ -308,13 +296,13 @@ const exerciseTypes = (["All Types", preferences?.exercise_types].flat()).filter
 
 
   return (
-    <div  style={{ padding: 18, maxWidth: "100%", background: "#f5f5f5" }} >
+    <div  style={{ maxWidth: "100%",  }} >
       {/* Page Header */}
              <PageHeader title="View Exercises" subtitle="Filter, search and manager exercises" showButton buttonText="Add Exercise" onButtonPress={() => navigate("/knowledge-checks/edit-exercise")} />
      
 
       {/* Filters */}
-      <Card className="shadow-soft mb-4">
+      <Card className="shadow-soft mb-4" style={{ margin: "0 1.5rem"}}>
         <Form
           form={form}
           layout="vertical"
@@ -363,60 +351,60 @@ const exerciseTypes = (["All Types", preferences?.exercise_types].flat()).filter
           </Row>
         </Form>
       </Card>
-
-      <Card
+<Card
+  style={{ margin: "1.5rem", overflowX: "auto" }}
+  bodyStyle={{ padding: 16 }}
+>
+  <div style={{ marginBottom: 12 }}>
+    <Space align="center" size="small">
+      <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
+      <Typography.Title
+        level={4}
         style={{
-          marginTop: 16,
-          width: "100%",
-
+          margin: 0,
+          fontWeight: 600,
+          fontSize: "20px",
+          color: "var(--color-heading, #1f1f1f)",
         }}
-        bodyStyle={{ padding: 16 }}
       >
-        <Space
-          direction="vertical"
-          size={2}
-          style={{
-            width: "100%",
-            padding: "4px 0",
-          }}
-        >
-          <Space>
-            <FileTextOutlined style={{ fontSize: 24, color: "var(--color-primary, #1677ff)" }} />
-            <Typography.Title
-              level={4}
-              style={{
-                margin: 0,
-                fontWeight: 600,
-                fontSize: "20px",
-                color: "var(--color-heading, #1f1f1f)",
-              }}
-            >
-              {selectedExerciseType === "All Types" ? "All Exercises" : selectedExerciseType}
-            </Typography.Title>
-          </Space>
+        {selectedExerciseType === "All Types"
+          ? "All Exercises"
+          : selectedExerciseType}
+      </Typography.Title>
+    </Space>
+    <Typography.Text
+      type="secondary"
+      style={{
+        display: "block",
+        marginTop: 4,
+        fontSize: "14px",
+        color: "var(--color-text-secondary, #888)",
+      }}
+    >
+      {filteredData.length}{" "}
+      {filteredData.length === 1 ? "exercise" : "exercises"} found
+    </Typography.Text>
+  </div>
 
-          <Typography.Text
-            type="secondary"
-            style={{
-              fontSize: "14px",
-              color: "var(--color-text-secondary, #888)",
-            }}
-          >
-            {filteredData.length} {filteredData.length === 1 ? "exercise" : "exercises"} found
-          </Typography.Text>
-        </Space>
+  <Table
+    rowKey="id"
+    columns={exerciseTableColumns}
+    dataSource={filteredData}
+    pagination={{
+      pageSize: 10,
+      showQuickJumper: true,
+      showSizeChanger: true,
+      showTotal: (total) => `Total ${total} exercises`,
+    }}
+    scroll={{
+      y: 400,
+      x: "max-content",
+    }}
+    sticky
+    bordered
+  />
+</Card>
 
-        <div className="overflow-auto mt-2" style={{ maxHeight: "60vh" }}>
-          <Table
-            rowKey="id"
-            columns={exerciseTableColumns}
-            dataSource={filteredData}
-            pagination={false}
-          >
-
-          </Table>
-        </div>
-      </Card>
 
 
       {/* View Exercise Modal */}

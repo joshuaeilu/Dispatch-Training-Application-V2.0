@@ -89,3 +89,12 @@ export function getUsers() {
 
   };
 }
+
+export function getPreferences(){
+  const { preferences, setPreferences } = useContext(UniversalContext);
+  return {
+    preferences,
+    setPreferences,
+  }
+
+}

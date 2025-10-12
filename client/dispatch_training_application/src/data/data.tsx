@@ -87,9 +87,7 @@ export const TYPE_META: Record<ResourceKey, {
 
 export const STATUS_COLORS: Record<string, string> = {
   draft: "default",
-  published: "green",
-  archived: "red",
-  pending: "gold",
+  published: "geekblue",
 };
 
 export const AUDIENCE_COLORS: Record<string, string> = {

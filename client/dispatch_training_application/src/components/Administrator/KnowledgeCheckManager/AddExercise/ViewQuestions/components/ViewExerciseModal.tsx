@@ -1,8 +1,8 @@
 import { Card, Checkbox, Input, Modal, Radio, Tag, Typography } from "antd";
-import type { Exercise } from "../../../../../types/index.types";
+import type { Exercise } from "../../../../../../types/index.types";
 import { useEffect, useState, useContext } from "react";
-import { RESOURCE_URL } from "../../../../../data/data";
-import { AuthContext } from "../../../../../contexts/AuthProvider";
+import { RESOURCE_URL } from "../../../../../../data/data";
+import { AuthContext } from "../../../../../../contexts/AuthProvider";
 
 export default function ViewExerciseModal({ exercise, setViewExerciseModal, viewExerciseModal }: { exercise: Exercise | null, setViewExerciseModal: React.Dispatch<React.SetStateAction<boolean>>, viewExerciseModal: boolean }) {
     const { token } = useContext(AuthContext);

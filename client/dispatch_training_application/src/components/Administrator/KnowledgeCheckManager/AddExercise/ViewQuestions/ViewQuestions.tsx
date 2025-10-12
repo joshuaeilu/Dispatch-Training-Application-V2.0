@@ -10,7 +10,7 @@ import {
   Dropdown,
 } from "antd";
 import { EyeOutlined, MoreOutlined } from "@ant-design/icons";
-import ViewResourcesPage from "./ViewResources";
+import ViewResourcesPage from "./components/ViewResources";
 import type { Exercise, Question } from "../../../../../types/index.types";
 import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
