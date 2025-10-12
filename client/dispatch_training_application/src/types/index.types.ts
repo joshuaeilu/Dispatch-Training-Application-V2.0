@@ -124,7 +124,7 @@ export interface ResourcePreview{
   url: string;
 }
 
-export type Option = { id: number; text: string; isCorrect: boolean };
+export type Option = { id: number; text: string; };
 
 export interface Question {
   id: string;
@@ -172,7 +172,6 @@ export interface ExerciseTableType{
 
 export type ResourceKey =
   | "all"
-  | "maps"
   | "documents"
   | "videos"
   | "audio"

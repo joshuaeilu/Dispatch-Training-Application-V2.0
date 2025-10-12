@@ -44,7 +44,7 @@ export default function AddResourceModal({
   open,
   onCancel,
   onSubmit,
-  defaultType = "maps",
+  defaultType = "images",
 }: AddResourceModalProps) {
   const [form] = Form.useForm<AddResourceValues>();
 

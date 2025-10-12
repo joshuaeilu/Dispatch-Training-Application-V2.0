@@ -1,6 +1,6 @@
 
 
-import { Select, Input, Button, Card, Typography, Row, Col,  Tag, Segmented, Space, type TableColumnType, Table, Tooltip, Popconfirm, message, Switch } from "antd";
+import { Select, Input, Button, Card, Typography, Row, Col,  Space, type TableColumnType, Table, Tooltip, Popconfirm, message, Switch } from "antd";
 import {  useState } from "react";
 import { DeleteOutlined,FileTextOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
 import type { ResourceCategory, ResourceKey, ResourceTableType } from "../../../../types/index.types";
@@ -9,8 +9,7 @@ import { useContext } from "react";
 const { Option } = Select;
 import { api } from "../../../../utils/api";
 import ResourcePreviewModal from "../../../Shared/Resources/ResourcePreviewModal";
-import { PROFILE_PIC_URL, RESOURCE_CATEGORIES } from "../../../../data/data";
-import { formatFileSize, formatDateOnly, toTitleCase } from "../../../../utils/tools";
+import {  RESOURCE_CATEGORIES } from "../../../../data/data";
 import { RESOURCE_URL } from "../../../../data/data";
 
 const { Title } = Typography;
@@ -115,7 +114,36 @@ const columns: TableColumnType<ResourceTableType>[] = [
     },
   },
 
+
   {
+    title: "Visibility",
+    dataIndex: "visibility",
+    key: "visibility",
+    align: "center",
+    render: (visibility: boolean, record) => (
+      <Switch
+        size="small"
+        checked={visibility}
+        onChange={async (checked) => {
+          try {
+            await api.patch(`/resources/${record.id}`, { visibility: checked });
+            messageApi.success(
+              `Resource visibility updated to ${checked ? "visible" : "hidden"}.`
+            );
+            fetchResources();
+          } catch (error) {
+            messageApi.error(
+              error instanceof Error
+                ? error.message
+                : "Failed to update visibility"
+            );
+          }
+        }}
+      />
+    ),
+  },
+
+    {
     title: "Actions",
     dataIndex: "actions",
     key: "actions",
@@ -166,51 +194,24 @@ const columns: TableColumnType<ResourceTableType>[] = [
       </Space>
     ),
   },
-  {
-    title: "Visibility",
-    dataIndex: "visibility",
-    key: "visibility",
-    align: "center",
-    render: (visibility: boolean, record) => (
-      <Switch
-        size="small"
-        checked={visibility}
-        onChange={async (checked) => {
-          try {
-            await api.patch(`/resources/${record.id}`, { visibility: checked });
-            messageApi.success(
-              `Resource visibility updated to ${checked ? "visible" : "hidden"}.`
-            );
-            fetchResources();
-          } catch (error) {
-            messageApi.error(
-              error instanceof Error
-                ? error.message
-                : "Failed to update visibility"
-            );
-          }
-        }}
-      />
-    ),
-  },
-    {
-    title: "Created At",
-    dataIndex: "created_at",
-    key: "created_at",
-    sorter: (a, b) =>
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-    render: (date: string) => (
-      <Typography.Text style={{ fontSize: 13, color: "#8c8c8c", whiteSpace: "nowrap" }}>
-        {formatDateOnly(date)}
-      </Typography.Text>
-    ),
-  },
+  //   {
+  //   title: "Created At",
+  //   dataIndex: "created_at",
+  //   key: "created_at",
+  //   sorter: (a, b) =>
+  //     new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+  //   render: (date: string) => (
+  //     <Typography.Text style={{ fontSize: 13, color: "#8c8c8c", whiteSpace: "nowrap" }}>
+  //       {formatDateOnly(date)}
+  //     </Typography.Text>
+  //   ),
+  // },
 ];
 
 
     async function handleResourceDelete(resourceId: string) {
         try {
-            const { data } = await api.delete(`/resources/${resourceId}`);
+            await api.delete(`/resources/${resourceId}`);
             messageApi.open({
                 type: 'success',
                 content: 'Resource deleted successfully',

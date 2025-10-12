@@ -2,7 +2,7 @@ import { Form, Typography, Button, Select } from "antd";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import type { Exercise, Question } from "../../../../../../types/index.types";
-import { SelectedResourceCard } from "../../components/SelectedResourceCard";
+import { SelectedResourceCard } from "./SelectedResourceCard";
 import OptionsEditor from "./EditQuestionOptions";
 import { v4 as uuid } from "uuid";
 import { useEffect, useState } from "react";
@@ -28,10 +28,12 @@ export default function ExerciseEditor({
   function canAdd(currentQuestion: Question): boolean {
   if (currentQuestion.answerType === "text-area") return true;
   if (currentQuestion.answerType === "multiple-choice") {
-    return currentQuestion.options?.some((o) => o.isCorrect);
+    return currentQuestion.options.length >= 2 && currentQuestion.correctOptions.length >= 1;
   }
   return false;
 }
+
+
 
 useEffect(() => {
   setCanAddQuestion(canAdd(currentQuestion));
@@ -202,15 +204,9 @@ useEffect(() => {
             {({ getFieldValue }) =>
               getFieldValue("answerType") === "multiple-choice" ? (
                 <OptionsEditor
-                  options={currentQuestion.options}
-                  setOptions={(options) =>
-                    setExercise({
-                      ...exercise,
-                      questions: exercise.questions.map((q, index) =>
-                        index === selectedIndex ? { ...q, options } : q
-                      ),
-                    })
-                  }
+                exercise={exercise}
+                setExercise={setExercise}
+                selectedIndex={selectedIndex}
                 />
               ) : (
                 <Form.Item

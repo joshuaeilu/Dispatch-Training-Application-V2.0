@@ -1,7 +1,7 @@
 import { Card, Typography, Button, Space, Tag, Tooltip } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
-import type { ResourceKey, ResourcePreview } from "../../../../../types/index.types";
-import { TYPE_META } from "../../../../../data/data";
+import type { ResourceKey, ResourcePreview } from "../../../../../../types/index.types";
+import { TYPE_META } from "../../../../../../data/data";
 
 const { Text, Title } = Typography;
 

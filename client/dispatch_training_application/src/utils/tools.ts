@@ -23,5 +23,13 @@ function formatDateOnly(dateInput: string | Date): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+const singularize = (word: string) => {
+  if (!word) return "";
+  // basic plural removal
+  if (word.endsWith("ies")) return word.slice(0, -3) + "y"; // e.g. "bodies" → "body"
+  if (word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1); // e.g. "videos" → "video"
+  return word; // unchanged if already singular
+};
 
-export { formatFileSize, formatDateOnly, toTitleCase };
+
+export { formatFileSize, formatDateOnly, toTitleCase, singularize };

@@ -12,10 +12,10 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
-import { UniversalContext } from "../../../../../contexts/UniversalHelpers";
-import { AuthContext } from "../../../../../contexts/AuthProvider";
-import type { Exercise } from "../../../../../types/index.types";
-import { api } from "../../../../../utils/api";
+import { UniversalContext } from "../../../../../../contexts/UniversalHelpers";
+import { AuthContext } from "../../../../../../contexts/AuthProvider";
+import type { Exercise } from "../../../../../../types/index.types";
+import { api } from "../../../../../../utils/api";
 import { FileAddOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;

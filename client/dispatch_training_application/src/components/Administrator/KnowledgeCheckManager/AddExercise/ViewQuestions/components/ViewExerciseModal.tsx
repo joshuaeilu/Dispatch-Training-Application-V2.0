@@ -147,7 +147,7 @@ export default function ViewExerciseModal({ exercise, setViewExerciseModal, view
 
                             {/* 🧠 Multiple Choice View */}
                             {question.answerType === 'multiple-choice' && (() => {
-                                const isMultiCorrect = question.options.filter(opt => opt.isCorrect).length > 1;
+                                const isMultiCorrect = question.correctOptions.length > 1;
 
                                 return (
                                     <div className="w-full sm:w-5/6 bg-[var(--color-bg-muted)] space-y-2 rounded-lg px-4 py-2">
@@ -156,7 +156,7 @@ export default function ViewExerciseModal({ exercise, setViewExerciseModal, view
                                                 <Typography.Text className="text-sm text-gray-500 ">Please fill in options for this question</Typography.Text>
                                             ) : (
                                                 question.options.map((option, idx) => {
-                                                    const isCorrect = option.isCorrect;
+                                                    const isCorrect = question.correctOptions.includes(option.id.toString());
                                                     const letter = String.fromCharCode(65 + idx).toLowerCase();
 
                                                     const label = (

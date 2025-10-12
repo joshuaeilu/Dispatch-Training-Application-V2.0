@@ -1,80 +1,109 @@
 // types (keep your server/persisted shape clean)
-import type { Option } from "../../../../../../types/index.types";
+import type { Exercise, Option } from "../../../../../../types/index.types";
 
-type OptionsEditorProps = {
-  options: Option[];
-  setOptions: (opts: Option[]) => void;
-};
+interface OptionsEditorProps {
+  exercise: Exercise;
+  setExercise: (exercise: Exercise) => void;
+  selectedIndex: number;
+}
 
 import { useEffect, useState } from "react";
 import { Button, Input, Space, Tag, Tooltip } from "antd";
 import { CheckCircleOutlined, CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 
-export default function OptionsEditor({ options, setOptions }: OptionsEditorProps) {
+export default function OptionsEditor({ exercise, setExercise, selectedIndex }: OptionsEditorProps) {
   const [newOptionText, setNewOptionText] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
+  const currentQuestion = exercise.questions[selectedIndex];
+
+  useEffect(() => {
+    console.log(currentQuestion);
+  }, [currentQuestion]);
   
+
 
   // If the option being edited gets removed externally, exit edit mode gracefully
   useEffect(() => {
-    if (editingId && !options.some(o => o.id === editingId)) {
-      setEditingId(null);
-      setEditingText("");
+    if (editingId !== null) {
+      if (!currentQuestion.options.some(o => o.id === editingId)) {
+        setEditingId(null);
+        setEditingText("");
+      }
     }
-  }, [options, editingId]);
+  }, [exercise.questions, editingId, selectedIndex]);
 
-  const addOption = () => {
+  // Add a new option
+const addOption = () => {
   const text = newOptionText.trim();
   if (!text) return;
-  setOptions([
-    ...options,
-    { id: nextId, text, isCorrect: false }
-  ]);
+  const newOption: Option = { id: nextId, text };
+  const updatedQuestions = exercise.questions.map((q, index) =>
+    index === selectedIndex ? { ...q, options: [...q.options, newOption] } : q
+  );
+  setExercise({ ...exercise, questions: updatedQuestions });
   setNextId(nextId + 1); // increment for next use
   setNewOptionText("");
 };
 
-
+// Remove an option by id
 const removeOption = (id: number) => {
-  setOptions(options.filter(opt => opt.id !== id));
-  if (editingId === id) {
-    setEditingId(null);
-    setEditingText("");
-  }
+  const updatedQuestions = exercise.questions.map((q, index) =>
+    index === selectedIndex ? { ...q, options: q.options.filter(opt => opt.id !== id) } : q
+  );
+  setExercise({ ...exercise, questions: updatedQuestions });
 };
 
 
-  const toggleCorrect = (id: number) => {
-    setOptions(options.map(opt =>
-      opt.id === id ? { ...opt, isCorrect: !opt.isCorrect } : opt
-    ));
+  // Toggle an option as correct/incorrect
+  const toggleCorrect = (text: string) => {
+    const isAlreadyCorrect = currentQuestion.correctOptions.includes(text);
+    const updatedCorrectOptions = isAlreadyCorrect
+      ? currentQuestion.correctOptions.filter(co => co !== text)
+      : [...currentQuestion.correctOptions, text];
+    const updatedQuestions = exercise.questions.map((q, index) =>
+      index === selectedIndex ? { ...q, correctOptions: updatedCorrectOptions } : q
+    );
+    setExercise({ ...exercise, questions: updatedQuestions });
   };
 
+
+  // Start editing an option
   const startEditOption = (id: number) => {
-    const opt = options.find(o => o.id === id);
+    const opt = currentQuestion.options.find(o => o.id === id);
     if (!opt) return;
     setEditingId(id);
     setEditingText(opt.text);
-  };
+  }
 
+  // Save edited option text
   const saveEditOption = () => {
-    if (!editingId) return;
+    if (editingId === null) return;
     const text = editingText.trim();
     if (!text) return;
-    setOptions(options.map(opt =>
-      opt.id === editingId ? { ...opt, text } : opt
-    ));
+    const updatedQuestions = exercise.questions.map((q, index) =>
+      index === selectedIndex
+        ? {
+            ...q,
+            options: q.options.map((opt) =>
+              opt.id === editingId ? { ...opt, text } : opt
+            ),
+          }
+        : q
+    );
+    setExercise({ ...exercise, questions: updatedQuestions });
     setEditingId(null);
     setEditingText("");
   };
 
+  // Cancel editing mode
   const cancelEditOption = () => {
     setEditingId(null);
     setEditingText("");
   };
 
-  const correctCount = options.filter(o => o.isCorrect).length;
+  const options = currentQuestion.options;
+  const correctCount = currentQuestion.correctOptions.length;
 
   const [nextId, setNextId] = useState(() =>
   options.length > 0 ? Math.max(...options.map((o) => o.id)) + 1 : 1
@@ -158,12 +187,12 @@ const removeOption = (id: number) => {
       <>
         <span className="flex-1 text-[var(--color-text)]">{option.text}</span>
         <Space size="small">
-          <Tooltip title={option.isCorrect ? "Unmark correct" : "Mark correct"}>
-            {option.isCorrect ? (
+          <Tooltip title={currentQuestion.correctOptions.includes(option.text) ? "Unmark correct" : "Mark correct"}>
+            {currentQuestion.correctOptions.includes(option.text) ? (
                 <Tag
                   className="cursor-pointer"
                   color="green"
-                  onClick={() => toggleCorrect(option.id)}
+                  onClick={() => toggleCorrect(option.text)}
                 >
                   Correct
                 </Tag>
@@ -172,7 +201,7 @@ const removeOption = (id: number) => {
                   <Button
                     type="link"
                     icon={<CheckCircleOutlined />}
-                    onClick={() => toggleCorrect(option.id)}
+                    onClick={() => toggleCorrect(option.text)}
                   />
                 </Tooltip>
               )}

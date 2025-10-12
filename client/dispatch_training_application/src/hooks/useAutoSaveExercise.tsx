@@ -29,11 +29,12 @@ export function useAutosaveExercise(
   const debouncedSave = useRef(
     debounce((exercise: Exercise) => {
       saveToServer(exercise);
-    }, 5000) // 5 seconds of inactivity
+    }, 3000) // 3 seconds of inactivity
   ).current;
 
   useEffect(() => {
-    if (!exercise?.id) return;
+    if (!exercise?.name) return;
+    
     const prev = lastExerciseRef.current;
 
     const hasChanged =

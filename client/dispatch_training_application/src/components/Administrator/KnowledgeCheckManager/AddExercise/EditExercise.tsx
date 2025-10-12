@@ -14,9 +14,10 @@ import {
   ArrowLeftOutlined,
   SaveOutlined,
   DeleteOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 
-import AddExerciseModal from "./components/AddExerciseModal";
+import AddExerciseModal from "./AddQuestions/components/AddExerciseModal";
 import AddQuestionsSections from "./AddQuestions/AddQuestions";
 import ViewQuestions from "./ViewQuestions/ViewQuestions";
 import { useExerciseManager } from "../../../../hooks/useExerciseManager";
@@ -111,7 +112,7 @@ export default function EditExercisePage() {
     alignItems: "center",
     justifyContent: "space-between",
     padding: "0 1rem",
-    height: "12vh",
+    height: "9vh",
     boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
   }}
 >
@@ -149,7 +150,7 @@ export default function EditExercisePage() {
 
 
       {/* Main Layout */}
-<div className="flex flex-col md:flex-row h-[88vh] overflow-hidden p-4 gap-4">
+<div className="flex flex-col md:flex-row h-[87vh] overflow-hidden gap-4" style={{ padding: 16 }}>
         <div className="w-full md:w-1/2 h-full ">
           <AddQuestionsSections
             selectedIndex={selectedIndex}
@@ -169,35 +170,18 @@ export default function EditExercisePage() {
       </div>
 
       {/* Autosave Indicator */}
-      {/* <div
-        className="h-[2vh] flex items-center px-3 mx-2 text-xs text-white font-medium border rounded"
-        style={{
-          backgroundColor: "#8C2131",
-          marginBottom: 32,
-          gap: 8,
-        }}
-      >
-        <span
-          style={{
-            height: 8,
-            width: 8,
-            borderRadius: "50%",
-            backgroundColor: "#F3CD00",
-            animation: autosaving ? "pulse 1s ease-in-out infinite" : "none",
-          }}
-        />
-        <span>{autosaving ? "Autosaving..." : "All changes saved."}</span>
-
-        <style>
-          {`
-            @keyframes pulse {
-              0%, 100% { transform: scale(1); opacity: 1; }
-              50% { transform: scale(1.5); opacity: 0.5; }
-            }
-          `}
-        </style>
-      </div>
-       */}
+    <div
+      className="flex items-center text-xs font-normal text-[#595959] bg-white"
+      style={{
+        padding: "0 16px",
+        height: "4vh",
+        gap: 6,
+      }}
+    >
+      <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 14 }} />
+      <span>{autosaving ? "Autosaving..." : "All changes saved"}</span>
+    </div>
+      
       
       
       </>)

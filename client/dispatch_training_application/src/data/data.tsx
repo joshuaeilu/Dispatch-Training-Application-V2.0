@@ -20,11 +20,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         icon: <FileTextOutlined style={{ fontSize: 18 }} />,
     },
     {
-        key: "maps",
-        label: "Maps",
-        icon: <EnvironmentOutlined style={{ fontSize: 18 }} />,
-    },
-    {
         key: "documents",
         label: "Documents",
         icon: <FileTextOutlined style={{ fontSize: 18 }} />,
@@ -78,11 +73,7 @@ export const TYPE_META: Record<ResourceKey, {
     icon: <AudioOutlined />,
     color: "gold",
   },
-  maps: {
-    label: "MAP",
-    icon: <EnvironmentOutlined />,
-    color: "green",
-  },
+ 
 };
 
 export const STATUS_COLORS: Record<string, string> = {

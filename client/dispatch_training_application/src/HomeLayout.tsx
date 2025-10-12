@@ -145,7 +145,7 @@ const App: React.FC = () => {
 <Header
   style={{
     position: "fixed",
-    zIndex: 1,
+    zIndex: 10,
     width: "100%",
     background: "#fff",
     padding: "0 16px",
