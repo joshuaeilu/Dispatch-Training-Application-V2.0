@@ -140,6 +140,7 @@ router.put('/:id', auth(['admin']), upload.single('profileImage'), async (req, r
     let { username, role, password } = req.body;
 
     if (username) username = username.trim().toLowerCase();
+    if (role) role = role.trim().toLowerCase();
 
     let updates = [];
     let values = [];

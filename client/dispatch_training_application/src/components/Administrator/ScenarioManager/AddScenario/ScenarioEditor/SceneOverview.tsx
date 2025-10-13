@@ -7,10 +7,11 @@ import {
   Draggable,
   type DropResult,
 } from "@hello-pangea/dnd";
+import ActiveTabs from "../../../KnowledgeCheckManager/AddExercise/AddQuestions/components/ActiveTabs";
 
 interface SceneOverviewProps{
-  scenario: Scenario;
-  setScenario: React.Dispatch<React.SetStateAction<Scenario>>;
+  scenario: Scenario | undefined;
+  setScenario: React.Dispatch<React.SetStateAction<Scenario | undefined>>;
   currentIndex: number;
   setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
   stopAudio: () => void;
@@ -37,15 +38,15 @@ export default function SceneOverview({
     const { source, destination } = result;
     if (!destination || source.index === destination.index) return;
 
-    const updatedScenes = reorder(scenario.scenes, source.index, destination.index);
-    setScenario({ ...scenario, scenes: updatedScenes });
+    const updatedScenes = reorder(scenario?.scenes || [], source.index, destination.index);
+    setScenario({ ...scenario!, scenes: updatedScenes });
     setCurrentIndex(destination.index);
   };
 
 const handleDeleteScene = (indexToDelete: number) => {
   stopAudio();
-  setScenario((prevScenario) => {
-    const updatedScenes = [...prevScenario.scenes];
+  setScenario((prevScenario: any) => {
+    const updatedScenes = [...prevScenario!.scenes];
     if (indexToDelete < 0 || indexToDelete >= updatedScenes.length) {
       console.warn("Invalid scene index to delete:", indexToDelete);
       return prevScenario;
@@ -82,24 +83,12 @@ const handleDeleteScene = (indexToDelete: number) => {
   return (
     <div
       style={{
-        width: "30%",
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        paddingRight: 8,
       }}
     >
-      <Typography.Title
-        level={5}
-        style={{
-          padding: "8px 12px",
-          margin: 0,
-          borderBottom: "1px solid #f0f0f0",
-        }}
-      >
-        Scenario Overview
-      </Typography.Title>
-  <DragDropContext onDragEnd={handleDragEnd}>
+      <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="scene-list">
           {(dropProvided) => (
             <div
@@ -108,11 +97,39 @@ const handleDeleteScene = (indexToDelete: number) => {
               style={{
                 flex: 1,
                 overflowY: "auto",
-                padding: "12px",
+                padding: "1.5rem",
                 backgroundColor: "#fff",
+                borderRadius: 10,
+                border: "1px solid #f0f0f0",
               }}
             >
-              {scenario.scenes.map((scene, index) => {
+               <div
+      style={{
+        display: "flex",
+        border: "1px solid #D9D9D9",
+        borderRadius: 10,
+        overflow: "clip",
+        marginBottom: 16,
+      }}
+    >
+ <span
+            style={{
+              flex: 1,
+              height: 40,
+              textAlign: "center",
+              padding: "12px 16px",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: 14,
+              transition: "all 0.2s ease",
+              backgroundColor:  "#8C2131" ,
+              color:  "#FFFFFF" ,
+            }}
+          >
+            Scene Overview
+          </span> 
+          </div>
+              {scenario?.scenes.map((scene, index) => {
                 const isCurrent = index === currentIndex;
                 const draggableId = (scene as any).id || `scene-${index}`;
 

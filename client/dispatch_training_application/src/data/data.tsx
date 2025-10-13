@@ -98,17 +98,15 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   ],
   dispatcher: [
     { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
-    { key: '/knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
+    { key: '/user-knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
     { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
   ],
   trainee: [
     { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
-    { key: '/knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
+    { key: '/user-knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
     { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
   ],
 };
-
-
 
 
 

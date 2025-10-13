@@ -6,11 +6,9 @@ import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { api } from "../../../utils/api";
 import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
-import type { Scenario, ScenarioTableType } from "../../../types/index.types";
+import type {  ScenarioTableType } from "../../../types/index.types";
 import { UniversalContext } from "../../../contexts/UniversalHelpers";
-import { PROFILE_PIC_URL } from "../../../data/data";
 import { AuthContext } from "../../../contexts/AuthProvider";
-import { toTitleCase } from "../../../utils/tools";
 export default function ViewScenarios() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -58,7 +56,6 @@ export default function ViewScenarios() {
   }, []);
 
   const { preferences } = useContext(UniversalContext);
-  const { token } = useContext(AuthContext);
 
   const scenarioTypes = (["All Types", preferences?.scenario_types].flat()).filter(t => t !== "Custom")
   const scenarioDifficultyOptions = [
@@ -118,8 +115,9 @@ export default function ViewScenarios() {
       dataIndex: "name",
       key: "name",
       render: (text: string) => (
-        <span style={{ fontWeight: 500, fontSize: "16px" }}>{text}</span>
-      ),
+ <Typography.Text style={{ fontSize: 14, color: "#262626", whiteSpace: "nowrap"  }}>
+        {text}
+      </Typography.Text>      ),
     },
     {
       title: "Type",
@@ -196,21 +194,7 @@ export default function ViewScenarios() {
         </Tag>
       ),
     },
-    {
-      title: "Created By",
-      dataIndex: "created_by",
-      key: "created_by",
-      render: (created_by: { id: string; name: string; avatar_url: string }) => (
-        <Space>
-          <img
-            src={PROFILE_PIC_URL+created_by.avatar_url + "?token=" + token}
-            alt={created_by.name}
-            style={{ width: 32, height: 32, borderRadius: "50%" }}
-          />
-          <span>{toTitleCase(created_by.name)}</span>
-        </Space>
-      ),
-    },
+   
     {
       title: "Actions",
       key: "actions",
@@ -227,20 +211,19 @@ export default function ViewScenarios() {
               onClick={() => {
                 navigate(`/scenario-manager/view-scenario/`, { state: { scenario: record } });
               }}
-            />
+            >View</Button>
           </Tooltip>
           <Tooltip title="Edit">
             <Button
               type="text"
               icon={<EditOutlined />}
               variant="filled"
-              color="blue"
               onClick={() => {
                 navigate(`/scenario-manager/edit-scenario/`, {
-                  state: { scenario: record },
+                  state: { scenarioId: record.id },
                 });
               }}
-            />
+            >Edit</Button>
           </Tooltip>
           <Tooltip title="Delete">
             <Popconfirm
@@ -264,7 +247,7 @@ export default function ViewScenarios() {
                 }
               }}
             >
-              <Button type="text" variant="filled" color="red" icon={<DeleteOutlined />} />
+              <Button type="text" variant="filled" color="red" icon={<DeleteOutlined />} >Delete</Button>
             </Popconfirm>
           </Tooltip>
         </Space>
@@ -273,12 +256,12 @@ export default function ViewScenarios() {
   ];
 
   return (
-    <div style={{ padding: 18, maxWidth: "100%", background: "#f5f5f5" }}>
+    <div style={{  maxWidth: "100%", background: "#f5f5f5" }}>
       
-        <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios" showAddButton addButtonText="Add Scenario" onAdd={() => navigate("/scenario-manager/add-scenario")} />
+        <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios" showButton buttonText="Add Scenario" onButtonPress={() => navigate("/scenario-manager/add-scenario")} />
       
       {/* Filters */}
-      <Card className="shadow-soft mb-4">
+      <Card className="shadow-soft" style={{ margin: "1rem"}}>
         <Form
           form={form}
           layout="vertical"
@@ -332,7 +315,7 @@ export default function ViewScenarios() {
 
       <Card
         style={{
-          marginTop: 16,
+          margin: "0 1rem 1rem 1rem",
           width: "100%",
 
         }}
@@ -347,7 +330,7 @@ export default function ViewScenarios() {
           }}
         >
           <Space>
-            <FileTextOutlined style={{ fontSize: 24, color: "var(--color-primary, #1677ff)" }} />
+      <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
             <Typography.Title
               level={4}
               style={{
@@ -376,11 +359,19 @@ export default function ViewScenarios() {
           <Table
             rowKey="id"
             columns={scenarioTableColumns}
-            dataSource={filteredData}
-            pagination={false}
-          >
-
-          </Table>
+            dataSource={filteredData}pagination={{
+      pageSize: 10,
+      showQuickJumper: true,
+      showTotal: (total) => `Total ${total} exercises`,
+    }}
+    scroll={{
+      y: 400,
+      x: "max-content",
+    }}
+    sticky
+    bordered
+  
+          />
         </div>
       </Card>
 

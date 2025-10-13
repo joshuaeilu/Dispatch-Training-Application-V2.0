@@ -24,7 +24,7 @@ import { AuthContext } from "../../../../contexts/AuthProvider";
 import { api } from "../../../../utils/api";
 import { toTitleCase } from "../../../../utils/tools";
 import { v4 as uuidv4 } from "uuid";
-import type { Scenario, Speaker } from "../../../../types/index.types";
+import type {  Speaker } from "../../../../types/index.types";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -76,7 +76,6 @@ export default function SituationSetterCard() {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
-  const [scenario, setScenario] = useState<Scenario | null>(null);
 
   const navigate = useNavigate();
   const { token } = useContext(AuthContext);
@@ -182,7 +181,11 @@ export default function SituationSetterCard() {
         day: form.getFieldValue("day"),
         season: form.getFieldValue("season"),
       },
-      speakers,
+      speakers: speakers,
+      scenes: [
+        { id: uuidv4(), speaker: "", sceneDescription: "", options: [], correctOption: null, tip: "", highlights: [] },
+      ],
+      status: "draft",
     };
 
     navigate("/scenario-manager/edit-scenario", {

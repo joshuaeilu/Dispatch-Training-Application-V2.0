@@ -6,14 +6,11 @@ import {
   Space,
   Skeleton,
   Modal,
-  Popconfirm,
-  Tooltip,
   Radio,
 } from "antd";
 import {
   ArrowLeftOutlined,
   SaveOutlined,
-  DeleteOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
 

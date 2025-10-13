@@ -4,12 +4,11 @@ import { ReloadOutlined, SearchOutlined, EditOutlined,  FileTextOutlined, Delete
 import { useNavigate } from "react-router-dom";
 import { api } from "../../../utils/api";
 import type { Exercise, ExerciseTableType } from "../../../types/index.types";
-import {  AUDIENCE_COLORS, PROFILE_PIC_URL, STATUS_COLORS } from "../../../data/data";
+import {  AUDIENCE_COLORS, STATUS_COLORS } from "../../../data/data";
 import ViewExerciseModal from "./AddExercise/ViewQuestions/components/ViewExerciseModal";
 import { PageHeader } from "../../Shared/PageHeader";
 import {  exerciseDifficultyOptions, exerciseStatusOptions } from "../../../data/data";
 import { UniversalContext } from "../../../contexts/UniversalHelpers";
-import { AuthContext } from "../../../contexts/AuthProvider";
 import { toTitleCase } from "../../../utils/tools";
 
 
@@ -26,7 +25,6 @@ export default function KnowledgeCheckViewExercises() {
 
   
   const [messageApi, contextHolder] = message.useMessage();
-  const { token } = useContext(AuthContext);
 
 
 // Create a version of exerciseFiles that matches the TableType
@@ -393,7 +391,6 @@ const exerciseTypes = (["All Types", preferences?.exercise_types].flat()).filter
     pagination={{
       pageSize: 10,
       showQuickJumper: true,
-      showSizeChanger: true,
       showTotal: (total) => `Total ${total} exercises`,
     }}
     scroll={{

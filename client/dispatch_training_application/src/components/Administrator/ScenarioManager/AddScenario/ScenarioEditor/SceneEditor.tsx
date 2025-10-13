@@ -3,6 +3,7 @@ import { useState } from "react";
 import SceneEditorPage from "./components/SceneEditorPage";
 import ScenarioDetails from "./components/ScenarioDetails";
 import type { Scenario, SceneEditorProps } from "../../../../../types/index.types";
+import ActiveTabs from "../../../KnowledgeCheckManager/AddExercise/AddQuestions/components/ActiveTabs";
 
 
 
@@ -14,28 +15,21 @@ export default function SceneEditor({ scenario, setScenario, currentIndex, setCu
     
     return (
 
-        <div style={{ width: '35%', height: '100%', display: 'flex', flexDirection: 'column'}}>
-            <Tabs
-
-type="card"
-activeKey={activeTab}
-onChange={key => setActiveTab(key)}
-        tabBarStyle={{ marginBottom: 0  }}
-    items={[
-  {
-    label: 'Scenario Details',
-    key: '1',
-    children: null
-  },
-  {
-    label: 'Scene Editor',
-    key: '2',
-    children: null
-  }
-]}
-  
-  />
-
+        <div style={{       
+               height: "100%",
+               display: "flex",
+               flexDirection: "column",
+               backgroundColor: "#FFFFFF",
+               borderRadius: 10,
+               boxShadow: "0 4px 12px rgba(0,0,0,0.06)", }}>
+       <ActiveTabs
+         activeTab={activeTab}
+         setActiveTab={setActiveTab}
+         tabs={[
+           { label: "Scenario Details", value: "1" },
+           { label: "Scenario Editor", value: "2" },
+         ]}
+       />
 
 
 {activeTab === '1' && (

@@ -84,8 +84,8 @@ export type AdminPreferences = {
 };
 
 export interface SceneEditorProps {
-  scenario: Scenario;
-  setScenario: React.Dispatch<React.SetStateAction<Scenario>>;
+  scenario: Scenario | undefined;
+  setScenario: React.Dispatch<React.SetStateAction<Scenario | undefined>>;
   playing: boolean;
   setPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;

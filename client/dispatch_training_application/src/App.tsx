@@ -19,17 +19,19 @@ import AdminSection from './components/Administrator/Dashboard/Admins/AdminSecti
 import UserViewKnowledgeChecks from './components/User/KnowledgeChecks/UserViewKnowledgeChecks'
 import ViewKnowledgeCheck from './components/User/KnowledgeChecks/ViewKnowledgeCheck'
 import UserResourcesPage from './components/Shared/Resources/UserResourcesPage'
+import { getUser } from './contexts/AuthProvider'
 function App() {
 
+  const user = getUser();
   return (
     <Router>
       <Routes>
         {/* Login Page */}
         <Route path="/login" element={<LoginPage />} />
-
         {/* Protected Routes */}
         <Route element={<Protected />} >
-         <Route index element={<AdminDashboard />} />
+                <Route index element={user?.role === 'admin' ? <AdminDashboard /> : <UserResourcesPage />} />
+
          <Route path="/scenario-manager" element={<Outlet />} >
             <Route index element={<ViewScenarios />} />
             <Route path="add-scenario" element={<SituationSetter />} />
@@ -52,7 +54,7 @@ function App() {
           <Route path="admins" element={<AdminSection />} />
           </Route>
           <Route path="resource-manager" element={<ResourceManager />} />
-          <Route path="/trainee-knowledge-checks" element={<Outlet />} >
+          <Route path="/user-knowledge-checks" element={<Outlet />} >
             <Route index element={<UserViewKnowledgeChecks />} />
             <Route path="view-exercise" element={<ViewKnowledgeCheck />} />
           </Route>

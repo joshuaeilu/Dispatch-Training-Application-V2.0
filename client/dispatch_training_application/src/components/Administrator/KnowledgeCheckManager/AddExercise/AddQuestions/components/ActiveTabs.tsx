@@ -1,7 +1,7 @@
 
 interface ActiveTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
   tabs: { label: string; value: string }[];
 }
 
@@ -25,7 +25,7 @@ export default function ActiveTabs({
         return (
           <span
             key={value}
-            onClick={() => setActiveTab(value)}
+            onClick={() => setActiveTab?.(value)}
             style={{
               flex: 1,
               textAlign: "center",

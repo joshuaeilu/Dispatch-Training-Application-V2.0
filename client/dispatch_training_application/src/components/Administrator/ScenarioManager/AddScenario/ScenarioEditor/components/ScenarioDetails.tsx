@@ -9,8 +9,8 @@ import { api } from '../../../../../../utils/api';
 import { toTitleCase } from '../../../../../../utils/tools';
 
 export interface ScenarioDetailsProps {
-  scenario: Scenario;
-  setScenario: React.Dispatch<React.SetStateAction<Scenario>>;
+  scenario: Scenario | undefined;
+  setScenario: React.Dispatch<React.SetStateAction<Scenario | undefined>>;
 }
 export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetailsProps) {
 
@@ -23,7 +23,7 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
     const trimmed = toTitleCase(customType);
     if (!trimmed) return;
     if (scenarioTypes.includes(trimmed)) {
-      setScenario({ ...scenario, type: trimmed });
+      setScenario && setScenario({ ...scenario!, type: trimmed });
       setCustomType("");
       return;
     }
@@ -31,7 +31,7 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
     try {
       await api.patch("/preferences/scenario_types", { value: updated });
       setPreferences({ ...preferences, scenario_types: updated });
-      setScenario({ ...scenario, type: trimmed });
+      setScenario && setScenario({ ...scenario!, type: trimmed });
       setCustomType("");
       messageApi.success("Custom scenario type saved successfully.");
     } catch (err) {
@@ -44,16 +44,16 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
 
       {/* Scenario Name */}
       <Typography.Text >Scenario Name</Typography.Text>
-      <Input placeholder="Enter scenario name" value={scenario.name} onChange={(e) => setScenario({ ...scenario, name: e.target.value })} style={{ marginTop: 8, marginBottom: 16 }} />
+      <Input placeholder="Enter scenario name" value={scenario?.name} onChange={(e) => setScenario && setScenario({ ...scenario!, name: e.target.value })} style={{ marginTop: 8, marginBottom: 16 }} />
 
       {/*Scenario Type */}
       <Typography.Text >Scenario Type</Typography.Text> <br />
       <Select
         placeholder="Select a scenario type"
-        value={scenario.type}
+        value={scenario?.type}
         style={{ width: "100%", marginTop: 8, marginBottom: 16 }}
         onChange={(val) => {
-          setScenario({ ...scenario, type: val });
+          setScenario && setScenario({ ...scenario!, type: val });
           if (val !== "Custom") setCustomType("");
         }}
       >
@@ -65,7 +65,7 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
       </Select>
       <br />
       {/* Custom Type Field */}
-      {scenario.type === "Custom" && (
+      {scenario?.type === "Custom" && (
         <Form.Item label="Custom Type" required>
           <Space.Compact style={{ width: "100%" }}>
             <Input
@@ -93,8 +93,8 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
           <Select
             placeholder="Select difficulty"
             style={{ width: "100%", marginTop: 8, marginBottom: 16 }}
-            value={scenario.difficulty}
-            onChange={(value) => setScenario({ ...scenario, difficulty: value })}
+            value={scenario?.difficulty}
+            onChange={(value) => setScenario && setScenario({ ...scenario!, difficulty: value })}
           >
             {["Easy", "Medium", "Hard"].map((level) => (
               <Select.Option key={level} value={level}>
@@ -109,8 +109,8 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
           <Select
             placeholder="Select audience"
             style={{ width: "100%", marginTop: 8, marginBottom: 16 }}
-            value={scenario.audience}
-            onChange={(value) => setScenario({ ...scenario, audience: value })}
+            value={scenario?.audience}
+            onChange={(value) => setScenario && setScenario({ ...scenario!, audience: value })}
           >
             {["All", "Dispatchers", "Trainees"].map((audience) => (
               <Select.Option key={audience} value={audience}>
@@ -127,8 +127,8 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
           <Select
             placeholder="Select day"
             style={{ width: "100%", marginTop: 8, marginBottom: 16 }}
-            value={scenario.timing.day}
-            onChange={(value) => setScenario({ ...scenario, timing: { ...scenario.timing, day: value } })}
+            value={scenario?.timing.day}
+            onChange={(value) => setScenario && setScenario({ ...scenario!, timing: { ...scenario!.timing, day: value } })}
           >
             {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
               <Select.Option key={day} value={day}>
@@ -143,8 +143,8 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
           <Select
             placeholder="Select season"
             style={{ width: "100%", marginTop: 8, marginBottom: 16 }}
-            value={scenario.timing.season}
-            onChange={(value) => setScenario({ ...scenario, timing: { ...scenario.timing, season: value } })}
+            value={scenario?.timing.season}
+            onChange={(value) => setScenario && setScenario({ ...scenario!, timing: { ...scenario!.timing, season: value } })}
           >
             {["Winter", "Spring", "Summer", "Fall"].map((season) => (
               <Select.Option key={season} value={season}>
@@ -161,19 +161,16 @@ export default function ScenarioDetails({ scenario, setScenario }: ScenarioDetai
       <TimePicker
         use12Hours
         format="h:mm A"
-        value={scenario.timing.time ? dayjs(scenario.timing.time) : null} // ✅ convert back
+        value={scenario?.timing.time ? dayjs(scenario.timing.time) : null} // ✅ convert back
         style={{ width: "100%", cursor: "pointer", marginTop: 8, marginBottom: 16 }}
 
         onChange={(value) =>
-          setScenario({
-            ...scenario,
-            timing: { ...scenario.timing, time: value ? value.toISOString() : null }, // keep serializable
-          })
+          setScenario && setScenario({ ...scenario!, timing: { ...scenario!.timing, time: value ? value.toISOString() : null } }) // keep serializable
         }
       />
       {/* Scenario Description */}
       <Typography.Text >Scenario Description</Typography.Text>
-      <Input.TextArea rows={4} placeholder="Enter scenario description" value={scenario.description} onChange={(e) => setScenario({ ...scenario, description: e.target.value })} style={{ marginTop: 8, marginBottom: 16 }} />
+      <Input.TextArea rows={4} placeholder="Enter scenario description" value={scenario?.description} onChange={(e) => setScenario && setScenario({ ...scenario!, description: e.target.value })} style={{ marginTop: 8, marginBottom: 16 }} />
 
       {contextHolder}
     </div>

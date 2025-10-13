@@ -75,7 +75,7 @@ export default function UserViewScenarios() {
   const sortedTypes = Object.keys(grouped).sort();
 
   return (
-    <div className="p-6" style={{ background: "#fafafa", minHeight: "100vh" }}>
+    <div style={{ background: "#fafafa", height: "100vh" }}>
       <PageHeader
         title="Scenario Walkthroughs"
         subtitle="Explore and complete available training scenarios."

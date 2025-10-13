@@ -3,23 +3,46 @@ import { getUsers } from "../../../../contexts/UniversalHelpers";
 import UserCard from "../../../Shared/UserCard";
 import { PROFILE_PIC_URL } from "../../../../data/data";
 import { getToken } from "../../../../contexts/AuthProvider";
-export default function DispatchersSection(){
+import { Row, Col } from "antd";
 
-    const { users } = getUsers();
-    const token = getToken();
-    return (
-        <div style={{ padding: '20px', overflow: 'auto', height: '100%' }}>
-        <PageHeader title="Admins" subtitle="View Admin Users" onBack={() => window.history.back()} showBackButton buttonText="History"  onButtonPress={() => {}} showButton />
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '20px' }}>
-          {users.filter(user => user.role === 'admin').map((user) => (
-            <UserCard
+export default function DispatchersSection() {
+  const { users } = getUsers();
+  const token = getToken();
+
+  const admins = users.filter((user) => user.role === "admin");
+
+  return (
+    <div style={{ overflow: "auto" }}>
+      <PageHeader
+        title="Administrators"
+        subtitle="Assess Administrators Progress"
+        onBack={() => window.history.back()}
+        showBackButton
+      
+      />
+
+      <div style={{ padding: "0 1.5rem" }}>
+        <Row gutter={[24, 24]}>
+          {admins.map((user) => (
+            <Col
               key={user.id}
-              name={user.name}
-              imageUrl={PROFILE_PIC_URL + user.avatar + "?token="+ token }
-             
-            />
+              xs={24}
+              sm={12}
+              md={8}
+              lg={6}
+            >
+              <UserCard
+                name={user.name}
+                imageUrl={`${PROFILE_PIC_URL}${user.avatar}?token=${token}`}
+                completed={6}
+                totalAssignments={12}
+                knowledgeChecks={{ completed: 4, total: 8 }}
+                scenarios={{ completed: 4, total: 4 }}
+              />
+            </Col>
           ))}
-        </div>
-        </div>
-    )
+        </Row>
+      </div>
+    </div>
+  );
 }

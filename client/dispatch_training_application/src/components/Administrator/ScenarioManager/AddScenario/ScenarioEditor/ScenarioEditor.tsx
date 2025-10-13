@@ -1,71 +1,53 @@
 import { Space, Button, Typography, Radio, Modal, Tooltip, Popconfirm } from "antd";
-import { ArrowLeftOutlined,  DeleteOutlined, SaveOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined,  CheckCircleOutlined,  DeleteOutlined, SaveOutlined } from "@ant-design/icons";
 import SceneEditor from "./SceneEditor";
 import 'antd/dist/reset.css'; // AntD v5
-import { Skeleton } from "antd";
-import { debounce } from "lodash"; // install with npm i lodash
-import { v4 as uuidv4 } from 'uuid';
 
 import { useState, useRef, useEffect } from "react";
 import type { HighlightData, Scenario } from "../../../../../types/index.types";
 import PdfViewer from "../../../../Shared/PdfViewer";
 import { useLocation } from "react-router-dom";
-import { toTitleCase } from "../../../../../utils/tools";
 import SceneOverview from "./SceneOverview";
 import { api } from "../../../../../utils/api";
 import { useContext } from "react";
 import { AuthContext } from "../../../../../contexts/AuthProvider";
 import {  toast } from 'react-hot-toast';
+import { useScenarioManager } from "../../../../../hooks/useScenarioManager";
+import { useAutosaveScenario } from "../../../../../hooks/useAutoSaveScenario";
+import { useNavigate } from "react-router-dom";
+
+const { Text} = Typography;
 export default function ScenarioEditor() {
   const { Title } = Typography;
   const location = useLocation();
-const scenarioDetails = location.state?.scenario || location.state?.scenarioDetails;
+  const {scenarioId} = location.state || {};
+  const { scenarioDetails } = location.state || {};
 
-if (!scenarioDetails) {
-  toast.error("No scenario loaded.");
-  window.history.back();
-}
+  const { scenario, setScenario} = useScenarioManager({ scenarioId, scenarioDetails });
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const { user } = useContext(AuthContext);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [__, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
+
+  const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario);
   const [isPublishing, setIsPublishing] = useState(false);
 
 
-  const [scenario, setScenario] = useState<Scenario>({
-  id: scenarioDetails.id || uuidv4(),
-  name: toTitleCase(scenarioDetails.name || "Untitled"),
-  description: scenarioDetails.description || "",
-  difficulty: scenarioDetails.difficulty || "",
-  type: scenarioDetails.type || "",
-  audience: scenarioDetails.audience || "",
-  timing: scenarioDetails.timing || { time: "", day: "", season: "" },
-  speakers: scenarioDetails.speakers || [],
-  scenes: scenarioDetails.scenes?.length > 0
-    ? scenarioDetails.scenes
-    : [
-        {
-          id: uuidv4(),
-          speaker: "",
-          sceneDescription: "",
-          options: [],
-          correctOption: null,
-          tip: "",
-          highlights: [],
-        },
-      ],
-});
-  const [lastSavedScenario, setLastSavedScenario] = useState<Scenario | null>(scenario);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const { user } = useContext(AuthContext);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
   // Audio playback ref
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [playing, setPlaying] = useState(false);
 
+    const navigate = useNavigate();
 
-     const stopAudio = () => {
+
+  const stopAudio = () => {
   if (audioRef.current) {
     audioRef.current.pause();
     audioRef.current = null;
@@ -110,33 +92,6 @@ if (!scenarioDetails) {
 
 
 
-  // Debounced save function (prevents spamming requests)
-  const debouncedSave = useRef(
-    debounce(async (scenario, userId, setLastSavedScenario) => {
-      try {
-        await api.post("/scenarios", {
-          scenario,
-          authorId: userId,
-          status: "draft",
-        });
-        setLastSavedScenario(scenario);
-        console.log("✅ Autosaved while typing.");
-      } catch (err) {
-        console.error("❌ Autosave failed:", err);
-      }
-    }, 5000) // save 2s after last change
-  ).current;
-
-  useEffect(() => {
-    if (!user?.id) return;
-    const hasChanged =
-      JSON.stringify(lastSavedScenario) !== JSON.stringify(scenario);
-
-    if (!hasChanged) return;
-
-    debouncedSave(scenario, user.id, setLastSavedScenario);
-  }, [scenario, user, lastSavedScenario]);
-
   async function saveScenario() {
     setIsPublishing(true);
     try {
@@ -148,9 +103,9 @@ if (!scenarioDetails) {
 
       if(saveStatus === 'published') {
         // generate TTS for each scene
-      const audioResponse = await api.post(`/scenarios/${scenario.id}/generate-audio`, {
-        scenes: scenario.scenes,
-        speakers: scenario.speakers
+      const audioResponse = await api.post(`/scenarios/${scenario?.id}/generate-audio`, {
+        scenes: scenario?.scenes,
+        speakers: scenario?.speakers
       });
       if (audioResponse.status === 200) {
         console.log("Audio generated successfully!");
@@ -175,48 +130,6 @@ if (!scenarioDetails) {
   }
 
 
-  useEffect(() => {
-    const fetchLatestScenario = async () => {
-      const id = scenarioDetails?.id;
-      if (!id) return;
-      setLoading(true);
-      try {
-        const res = await api.get(`/scenarios/${id}`);
-        if (res.status === 200) {
-          setScenario(res.data.scenario_data);
-          setLastSavedScenario(res.data.scenario_data);
-          console.log("✅ Loaded latest scenario from DB.");
-        }
-      } catch (err) {
-        console.error("❌ Failed to load latest scenario:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLatestScenario();
-  }, []);
-
-
-  const handleDeleteScenario = async () => {
-    if (!scenario.id || !user?.id) return;
-
-    try {
-      const res = await api.delete(`/scenarios/${scenario.id}`, {
-        data: { authorId: user.id }, // optional: verify ownership
-      });
-
-      if (res.status === 200) {
-        toast.success("Scenario deleted successfully.");
-        window.history.back(); // or navigate to dashboard
-      } else {
-        toast.error(`Failed to delete scenario. Status: ${res.status}`);
-      }
-    } catch (err) {
-      console.error("❌ Failed to delete scenario:", err);
-      toast.error("An error occurred while deleting.");
-    }
-  };
 
 
 
@@ -225,80 +138,88 @@ if (!scenarioDetails) {
   return (
 
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', padding: 10 }}>
-      <Skeleton
-        loading={loading}
-        active
-        title={{ width: 300 }}
-        paragraph={{ rows: 25 }}
-        style={{ padding: 15 }}
-      >
 
-        {/* Header Section */}
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 1000,
-            background: "var(--color-bg-base)",
-            borderBottom: "1px solid var(--color-border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            height: '10%'
-          }}
-        >
-       {/* Left: Back + Page Title */}
-  <div style={{ display: 'flex', alignItems: 'center', }}>
+          <div
+  style={{
+    position: "sticky",
+    top: 0,
+    zIndex: 1000,
+    borderBottom: "1px solid var(--color-border)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 1rem",
+    height: "9vh",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
+  }}
+>
+  {/* Left: Back + Title */}
+  <Space align="center" size="middle">
     <Button
       type="primary"
-      size="middle"
       icon={<ArrowLeftOutlined />}
-      style={{ marginRight: 12 }}
-      onClick={() => window.history.back()}
+      size="large"
+      onClick={() => navigate("/scenario-manager")}
+      
     />
-    <Title level={4} style={{ margin: 0 }}>
-      {scenario.name}
-    </Title>
-  </div>
+    <div>
+      <Title level={4} style={{ margin: 0, color: "#1F1F1F" }}>
+        {scenario?.name || "Untitled Exercise"}
+      </Title>
+      <Text type="secondary" style={{ fontSize: 14 }}>
+        Editing scenario
+      </Text>
+    </div>
+  </Space>
 
-          {/* Right: Actions */}
-          <Space>
-            <Popconfirm
-              title="Are you sure you want to delete this scenario? This action cannot be undone."
-              onConfirm={() => {
-                handleDeleteScenario();
-              }}
-            >
-              <Tooltip title="Delete scenario" placement="left">
-                <Button icon={<DeleteOutlined />}
-                  danger>
-                  Delete
-                </Button>
-              </Tooltip>
-            </Popconfirm>
-            <Button type="primary" icon={<SaveOutlined />} onClick={() => setIsSaveModalOpen(true)}>
-              Save
-            </Button>
-          </Space>
-        </div>
+
+
+    <Button
+      type="primary"
+      icon={<SaveOutlined />}
+      size="large"
+      onClick={() => setIsSaveModalOpen(true)}
+      className="regular-btn"
+    >
+      Save
+    </Button>
+</div>
 
         {/* Main Content Area */}
-        <div style={{ height: '90%', display: 'flex', flexDirection: 'row' }}>
+<div className="flex flex-col md:flex-row h-[87vh] overflow-hidden gap-4" style={{ padding: 16 }}>
+        <div className="w-full md:w-1/3 h-full ">
           <SceneEditor scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollHighlight={(highlight: HighlightData) => scrollToHighlight(highlight)} playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
-          <div style={{width:'35%'}}>
-            <PdfViewer highlights={scenario.scenes[currentIndex]?.highlights || []} setHighlights={(highlights) => {
-            setScenario((prev) => ({
-              ...prev,
-              scenes: prev.scenes.map((scene, index) =>
-                index === currentIndex ? { ...scene, highlights } : scene
-              ),
-            }));
+
+</div>
+
+
+
+        <div className="w-full md:w-1/3 h-full ">
+            <PdfViewer highlights={scenario?.scenes[currentIndex]?.highlights || []} setHighlights={(highlights) => {
+          
+            setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, highlights } : s) });
           }}
             scrollContainerRef={scrollContainerRef} pageRefs={pageRefs} />
           </div>
+                  <div className="w-full md:w-1/3 h-full ">
+
           <SceneOverview scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} stopAudio={stopAudio} />
         </div>
-      </Skeleton>
+        
+        </div>
+         <div
+      className="flex items-center text-xs font-normal text-[#595959] bg-white"
+      style={{
+        padding: "0 16px",
+        margin: "0 1rem", 
+        borderRadius: 10,
+        height: "4vh",
+        gap: 6,
+      }}
+    >
+      <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 14 }} />
+      <span>{autosaving ? "Autosaving..." : "All changes saved"}</span>
+    </div>
 
   
 <Modal

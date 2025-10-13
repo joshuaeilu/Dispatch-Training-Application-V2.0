@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { debounce } from "lodash";
-import toast from "react-hot-toast";
 import { api } from "../utils/api";
 import type { Exercise } from "../types/index.types";
 

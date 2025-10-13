@@ -22,7 +22,7 @@ export default function SceneEditorPage({
   scrollHighlight, audioRef,
   playing, setPlaying
 }: SceneEditorProps) {
-  const scene = scenario.scenes[currentIndex];
+  const scene = scenario?.scenes[currentIndex];
   const [messageApi, contextHolder] = message.useMessage();
   const [tipOpen, setTipOpen] = useState(false);
   const [loadingAudio, setLoadingAudio] = useState(false);
@@ -36,23 +36,23 @@ export default function SceneEditorPage({
     formState: { errors },
   } = useForm({
     defaultValues: {
-      speaker: scene.speaker,
-      sceneDescription: scene.sceneDescription,
+      speaker: scene?.speaker,
+      sceneDescription: scene?.sceneDescription,
     },
   });
 
   useEffect(() => {
     reset({
-      speaker: scene.speaker,
-      sceneDescription: scene.sceneDescription,
+      speaker: scene?.speaker,
+      sceneDescription: scene?.sceneDescription,
     });
   }, [currentIndex, scene, reset]);
 
   const onSubmit = (data: any) => {
-    const currentScene = scenario.scenes[currentIndex];
+    const currentScene = scenario?.scenes[currentIndex];
 
-    const hasOptions = currentScene.options && currentScene.options.length > 0;
-    const hasCorrect = !!currentScene.correctOption;
+    const hasOptions = currentScene?.options && currentScene.options.length > 0;
+    const hasCorrect = !!currentScene?.correctOption;
 
    
 
@@ -70,14 +70,15 @@ export default function SceneEditorPage({
       highlights: []
     };
 
-    setScenario((prev) => ({
-      ...prev,
+
+    setScenario && setScenario({
+      ...scenario!,
       scenes: [
-        ...prev.scenes.slice(0, currentIndex + 1),
+        ...scenario!.scenes.slice(0, currentIndex + 1),
         newScene,
-        ...prev.scenes.slice(currentIndex + 1),
+        ...scenario!.scenes.slice(currentIndex + 1),
       ],
-    }));
+    });
 
     setCurrentIndex(currentIndex + 1); // stay on new scene
 
@@ -95,14 +96,11 @@ export default function SceneEditorPage({
         rows={4}
         style={{ marginBottom: 8, marginTop: 8 }}
         placeholder="e.g. Ask for the caller's location."
-        value={scene.tip}
+        value={scene?.tip}
         onChange={(e) =>
-          setScenario((prev) => ({
-            ...prev,
-            scenes: prev.scenes.map((s, idx) =>
-              idx === currentIndex ? { ...s, tip: e.target.value } : s
-            ),
-          }))
+
+          setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, tip: e.target.value } : s) })
+
         }
       />
       <Button type="primary" onClick={() => setTipOpen(false)}>
@@ -116,11 +114,11 @@ export default function SceneEditorPage({
 
   // ---- Audio Controls ----
   const handlePlayDescription = () => {
-    if (!scene.sceneDescription?.trim()) {
+    if (!scene?.sceneDescription?.trim()) {
       return messageApi.warning("No description text to play.");
     }
 
-    const speaker = scenario.speakers.find((sp) => sp.name === scene.speaker);
+    const speaker = scenario?.speakers.find((sp) => sp.name === scene?.speaker);
     if (!speaker?.voice) {
       return messageApi.error("No voice assigned to this speaker.");
     }
@@ -214,17 +212,13 @@ export default function SceneEditorPage({
                 }
                 else {
                   field.onChange(value);
-                  setScenario((prev) => ({
-                    ...prev,
-                    scenes: prev.scenes.map((s, idx) =>
-                      idx === currentIndex ? { ...s, speaker: value } : s
-                    ),
-                  }));
+               
+                  setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, speaker: value } : s) });
                 }
               }}
               value={field.value || undefined}
             >
-              {scenario.speakers.map((sp) => (
+              {scenario?.speakers.map((sp) => (
                 <Option key={sp.id} value={sp.name}>
                   {sp.name}
                 </Option>
@@ -262,14 +256,8 @@ export default function SceneEditorPage({
                 }}
                 onChange={(e) => {
                   field.onChange(e.target.value);
-                  setScenario((prev) => ({
-                    ...prev,
-                    scenes: prev.scenes.map((s, idx) =>
-                      idx === currentIndex
-                        ? { ...s, sceneDescription: e.target.value }
-                        : s
-                    ),
-                  }));
+                
+                  setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, sceneDescription: e.target.value } : s) });
                 }}
               />
               <div style={{ marginBottom: 16 }}>
@@ -305,16 +293,12 @@ export default function SceneEditorPage({
 
         {/* Highlights */}
         <Text>Highlights</Text>
-        {scene.highlights.length > 0 ? (
+
+        {scene?.highlights && scene.highlights.length > 0 ? (
           <HighlightTagSection
             highlights={scene.highlights}
             setHighlights={(highlights) =>
-              setScenario((prev) => ({
-                ...prev,
-                scenes: prev.scenes.map((s, idx) =>
-                  idx === currentIndex ? { ...s, highlights } : s
-                ),
-              }))
+              setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, highlights } : s) })
             }
             scrollToHighlight={scrollHighlight}
           />
@@ -331,23 +315,13 @@ export default function SceneEditorPage({
         {/* Scene Options */}
         <Text>Scene Options</Text>
         <SceneOptionsEditor
-          options={scene.options || []}
-          correctOption={scene.correctOption || null}
-          onChange={(updatedOptions) =>
-            setScenario((prev) => ({
-              ...prev,
-              scenes: prev.scenes.map((s, idx) =>
-                idx === currentIndex ? { ...s, options: updatedOptions } : s
-              ),
-            }))
+          options={scene?.options || []}
+          correctOption={scene?.correctOption || null}
+          onChange={(updatedOptions) =>        
+            setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, options: updatedOptions } : s) })
           }
           onCorrectChange={(correctOption) =>
-            setScenario((prev) => ({
-              ...prev,
-              scenes: prev.scenes.map((s, idx) =>
-                idx === currentIndex ? { ...s, correctOption } : s
-              ),
-            }))
+            setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, correctOption } : s) })
           }
         />
 
@@ -370,9 +344,26 @@ export default function SceneEditorPage({
             <Button type="dashed">Add Tip</Button>
           </Popover>
 
-          <Button type="primary" htmlType="submit" icon={<PlusOutlined />} disabled={scenario.scenes[currentIndex].options.length > 0 && scenario.scenes[currentIndex].correctOption === null}>
-            Add New Scene
-          </Button>
+     <Button
+  type="primary"
+  htmlType="submit"
+  icon={<PlusOutlined />}
+  disabled={
+    (() => {
+      const currentScene = scenario?.scenes?.[currentIndex];
+      if (!currentScene) return true; // disable until scene exists
+
+      const hasOptions = currentScene.options?.length > 0;
+      const noCorrectOption = currentScene.correctOption === null || currentScene.correctOption === undefined;
+
+      return hasOptions && noCorrectOption;
+    })()
+  }
+>
+  Add New Scene
+</Button>
+
+          
           {contextHolder}
         </div>
       </form>
@@ -380,19 +371,11 @@ export default function SceneEditorPage({
       <AudioEditorModal
         visible={showAudioEditor}
         onClose={() => setShowAudioEditor(false)}
-        speakers={scenario.speakers}
+        speakers={scenario?.speakers || []}
         setSpeakers={(newSpeakers) => {
-          setScenario((prev) => {
-            const lastSpeaker = newSpeakers[newSpeakers.length - 1]?.name || "";
+   
+          setScenario && setScenario({ ...scenario!, speakers: newSpeakers, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, speaker: newSpeakers[newSpeakers.length - 1]?.name || "" } : s) });
 
-            return {
-              ...prev,
-              speakers: newSpeakers,
-              scenes: prev.scenes.map((s, idx) =>
-                idx === currentIndex ? { ...s, speaker: lastSpeaker } : s
-              ),
-            };
-          });
         }}
 
         voices={voices}

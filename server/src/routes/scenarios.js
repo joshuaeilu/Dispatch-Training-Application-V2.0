@@ -36,35 +36,42 @@ router.get("/", auth(['admin', 'trainee']), async (req, res) => {
 
 
 
-router.post("/", auth(['admin']), async (req, res) => {
+router.post("/", auth(["admin"]), async (req, res) => {
   const { scenario, authorId, status } = req.body;
-  console.log("Autosaved scenario..." + scenario.name);
 
   if (!scenario || !authorId) {
     return res.status(400).json({ error: "Missing scenario or authorId" });
   }
 
   try {
+    // Ensure we have an ID
+    if (!scenario.id) {
+      return res.status(400).json({ error: "Scenario missing ID" });
+    }
+
     await pool.query(
-      `INSERT INTO scenarios (id, author_id, scenario_data, status)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (id) 
-       DO UPDATE SET 
-         scenario_data = EXCLUDED.scenario_data,
-         status = EXCLUDED.status,
-         updated_at = NOW()`,
-      [scenario.id, authorId, scenario, status || "draft"]
+      `
+      INSERT INTO scenarios (id, author_id, scenario_data, status)
+      VALUES ($1, $2, $3::jsonb, $4)
+      ON CONFLICT (id)
+      DO UPDATE SET
+        scenario_data = EXCLUDED.scenario_data,
+        status = EXCLUDED.status,
+        updated_at = NOW();
+      `,
+      [scenario.id, authorId, JSON.stringify(scenario), status || "draft"]
     );
+
     res.status(200).json({ message: "Scenario saved successfully" });
   } catch (error) {
-    console.error("Error saving scenario:", error);
+    console.error("❌ Error saving scenario:", error);
     res.status(500).json({ error: "Failed to save scenario" });
   }
 });
 
 
+
 router.get("/:id", auth(['admin']), async (req, res) => {
-  console.log("Fetching updated scenario..." + req.params.id);
   const scenarioId = req.params.id;
 
   if (!scenarioId) {

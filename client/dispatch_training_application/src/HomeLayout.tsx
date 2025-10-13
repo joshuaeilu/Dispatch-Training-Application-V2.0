@@ -1,12 +1,12 @@
 import React, { useContext, useMemo } from 'react';
-import { ApartmentOutlined, AppstoreFilled, FileTextOutlined, LogoutOutlined, MenuOutlined, QuestionCircleFilled, QuestionCircleOutlined, UploadOutlined, UserOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import {  LogoutOutlined, MenuOutlined} from '@ant-design/icons';
 import { Button, Drawer, Grid, Layout, Menu, Typography, } from 'antd';
 import { Outlet } from 'react-router-dom';
 import CSLOGO from './assets/cs_logo.png';
 import type { Role } from './types/index.types';
 import { AuthContext } from './contexts/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content,  Sider } = Layout;
 
 import { Toaster } from 'react-hot-toast';
 import { UniversalContext } from './contexts/UniversalHelpers';
