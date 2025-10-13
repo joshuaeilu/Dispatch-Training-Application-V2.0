@@ -1,7 +1,7 @@
 import { Modal, Typography, Divider, Button, Skeleton } from "antd";
 import { useEffect, useRef } from "react";
 import { CloseOutlined, PlusCircleFilled } from "@ant-design/icons";
-
+import { Image } from "antd";
 const { Title, Text } = Typography;
 
 interface ResourcePreviewModalProps {
@@ -118,7 +118,8 @@ export default function ResourcePreviewModal({
   <Divider style={{ margin: "12px 0" }} />
 
       {isImage && (
-        <img
+        <div style={{ textAlign: "center" }}>
+          <Image
           src={url}
           alt={name}
           style={{
@@ -128,6 +129,7 @@ export default function ResourcePreviewModal({
             borderRadius: 8,
           }}
         />
+        </div>
       )}
 
       {isVideo && (

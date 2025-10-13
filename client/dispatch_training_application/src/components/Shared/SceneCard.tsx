@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useState, useContext, useRef, useEffect } from "react";
 import { Card, Typography, Tag } from "antd";
 import type { HighlightData, Scene } from "../../types/index.types";
 import { AuthContext } from "../../contexts/AuthProvider";
@@ -30,6 +30,10 @@ const SceneCard: React.FC<SceneCardProps> = ({
   const [selected, setSelected] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
   const [showTip, setShowTip] = useState(false);
+
+  useEffect(() => {
+    console.log("Scene updated:", scene);
+  }, [scene]);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);

@@ -8,6 +8,7 @@ import {
   Input,
   Typography,
   Divider,
+  Empty,
 } from "antd";
 import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
@@ -18,7 +19,7 @@ import { api } from "../../../utils/api";
 import type { Scenario } from "../../../types/index.types";
 import { useNavigate } from "react-router-dom";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export default function UserViewScenarios() {
   const [form] = Form.useForm();
@@ -27,14 +28,16 @@ export default function UserViewScenarios() {
   const [selectedScenarioType, setSelectedScenarioType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const scenarioTypes = preferences?.scenario_types || ["No types found"];
-
   const navigate = useNavigate();
-  // Fetch scenarios from database
+
+  // Fetch scenarios
   useEffect(() => {
     const fetchScenarios = async () => {
       try {
+        setLoading(true);
         const response = await api.get("/scenarios");
         const data = response.data.scenarios.map((s: any) => ({
           ...s.scenario_data,
@@ -42,13 +45,14 @@ export default function UserViewScenarios() {
         setScenarios(data);
       } catch (err) {
         console.error("Failed to fetch scenarios", err);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchScenarios();
   }, []);
 
-  // Apply filters (type + search)
+  // Apply filters
   const filteredScenarios = scenarios.filter((s) => {
     const matchesType =
       selectedScenarioType === "All" || s.type === selectedScenarioType;
@@ -58,35 +62,32 @@ export default function UserViewScenarios() {
     return matchesType && matchesSearch;
   });
 
-  // Group scenarios by type
+  // Group by type
   const grouped = filteredScenarios.reduce(
     (acc: Record<string, Scenario[]>, scenario) => {
-      if (!acc[scenario.type]) {
-        acc[scenario.type] = [];
-      }
+      if (!acc[scenario.type]) acc[scenario.type] = [];
       acc[scenario.type].push(scenario);
       return acc;
     },
     {}
   );
 
-  // Sort group headings alphabetically
   const sortedTypes = Object.keys(grouped).sort();
 
   return (
-    <div className="p-5">
+    <div className="p-6" style={{ background: "#fafafa", minHeight: "100vh" }}>
       <PageHeader
         title="Scenario Walkthroughs"
-        subtitle="Explore and complete available scenarios"
+        subtitle="Explore and complete available training scenarios."
       />
 
       {/* Filters */}
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" style={{ marginBottom: 24 }}>
         <Row gutter={[16, 12]}>
           <Col xs={24} sm={12} md={4}>
             <Form.Item label="Scenario Type" name="type">
               <Select
-                defaultValue={selectedScenarioType}
+                value={selectedScenarioType}
                 options={[
                   { label: "All", value: "All" },
                   ...scenarioTypes.map((type) => ({
@@ -94,7 +95,7 @@ export default function UserViewScenarios() {
                     value: type,
                   })),
                 ]}
-                onChange={(value) => setSelectedScenarioType(value)}
+                onChange={setSelectedScenarioType}
               />
             </Form.Item>
           </Col>
@@ -103,29 +104,24 @@ export default function UserViewScenarios() {
             <Form.Item label="Search by name" name="q">
               <Input
                 prefix={<SearchOutlined />}
-                placeholder="Type to search…"
+                placeholder="Search scenarios..."
                 allowClear
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onPressEnter={(e) =>
-                  setSearchQuery((e.target as HTMLInputElement).value)
-                }
               />
             </Form.Item>
           </Col>
 
           <Col xs={24} md={2}>
             <Space
-              className="w-full justify-center"
+              className="w-full"
               style={{
-                alignItems: "center",
-                justifyContent: "center",
                 height: "100%",
-                width: "100%",
+                justifyContent: "center",
+                alignItems: "flex-end",
               }}
             >
               <Button
                 className="border-btn"
-                size="middle"
                 icon={<ReloadOutlined />}
                 onClick={() => {
                   form.resetFields();
@@ -140,28 +136,46 @@ export default function UserViewScenarios() {
         </Row>
       </Form>
 
-      <p>{filteredScenarios.length} scenarios found</p>
+      {/* Results */}
+      <Text strong style={{ display: "block", marginBottom: 12 }}>
+        {filteredScenarios.length} scenarios found
+      </Text>
 
       {/* Grouped Scenarios */}
-      {sortedTypes.map((type) => (
-        <div key={type} style={{ marginBottom: 32 }}>
-          <Title level={4}>{type}</Title>
-          <Divider style={{ margin: "8px 0 16px" }} />
-          <Space wrap size="large">
-            {grouped[type].map((scenario, index) => (
-              <ScenarioCard
-                key={`${type}-${index}`}
-                name={scenario.name}
-                description={scenario.description}
-                type={scenario.type}
-                completed={ false}
-                onClick={() => navigate("view-scenario", { state: { scenario } })}
+      {sortedTypes.length > 0 ? (
+        sortedTypes.map((type) => (
+          <div key={type} style={{ marginBottom: 48 }}>
+            <Title level={4} style={{ color: "#8C2131" }}>
+              {type}
+            </Title>
+            <Divider style={{ margin: "8px 0 24px" }} />
 
-              />
-            ))}
-          </Space>
-        </div>
-      ))}
+            <Row gutter={[24, 24]}>
+              {grouped[type].map((scenario, index) => (
+                <Col
+                  key={`${type}-${index}`}
+                  xs={24}
+                  sm={12}
+                >
+                  <ScenarioCard
+                    name={scenario.name}
+                    completed={false}
+                    questionCount={scenario.scenes?.length || 0}
+                    onClick={() =>
+                      navigate("view-scenario", { state: { scenario } })
+                    }
+                  />
+                </Col>
+              ))}
+            </Row>
+          </div>
+        ))
+      ) : (
+        <Empty
+          description="No scenarios available"
+          style={{ marginTop: 64 }}
+        />
+      )}
     </div>
   );
 }

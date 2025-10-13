@@ -16,7 +16,6 @@ import {
   Form,
   Upload,
 } from "antd";
-import { toast } from "react-hot-toast";
 import {
   MoreOutlined,
   EditOutlined,
@@ -25,6 +24,7 @@ import {
   UploadOutlined,
   LockOutlined,
 } from "@ant-design/icons";
+import { toast } from "react-hot-toast";
 import { api } from "../../../../utils/api";
 import { PageHeader } from "../../../Shared/PageHeader";
 import { toTitleCase } from "../../../../utils/tools";
@@ -33,17 +33,17 @@ import { AuthContext } from "../../../../contexts/AuthProvider";
 import { getUsers } from "../../../../contexts/UniversalHelpers";
 import type { GetUser } from "../../../../types/index.types";
 
-
 const { Title } = Typography;
 const { Option } = Select;
 
-
-
 export default function ManageUsers() {
+  const { token } = useContext(AuthContext);
+  const { users: globalUsers, refreshUsers } = getUsers();
+
+  const [allUsers, setAllUsers] = useState<GetUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<GetUser[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [allUsers, setAllUsers] = useState<GetUser[]>([]);
-  const { users, setUsers, refreshUsers } = getUsers();
 
   // === Edit Modal State ===
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,31 +56,41 @@ export default function ManageUsers() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const { token } = useContext(AuthContext);
   const [form] = Form.useForm();
 
-
-
-  // Search + Filter logic
+  // === Initialize all users from context ===
   useEffect(() => {
+    if (Array.isArray(globalUsers)) {
+      setAllUsers(globalUsers);
+      setFilteredUsers(globalUsers);
+    }
+  }, [globalUsers]);
+
+  // === Search + Role Filter Logic ===
+  useEffect(() => {
+    if (!allUsers.length) return;
+
     let filtered = [...allUsers];
+
     if (roleFilter !== "all") {
       filtered = filtered.filter(
-        (user) => user.role.toLowerCase() === roleFilter
+        (u) => u.role.toLowerCase() === roleFilter.toLowerCase()
       );
     }
-    const term = searchTerm.toLowerCase();
+
+    const term = searchTerm.trim().toLowerCase();
     if (term) {
       filtered = filtered.filter(
-        (user) =>
-          user.name.toLowerCase().includes(term) ||
-          user.role.toLowerCase().includes(term)
+        (u) =>
+          u.name.toLowerCase().includes(term) ||
+          u.role.toLowerCase().includes(term)
       );
     }
-    setUsers(filtered);
+
+    setFilteredUsers(filtered);
   }, [searchTerm, roleFilter, allUsers]);
 
-  // Role Tag UI
+  // === Role Tag UI ===
   const getRoleTag = (role: string) => {
     switch (role.toLowerCase()) {
       case "admin":
@@ -94,13 +104,13 @@ export default function ManageUsers() {
     }
   };
 
-  // === Edit User Modal ===
+  // === Edit Handlers ===
   const handleEdit = (user: GetUser) => {
     setSelectedUser(user);
     setPreview(`${PROFILE_PIC_URL}${user.avatar}?token=${token}`);
     form.setFieldsValue({
-      username: user.name,
-      role: user.role,
+      username: toTitleCase(user.name),
+      role: toTitleCase(user.role),
       password: "",
     });
     setImageFile(null);
@@ -140,7 +150,7 @@ export default function ManageUsers() {
     return false;
   };
 
-  // === Delete User Modal ===
+  // === Delete Handlers ===
   const handleDeleteClick = (user: GetUser) => {
     setSelectedUser(user);
     setDeletePassword("");
@@ -161,7 +171,7 @@ export default function ManageUsers() {
 
       toast.success("User deleted successfully");
       setIsDeleteModalOpen(false);
-      setUsers((prev) => prev.filter((u) => u.id !== selectedUser?.id));
+      refreshUsers();
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || "Failed to delete user.";
       toast.error(errorMsg);
@@ -170,7 +180,7 @@ export default function ManageUsers() {
     }
   };
 
-  // === Menu Actions ===
+  // === Action Menu ===
   const actionMenu = (user: GetUser) => (
     <Menu>
       <Menu.Item
@@ -192,19 +202,19 @@ export default function ManageUsers() {
   );
 
   return (
-    <div className="px-8 py-6">
-  <PageHeader
-    title="User Management"
-    subtitle="Manage users, roles, and permissions"
-    showBackButton
-    onBack={() => window.history.back()}
-  />
-  
+    <div >
+      <PageHeader
+        title="User Management"
+        subtitle="Manage users, roles, and permissions"
+        showBackButton
+        onBack={() => window.history.back()}
+      />
 
-      {/* Search + Filter */}
-      <div className="flex flex-col md:flex-row md:items-center mb-6 gap-3">
+<div style={{ margin: "0 1rem"}}>
+        {/* Search + Filters */}
+      <div className="flex flex-col md:flex-row md:items-center mb-6 gap-3" >
         <Input
-          placeholder="Search users by name, email, or role..."
+          placeholder="Search users by name or role..."
           prefix={<SearchOutlined style={{ color: "#999" }} />}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -226,7 +236,7 @@ export default function ManageUsers() {
       </div>
 
       {/* User Cards */}
-      {users.length === 0 ? (
+      {filteredUsers.length === 0 ? (
         <Empty
           description="No users found"
           image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -234,7 +244,7 @@ export default function ManageUsers() {
         />
       ) : (
         <Row gutter={[16, 16]}>
-          {users.map((user) => (
+          {filteredUsers.map((user) => (
             <Col key={user.id} xs={24} sm={12} md={8} lg={6}>
               <Card
                 hoverable
@@ -259,8 +269,13 @@ export default function ManageUsers() {
                     />
                   </Dropdown>
                 </div>
+
                 <Avatar
-                  src={`${PROFILE_PIC_URL}${user.avatar}?token=${token}`}
+                  src={
+                    user.avatar
+                      ? `${PROFILE_PIC_URL}${user.avatar}?token=${token}`
+                      : undefined
+                  }
                   size={96}
                   className="border mb-3"
                 />
@@ -271,6 +286,7 @@ export default function ManageUsers() {
           ))}
         </Row>
       )}
+</div>
 
       {/* === Edit Modal === */}
       <Modal
@@ -293,7 +309,7 @@ export default function ManageUsers() {
           </Typography.Text>
         </div>
 
-        <Form layout="vertical" form={form} className="space-y-3">
+        <Form layout="vertical" form={form}>
           <Form.Item label="Username" name="username">
             <Input placeholder="Enter new username" size="large" />
           </Form.Item>
@@ -372,4 +388,3 @@ export default function ManageUsers() {
     </div>
   );
 }
-

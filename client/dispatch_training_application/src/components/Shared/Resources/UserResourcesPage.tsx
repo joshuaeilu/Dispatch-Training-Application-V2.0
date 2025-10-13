@@ -17,7 +17,6 @@ import {
   VideoCameraOutlined,
   AudioOutlined,
   AppstoreOutlined,
-  FileSearchOutlined,
   FolderOpenOutlined,
   UnorderedListOutlined,
   FileTextOutlined,
@@ -133,7 +132,6 @@ export default function UserResourcesPage() {
           top: isMobile ? "auto" : 0,
         }}
       >
-        <div >
           <Row gutter={[16, 16]} align="middle" justify="space-between">
             <Col xs={24} md={18}>
               <Input
@@ -172,7 +170,6 @@ export default function UserResourcesPage() {
                 </Button>
               ))}
             </Space>
-          </div>
 
           {/* Count */}
           <div style={{ marginTop: 16 }}>

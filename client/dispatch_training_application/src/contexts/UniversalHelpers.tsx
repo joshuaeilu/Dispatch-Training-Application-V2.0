@@ -4,6 +4,9 @@ import React, { createContext, useState, useEffect, useContext, useCallback,  } 
 import type { AdminPreferences,  } from '../types/index.types';
 import type { GetUser } from '../types/index.types'
 import { api } from '../utils/api';
+import { MENU_BY_ROLE } from '../data/data';
+import { getUser } from './AuthProvider';
+
 type Context = {
     preferences: AdminPreferences | null;
     setPreferences: (prefs: AdminPreferences | null) => void;
@@ -31,9 +34,10 @@ export const UniversalContext = createContext<Context>({
 export function UniversalProvider({ children }: { children: React.ReactNode }) {
     const [preferences, setPreferences] = useState<AdminPreferences | null>(null);
     const [users, setUsers] = useState<GetUser[]>([]);
+    const userRole = getUser()?.role;
 
 const [selectedKey, setSelectedKey] = useState<string>(() => {
-  return sessionStorage.getItem('selectedKey') || '/dashboard';
+  return sessionStorage.getItem('selectedKey') || MENU_BY_ROLE[userRole? userRole : 'trainee'][0].key;
 });
      useEffect(() => {
         const fetchPreferences = async () => {

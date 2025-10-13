@@ -83,3 +83,8 @@ export function checkIsMobile(){
   const { isMobile } = React.useContext(AuthContext);
   return isMobile;
 }
+
+export function getUser(){
+  const { user } = React.useContext(AuthContext);
+  return user;
+}

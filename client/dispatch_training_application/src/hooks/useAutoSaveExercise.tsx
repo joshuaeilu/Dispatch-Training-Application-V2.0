@@ -17,10 +17,8 @@ export function useAutosaveExercise(
       await api.put(`/exercises/${exercise.id}`, exercise);
       setLastSavedExercise(exercise);
       lastExerciseRef.current = exercise;
-      toast.success("Changes saved", { id: "autosave-success" });
     } catch (err) {
       console.error("❌ Autosave failed:", err);
-      toast.error("Autosave failed", { id: "autosave-error" });
     } finally {
       setAutosaving(false);
     }

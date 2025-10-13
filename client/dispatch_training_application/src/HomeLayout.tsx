@@ -10,32 +10,10 @@ const { Header, Content, Footer, Sider } = Layout;
 
 import { Toaster } from 'react-hot-toast';
 import { UniversalContext } from './contexts/UniversalHelpers';
+import type { MenuItem } from './types/index.types';
+import { MENU_BY_ROLE } from './data/data';
 
-type MenuItem = {
-  key: string;            // use route path
-  icon?: React.ReactNode;
-  label: string;
-};
 
-const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
-  admin: [
-    { key: '/dashboard', icon: <AppstoreFilled />, label: 'Dashboard' },
-    { key: '/resource-manager', icon: <FileTextOutlined />, label: 'Resources' },
-    { key: '/knowledge-checks', icon: <QuestionCircleOutlined />, label: 'Knowledge Checks' },
-    { key: '/scenario-manager', icon: <ApartmentOutlined />, label: 'Scenario Manager' },
-  ],
-  dispatcher: [
-    { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
-    { key: '/video-walkthroughs', icon: <VideoCameraOutlined />, label: 'Video Walkthroughs' },
-    { key: '/reports', icon: <UploadOutlined />, label: 'Reports' },
-    { key: '/settings', icon: <UserOutlined />, label: 'Settings' },
-  ],
-  trainee: [
-    { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
-    { key: '/trainee-knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
-    { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
-  ],
-};
 
 const App: React.FC = () => {
 

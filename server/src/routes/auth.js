@@ -66,9 +66,15 @@ router.post('/signup', auth(['admin']), upload.single('profileImage'), async (re
     res.status(201).json({ ...user, avatar: avatarPath });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+  console.error('❌ Error creating user:', err);
+
+  // Handle duplicate username (Postgres error code 23505)
+  if (err.code === '23505' && err.detail?.includes('(username)')) {
+    return res.status(400).json({ error: 'Username already exists' });
   }
+
+  res.status(500).json({ error: 'Server error' });
+}
 });
 
 

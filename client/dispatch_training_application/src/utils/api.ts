@@ -3,6 +3,8 @@ import axios from 'axios';
 
 export const api = axios.create({ baseURL: '/api' });
 
+
+
 //This injects the access token into the headers for every request
 api.interceptors.request.use((config) => {
   const t = localStorage.getItem('accessToken');

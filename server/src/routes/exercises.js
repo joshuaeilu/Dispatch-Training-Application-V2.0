@@ -65,7 +65,7 @@ router.put("/:id", auth(["admin"]), async (req, res) => {
 });
 
 // 🔹 Get all exercises
-router.get("/", auth(["admin", "trainee"]), async (req, res) => {
+router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
   try {
     const user = req.user; // decoded from JWT by auth middleware
 
@@ -78,6 +78,7 @@ router.get("/", auth(["admin", "trainee"]), async (req, res) => {
              exercises.visibility,
              exercises.audience,
              exercises.questions,
+             exercises.created_at,
              json_build_object(
                'id', users.id,
                'name', users.username,
@@ -95,6 +96,11 @@ router.get("/", auth(["admin", "trainee"]), async (req, res) => {
       values.push("Trainees", "All");
     }
 
+    if (user.role === "dispatcher"){
+      query += ` WHERE exercises.audience IN ($1, $2)`;
+      values.push("Dispatchers", "All");
+    }
+
     query += ` ORDER BY exercises.created_at DESC;`;
 
     const { rows } = await pool.query(query, values);
@@ -107,7 +113,7 @@ router.get("/", auth(["admin", "trainee"]), async (req, res) => {
 
 
 // 🔹 Get a single exercise by ID
-router.get("/:id", auth(["admin", "trainee"]), async (req, res) => {
+router.get("/:id", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
   try {
     const { id } = req.params;
     const { rows } = await pool.query(

@@ -1,6 +1,7 @@
-import { AudioOutlined, DeleteOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, SearchOutlined, SnippetsOutlined, UserOutlined } from "@ant-design/icons";
-import type {  ResourceCategory, ResourceKey,  } from '../types/index.types';
+import { ApartmentOutlined, AppstoreFilled, AudioOutlined, DeleteOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, SearchOutlined, SnippetsOutlined, UploadOutlined, UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
+import type {  ResourceCategory, ResourceKey, Role, MenuItem } from '../types/index.types';
 
+import React from "react";
   export const exerciseDifficultyOptions = [
     { label: "Easy", value: "easy" },
     { label: "Medium", value: "medium" },
@@ -85,6 +86,26 @@ export const AUDIENCE_COLORS: Record<string, string> = {
   all: "geekblue",
   trainees: "purple",
   dispatchers: "cyan",
+};
+
+
+export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
+  admin: [
+    { key: '/dashboard', icon: <AppstoreFilled />, label: 'Dashboard' },
+    { key: '/resource-manager', icon: <FileTextOutlined />, label: 'Resources' },
+    { key: '/knowledge-checks', icon: <QuestionCircleOutlined />, label: 'Knowledge Checks' },
+    { key: '/scenario-manager', icon: <ApartmentOutlined />, label: 'Scenario Manager' },
+  ],
+  dispatcher: [
+    { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
+    { key: '/knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
+    { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
+  ],
+  trainee: [
+    { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
+    { key: '/knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
+    { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
+  ],
 };
 
 
