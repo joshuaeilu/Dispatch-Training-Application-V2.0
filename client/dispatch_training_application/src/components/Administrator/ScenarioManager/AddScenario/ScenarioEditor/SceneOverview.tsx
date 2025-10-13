@@ -1,5 +1,5 @@
 import { Card, Typography, Radio, Space, Tag, Popconfirm, Dropdown, Menu, Button } from "antd";
-import type { Scenario, Scene, SceneEditorProps } from "../../../../../types/index.types";
+import type { Scenario } from "../../../../../types/index.types";
 import { DeleteOutlined, MoreOutlined, UserOutlined } from "@ant-design/icons";
 import {
   DragDropContext,
@@ -7,7 +7,6 @@ import {
   Draggable,
   type DropResult,
 } from "@hello-pangea/dnd";
-import ActiveTabs from "../../../KnowledgeCheckManager/AddExercise/AddQuestions/components/ActiveTabs";
 
 interface SceneOverviewProps{
   scenario: Scenario | undefined;

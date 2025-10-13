@@ -1,4 +1,4 @@
-import { Typography, Space, Tag, Divider, Card } from "antd";
+import { Typography, Space, Tag, Card } from "antd";
 import type { Question } from "../../../../types/index.types";
 import MultipleChoiceQuestion from "./MultipleChoiceQuestion";
 import TextAreaQuestion from "./TextAreaQuestion";
@@ -17,8 +17,6 @@ type Props = {
 
 export default function QuestionSection({
   question,
-  index,
-  total,
   userAnswer,
   setUserAnswer,
 }: Props) {

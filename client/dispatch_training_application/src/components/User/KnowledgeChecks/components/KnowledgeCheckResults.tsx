@@ -1,4 +1,4 @@
-import { Card, Progress, Typography, Space, Tag, Divider, Grid, List, Button } from "antd";
+import { Card,  Typography, Space, Tag,  Grid, List } from "antd";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,

@@ -1,15 +1,14 @@
 import { useForm, Controller } from "react-hook-form";
 import { Button, Divider, Empty, Input, Popover, Select, Typography, message } from "antd";
 import { PauseCircleFilled, PlayCircleFilled, PlusOutlined } from "@ant-design/icons";
-import { use, useContext, useEffect, useRef, useState } from "react";
-import type { HighlightData, Scenario, SceneEditorProps } from "../../../../../../types/index.types";
+import {  useContext, useEffect, useState } from "react";
+import type {  SceneEditorProps } from "../../../../../../types/index.types";
 import SceneOptionsEditor from "./SceneOptionsEditor";
 import HighlightTagSection from "./HighlightTagSection";
 import AudioEditorModal from "./AudioEditorModal";
 import { voices } from "../../SituationSetter"
 import { v4 as uuidv4 } from 'uuid';
 import { AuthContext } from "../../../../../../contexts/AuthProvider";
-import { api } from "../../../../../../utils/api";
 const { Text, Title } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;

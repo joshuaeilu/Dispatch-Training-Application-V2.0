@@ -5,21 +5,15 @@ import {
   Popconfirm,
   Tag,
   Tooltip,
-  Form,
   Space,
 } from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
-  CheckOutlined,
   EditOutlined,
-  DotChartOutlined,
-  RadiusUpleftOutlined,
-  CheckCircleFilled,
   CheckCircleOutlined,
 } from '@ant-design/icons';
 import { useState } from 'react';
-import RadioButton from 'antd/es/radio/radioButton';
 
 interface SceneOptionsEditorProps {
   options: string[];

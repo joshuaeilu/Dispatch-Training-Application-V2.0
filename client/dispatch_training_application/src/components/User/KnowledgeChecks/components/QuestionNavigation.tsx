@@ -1,5 +1,5 @@
 // components/QuestionNavigation.tsx
-import { Button, Space } from "antd";
+import { Button } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 type Props = {
   currentIndex: number;

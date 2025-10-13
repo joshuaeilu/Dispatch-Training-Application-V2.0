@@ -7,8 +7,6 @@ import {
   Input,
   Typography,
   Modal,
-  Descriptions,
-  Tag,
 } from "antd";
 import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";

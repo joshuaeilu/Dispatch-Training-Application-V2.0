@@ -7,32 +7,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { getUsers } from '../../../../contexts/UniversalHelpers';
-import { useEffect } from 'react';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title,  Paragraph } = Typography;
 
-const actions = [
-    {
-        title: 'Dispatchers',
-        icon: <CustomerServiceOutlined style={{ fontSize: 24, color: 'var(--color-primary)' }} />,
-        description: 'Manage and oversee dispatcher and activities.',
-        route: '/dashboard/dispatchers',
-    },
-    {
-        title: 'Trainees',
-        icon: <UserSwitchOutlined style={{ fontSize: 24, color: 'var(--color-primary)' }} />,
-        description: 'Manage and oversee trainee and activities.',
-        route: '/dashboard/trainees',
-    },
-     {
-        title: 'Admins',
-        icon: <SafetyCertificateOutlined style={{ fontSize: 24, color: 'var(--color-primary)' }} />,
-        description: 'Manage and oversee admin accounts and activities.',
-        route: '/dashboard/admins',
-    },
-
-   
-];
 
 export default function AdminUsersSection() {
   const navigate = useNavigate();

@@ -1,5 +1,4 @@
-import { Button } from "antd";
-import {PlusOutlined} from "@ant-design/icons";
+
 import ResourceSection from "./components/ResourceSection";
 import { useEffect, useState } from "react";
 import AddResourceModal from "./components/AddResourceModal";

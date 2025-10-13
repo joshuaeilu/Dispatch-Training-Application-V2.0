@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useContext } from "react";
 import {
   Button,
   Card,
@@ -42,12 +42,11 @@ export default function ScenarioWalkthrough() {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [notes, setNotes] = useState("");
-  const [scenarioTime, setScenarioTime] = useState<ScenarioTime | null>(null);
+  const [__, setScenarioTime] = useState<ScenarioTime | null>(null);
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const textAreaRef = useRef<any>(null);
   const { token } = useContext(AuthContext);
   const completionRef = useRef<HTMLDivElement | null>(null);
-    const [pdfViewerKey, setPdfViewerKey] = useState(0); 
 
 
   const progress = (answeredQuestions.size / scenarioData.scenes.length) * 100;
@@ -338,7 +337,6 @@ export default function ScenarioWalkthrough() {
 
       <Drawer
       
-        key={pdfViewerKey}
         title="📑 MANUAL OF PROCEDURES"
         placement="right"
         width="40%"

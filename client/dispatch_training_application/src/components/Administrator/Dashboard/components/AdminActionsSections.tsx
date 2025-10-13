@@ -2,11 +2,10 @@ import { Card, Row, Col, Typography } from "antd";
 import {
   UserAddOutlined,
   SettingOutlined,
-  UserSwitchOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 const actions = [
   {

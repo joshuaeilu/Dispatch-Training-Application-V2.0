@@ -18,7 +18,6 @@ import type { Exercise } from "../../../../../../types/index.types";
 import { api } from "../../../../../../utils/api";
 import { FileAddOutlined } from "@ant-design/icons";
 
-const { Text } = Typography;
 
 interface AddExerciseModalProps {
   exercise: Exercise;

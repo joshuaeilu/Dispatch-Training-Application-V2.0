@@ -4,7 +4,6 @@ import {
   ClockCircleOutlined,
   ArrowRightOutlined,
   ProfileOutlined,
-  CalendarOutlined,
   HistoryOutlined,
 } from "@ant-design/icons";
 

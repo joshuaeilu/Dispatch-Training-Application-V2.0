@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Button, message } from "antd";
+import { Button} from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 
-import type { Exercise, Question } from "../../../types/index.types";
+import type { Exercise } from "../../../types/index.types";
 import KnowledgeCheckHeader from "./components/KnowledgeCheckHeader";
 import QuestionSection from "./components/QuestionSection";
 import QuestionNavigation from "./components/QuestionNavigation";
@@ -11,38 +11,6 @@ import { checkIsMobile } from "../../../contexts/AuthProvider";
 import { useLocation } from "react-router-dom";
 import { api } from "../../../utils/api";
 
-// 💡 Sample data (replace with real API data later)
-const dummayQuestions: Question[] = [
-  {
-    id: "q1",
-    question: "What should a dispatcher do when receiving a distress call?",
-    answerType: "multiple-choice",
-    options: [
-      { id: 1, text: "Stay silent and listen" },
-      { id: 2, text: "Ask for the caller’s name and location" },
-      { id: 3, text: "End the call" },
-    ],
-    correctOptions: ["b", "c"],
-    tip: "Always collect caller identification and location first.",
-    questionCategory: "Emergency Protocols",
-  },
-  {
-    id: "q2",
-    question: "Describe how you would prioritize calls in a multi-incident scenario.",
-    answerType: "text-area",
-    options: [],
-    correctOptions: [],
-    questionCategory: "Call Management",
-    resource: {
-      id: "res1",
-      description: "Video on Multi-Incident Call Flow",
-      mimeType: "video/mp4",
-      name: "Multi-Incident Call Flow",
-      type: "video/mp4",
-      url: "https://www.w3schools.com/html/mov_bbb.mp4",
-    },
-  },
-];
 
 export default function KnowledgeCheckPage() {
   const [currentIndex, setCurrentIndex] = useState(0);

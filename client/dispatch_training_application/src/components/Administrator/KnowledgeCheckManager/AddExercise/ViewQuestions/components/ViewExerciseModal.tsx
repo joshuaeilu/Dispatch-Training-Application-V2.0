@@ -1,6 +1,6 @@
 import { Card, Checkbox, Input, Modal, Radio, Tag, Typography } from "antd";
 import type { Exercise } from "../../../../../../types/index.types";
-import { useEffect, useState, useContext } from "react";
+import { useEffect,  useContext } from "react";
 import { RESOURCE_URL } from "../../../../../../data/data";
 import { AuthContext } from "../../../../../../contexts/AuthProvider";
 

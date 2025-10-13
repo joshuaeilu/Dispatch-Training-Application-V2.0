@@ -1,4 +1,3 @@
-import React from "react";
 import { Card, Avatar, Typography, Progress, Tag, Row, Col, Divider, Space } from "antd";
 import {
   BookOutlined,

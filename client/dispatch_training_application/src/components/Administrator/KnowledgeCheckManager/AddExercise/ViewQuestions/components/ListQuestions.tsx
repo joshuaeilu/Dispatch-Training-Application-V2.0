@@ -1,4 +1,4 @@
-import type { Exercise, Question } from "../../../../../../types/index.types";
+import type { Exercise } from "../../../../../../types/index.types";
 import {
   Card,
   Typography,
@@ -19,7 +19,6 @@ import {
   Draggable,
   type DropResult,
 } from "@hello-pangea/dnd";
-import { v4 as uuidv4 } from "uuid";
 import { toTitleCase } from "../../../../../../utils/tools";
 
 const { Text, Title } = Typography;

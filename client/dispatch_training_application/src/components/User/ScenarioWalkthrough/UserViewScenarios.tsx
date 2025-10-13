@@ -28,7 +28,7 @@ export default function UserViewScenarios() {
   const [selectedScenarioType, setSelectedScenarioType] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [__, setLoading] = useState(false);
 
   const scenarioTypes = preferences?.scenario_types || ["No types found"];
   const navigate = useNavigate();

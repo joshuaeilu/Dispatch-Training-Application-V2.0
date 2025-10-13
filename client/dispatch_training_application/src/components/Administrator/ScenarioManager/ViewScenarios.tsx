@@ -8,7 +8,6 @@ import { api } from "../../../utils/api";
 import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
 import type {  ScenarioTableType } from "../../../types/index.types";
 import { UniversalContext } from "../../../contexts/UniversalHelpers";
-import { AuthContext } from "../../../contexts/AuthProvider";
 export default function ViewScenarios() {
   const navigate = useNavigate();
   const [form] = Form.useForm();

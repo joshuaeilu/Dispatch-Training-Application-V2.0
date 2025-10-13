@@ -1,7 +1,6 @@
-import React, { useState, useContext, useRef, useEffect } from "react";
+import React, { useState,  useRef, useEffect } from "react";
 import { Card, Typography, Tag } from "antd";
 import type { HighlightData, Scene } from "../../types/index.types";
-import { AuthContext } from "../../contexts/AuthProvider";
 import {
   BulbOutlined,
   CheckCircleTwoTone,

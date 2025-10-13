@@ -1,6 +1,5 @@
 import {
-  Card, Tag, Typography, Space,
-  Button
+  Card, Tag, Typography
 } from "antd";
 
 import type { ResourceKey } from "../../../../../../types/index.types";

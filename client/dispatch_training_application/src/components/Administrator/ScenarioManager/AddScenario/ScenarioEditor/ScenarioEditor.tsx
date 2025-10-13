@@ -1,9 +1,9 @@
-import { Space, Button, Typography, Radio, Modal, Tooltip, Popconfirm } from "antd";
-import { ArrowLeftOutlined,  CheckCircleOutlined,  DeleteOutlined, SaveOutlined } from "@ant-design/icons";
+import { Space, Button, Typography, Radio, Modal} from "antd";
+import { ArrowLeftOutlined,  CheckCircleOutlined, SaveOutlined } from "@ant-design/icons";
 import SceneEditor from "./SceneEditor";
 import 'antd/dist/reset.css'; // AntD v5
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import type { HighlightData, Scenario } from "../../../../../types/index.types";
 import PdfViewer from "../../../../Shared/PdfViewer";
 import { useLocation } from "react-router-dom";
