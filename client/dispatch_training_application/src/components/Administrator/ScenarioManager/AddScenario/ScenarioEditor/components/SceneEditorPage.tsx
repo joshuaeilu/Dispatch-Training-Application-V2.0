@@ -1,8 +1,7 @@
-import { useForm, Controller } from "react-hook-form";
-import { Button, Divider, Empty, Input, Popover, Select, Typography, message } from "antd";
+import { Button, Divider, Empty, Input, Popover, Select, Typography, message, Form } from "antd";
 import { PauseCircleFilled, PlayCircleFilled, PlusOutlined } from "@ant-design/icons";
-import {  useContext, useEffect, useState } from "react";
-import type {  SceneEditorProps } from "../../../../../../types/index.types";
+import { useContext, useEffect, useState } from "react";
+import type { SceneEditorProps } from "../../../../../../types/index.types";
 import SceneOptionsEditor from "./SceneOptionsEditor";
 import HighlightTagSection from "./HighlightTagSection";
 import AudioEditorModal from "./AudioEditorModal";
@@ -26,34 +25,19 @@ export default function SceneEditorPage({
   const [tipOpen, setTipOpen] = useState(false);
   const [loadingAudio, setLoadingAudio] = useState(false);
   const [showAudioEditor, setShowAudioEditor] = useState(false);
+  const [form] = Form.useForm();
 
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      speaker: scene?.speaker,
-      sceneDescription: scene?.sceneDescription,
-    },
-  });
 
-  useEffect(() => {
-    reset({
-      speaker: scene?.speaker,
-      sceneDescription: scene?.sceneDescription,
-    });
-  }, [currentIndex, scene, reset]);
 
-  const onSubmit = (data: any) => {
+
+  const onSubmit = () => {
     const currentScene = scenario?.scenes[currentIndex];
 
     const hasOptions = currentScene?.options && currentScene.options.length > 0;
     const hasCorrect = !!currentScene?.correctOption;
 
-   
+
 
     if (hasOptions && !hasCorrect) {
       return messageApi.error("Please mark the correct option.");
@@ -81,10 +65,7 @@ export default function SceneEditorPage({
 
     setCurrentIndex(currentIndex + 1); // stay on new scene
 
-    reset({
-      speaker: "",
-      sceneDescription: "",
-    });
+
   };
 
 
@@ -161,7 +142,17 @@ export default function SceneEditorPage({
     }
   };
 
- 
+
+
+    // Reset form fields when selected question changes
+    useEffect(() => {
+      form.resetFields();
+    }, [currentIndex]);
+
+    // load current question into form when exercise or selectedIndex changes
+  useEffect(() => {
+    form.setFieldsValue({ ...scene });
+  }, [scenario?.scenes, currentIndex]);
 
 
 
@@ -169,126 +160,82 @@ export default function SceneEditorPage({
 
   return (
     <>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        style={{
-          display: "flex",
-          padding: 16,
-          backgroundColor: "#ffffff",
-          height: "100%",
-          flexDirection: "column",
-          overflowY: "auto",
-          paddingRight: 8,
-        }}
-      >
+
+      <Form form={form} layout="vertical" style={{
+        display: "flex",
+        padding: 16,
+        backgroundColor: "#ffffff",
+        height: "100%",
+        flexDirection: "column",
+        overflowY: "auto",
+        paddingRight: 8,
+      }}>
         <Title level={5} style={{ textAlign: "center", margin: 0 }}>
           Scene {currentIndex + 1}
         </Title>
         <Divider style={{ margin: "8px 0" }} />
 
-        {/* Speaker Field */}
-        <Text>Speaker</Text>
-        <Controller
-          name="speaker"
-          control={control}
-          rules={{ required: "Speaker is required." }}
-          render={({ field }) => (
-            <Select
-              {...field}
-              placeholder="Select a Speaker"
-              style={{
-                width: "100%",
-                marginTop: 8,
-                marginBottom: errors.speaker ? 4 : 16,
-                borderColor: errors.speaker ? "#ff4d4f" : undefined,
-              }}
-              onChange={(value) => {
-                if (value === "add_new_speaker") {
-                  // 1. Show the modal
-                  setShowAudioEditor(true);
+        {/* Scene Speaker Selector */}
+        <Form.Item label="Speaker" name="speaker" rules={[{ required: true, message: 'Please select a speaker' }]} >
+          <Select
+            placeholder="Select a Speaker"
+            onChange={(value) => {
+              if (value === "add_new_speaker") {
+                // 1. Show the modal
+                setShowAudioEditor(true);
 
-                  return;
-                }
-                else {
-                  field.onChange(value);
-               
-                  setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, speaker: value } : s) });
-                }
-              }}
-              value={field.value || undefined}
-            >
-              {scenario?.speakers.map((sp) => (
-                <Option key={sp.id} value={sp.name}>
-                  {sp.name}
-                </Option>
-              ))}
-              <Option value="add_new_speaker" style={{ fontStyle: "italic" }}>
-                + Add / Edit Speaker
+                return;
+              }
+              else {
+                setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, speaker: value } : s) });
+              }
+            }}
+          >
+            {scenario?.speakers.map((sp) => (
+              <Option key={sp.id} value={sp.name}>
+                {sp.name}
               </Option>
-            </Select>
-          )}
-        />
-        {errors.speaker && (
-          <Text type="danger" style={{ fontSize: 12 }}>
-            {errors.speaker.message}
-          </Text>
-        )}
+            ))}
+            <Option value="add_new_speaker" style={{ fontStyle: "italic" }}>
+              + Add / Edit Speaker
+            </Option>
+          </Select>
+        </Form.Item>
 
-        {/* Scene Description */}
-        <Text>Scene Description</Text>
-        <Controller
-          name="sceneDescription"
-          control={control}
-          rules={{ required: "Description is required." }}
-          render={({ field }) => (
-            <>
-              <TextArea
-                {...field}
-                rows={4}
-                placeholder="Describe what is happening in this scene..."
-                style={{
-                  width: "100%",
-                  minHeight: 100,
-                  marginTop: 8,
-                  marginBottom: errors.sceneDescription ? 4 : 16,
-                  borderColor: errors.sceneDescription ? "#ff4d4f" : undefined,
-                }}
-                onChange={(e) => {
-                  field.onChange(e.target.value);
-                
-                  setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, sceneDescription: e.target.value } : s) });
-                }}
-              />
-              <div style={{ marginBottom: 16 }}>
-                <Button
-                  type="primary"
-                  block
-                  icon={
-                    playing ? (
-                      <PauseCircleFilled style={{ fontSize: 20 }} />
-                    ) : (
-                      <PlayCircleFilled style={{ fontSize: 20 }} />
-                    )
-                  }
-                  onClick={playing ? handlePauseDescription : handlePlayDescription}
-                  loading={loadingAudio} // AntD loading spinner
-                >
-                  {loadingAudio
-                    ? "Loading Audio..."
-                    : playing
-                      ? "Pause Audio Description"
-                      : "Play Audio Description"}
-                </Button>
+        {/* Scene Description Input */}
+        <Form.Item label="Scene Description" name="sceneDescription" rules={[{ required: true, message: 'Please enter a scene description' }]} >
+          <TextArea
+            rows={4}
+            placeholder="Describe the scene..."
+            value={scene?.sceneDescription}
+            onChange={(e) => {
+              setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, sceneDescription: e.target.value } : s) });
+            }}
+          />
+        </Form.Item>
+        <div style={{ marginBottom: 16 }}>
+          <Button
+            type="primary"
+            block
+            icon={
+              playing ? (
+                <PauseCircleFilled style={{ fontSize: 20 }} />
+              ) : (
+                <PlayCircleFilled style={{ fontSize: 20 }} />
+              )
+            }
+            onClick={playing ? handlePauseDescription : handlePlayDescription}
+            loading={loadingAudio}
+          >
+            {loadingAudio
+              ? "Loading Audio..."
+              : playing
+                ? "Pause Audio Description"
+                : "Play Audio Description"}
+          </Button>
+        </div>
 
-              </div>
-            </>
-          )}
-        />
-        {errors.sceneDescription && (
-          <Text type="danger" style={{ fontSize: 12 }}>
-            {errors.sceneDescription.message}
-          </Text>
-        )}
+
 
         {/* Highlights */}
         <Text>Highlights</Text>
@@ -316,14 +263,13 @@ export default function SceneEditorPage({
         <SceneOptionsEditor
           options={scene?.options || []}
           correctOption={scene?.correctOption || null}
-          onChange={(updatedOptions) =>        
+          onChange={(updatedOptions) =>
             setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, options: updatedOptions } : s) })
           }
           onCorrectChange={(correctOption) =>
             setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, correctOption } : s) })
           }
         />
-
         {/* Footer Buttons */}
         <div
           style={{
@@ -343,36 +289,35 @@ export default function SceneEditorPage({
             <Button type="dashed">Add Tip</Button>
           </Popover>
 
-     <Button
-  type="primary"
-  htmlType="submit"
-  icon={<PlusOutlined />}
-  disabled={
-    (() => {
-      const currentScene = scenario?.scenes?.[currentIndex];
-      if (!currentScene) return true; // disable until scene exists
+          <Button
+            type="primary"
+            htmlType="submit"
+            icon={<PlusOutlined />}
+            onClick={() => onSubmit()}
+            disabled={
+              (() => {
+                const currentScene = scenario?.scenes?.[currentIndex];
+                if (!currentScene) return true; // disable until scene exists
 
-      const hasOptions = currentScene.options?.length > 0;
-      const noCorrectOption = currentScene.correctOption === null || currentScene.correctOption === undefined;
+                const hasOptions = currentScene.options?.length > 0;
+                const noCorrectOption = currentScene.correctOption === null || currentScene.correctOption === undefined;
 
-      return hasOptions && noCorrectOption;
-    })()
-  }
->
-  Add New Scene
-</Button>
+                return hasOptions && noCorrectOption;
+              })()
+            }
+          >
+            Add New Scene
+          </Button>
 
-          
-          {contextHolder}
         </div>
-      </form>
+      </Form>
 
       <AudioEditorModal
         visible={showAudioEditor}
         onClose={() => setShowAudioEditor(false)}
         speakers={scenario?.speakers || []}
         setSpeakers={(newSpeakers) => {
-   
+
           setScenario && setScenario({ ...scenario!, speakers: newSpeakers, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, speaker: newSpeakers[newSpeakers.length - 1]?.name || "" } : s) });
 
         }}
@@ -380,6 +325,8 @@ export default function SceneEditorPage({
         voices={voices}
       />
 
+
+      {contextHolder}
     </>
   );
 }

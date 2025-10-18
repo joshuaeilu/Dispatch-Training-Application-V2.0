@@ -130,7 +130,7 @@ const filteredExercises = exercises.filter((e) => {
 
 
   return (
-    <div style={{ height: "100vh", background: "#F9F9F9", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100vh", background: "#fff", display: "flex", flexDirection: "column" }}>
       <UserPageHeader
         title="Knowledge Checks"
         subtitle="Complete knowledge checks to test your understanding."
@@ -140,18 +140,18 @@ const filteredExercises = exercises.filter((e) => {
       {/* Filter section (sticky) */}
       <div
         style={{
-          padding: "1.5rem",
-          background: "#F9F9F9",
+          padding: "1rem 1.5rem",
+          background: "#fff",
           borderBottom: "1px solid #f0f0f0",
           position: checkIsMobile() ? "relative" : "sticky",
           top: 0,
           zIndex: 2,
         }}
       >
-        <Form form={form} layout="vertical">
-          <Row gutter={[16, 12]}>
+        <Form form={form} layout="vertical" >
+          <Row gutter={[16, 12]} >
             <Col xs={24} sm={12} md={6}>
-              <Form.Item name="type">
+              <Form.Item name="type" style={{ marginBottom: 16 }}>
                 <Select
                   size="large"
                   placeholder="Select Exercise type"
@@ -169,7 +169,7 @@ const filteredExercises = exercises.filter((e) => {
             </Col>
 
             <Col xs={24} sm={12} md={10}>
-              <Form.Item name="q">
+              <Form.Item name="q" style={{ marginBottom: 0 }}>
                 <Input
                   size="large"
                   prefix={<SearchOutlined />}
@@ -208,18 +208,19 @@ const filteredExercises = exercises.filter((e) => {
       <div
         style={{
           flex: 1,
-          padding: "1.5rem",
+          padding: "1rem 1.5rem",
         }}
       >
         {sortedTypes.map((type) => (
-          <div key={type} style={{ marginBottom: "2rem" }}>
-            <Title level={3} style={{ marginBottom: 16 }}>{type}</Title>
+          <div key={type} style={{ marginBottom: "1.5rem" }}>
+            <Title level={4} style={{ marginBottom: 16 }}>{type}</Title>
             <Row gutter={[16, 16]}>
               {grouped[type].map((exercise) => (
                 <>
 
                 <KnowledgeCheckCard
   key={exercise.id}
+  type={"exercise"}
   name={exercise.name}
   date={dayjs(exercise.created_at).format("MMM D, YYYY")}
   completed={submittedMap[exercise.id] }
@@ -274,3 +275,4 @@ const filteredExercises = exercises.filter((e) => {
     </div>
   );
 }
+

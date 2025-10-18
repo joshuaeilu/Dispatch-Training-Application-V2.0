@@ -37,7 +37,7 @@ export default function EditExercisePage() {
   } = useExerciseManager({ exerciseId });
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [lastSavedExercise, setLastSavedExercise] = useState<Exercise | null>(
+  const [__, setLastSavedExercise] = useState<Exercise | null>(
     exercise
   );
   const [saveModalOpen, setSaveModalOpen] = useState(false);

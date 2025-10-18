@@ -68,16 +68,22 @@ export default function SelectedResourceCard({ resource }: Props) {
           />
         );
       case "application":
-        if (typeMain.includes("pdf")) {
           return (
             <div style={{ padding: 12 }}>
-              <FilePdfOutlined style={{ fontSize: 24, color: "#C2002F" }} />{" "}
-              <a href={resourceUrl} target="_blank" rel="noopener noreferrer">
-                Open PDF
-              </a>
+               <iframe
+  src={`${resourceUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+  title="PDF Viewer"
+  width="100%"
+  style={{
+    border: "1px solid var(--color-border)",
+    borderRadius: 8,
+    backgroundColor: "white",
+    height: "35vh",
+  }}
+/>
             </div>
           );
-        }
+        
         break;
       default:
         return (
@@ -90,18 +96,17 @@ export default function SelectedResourceCard({ resource }: Props) {
     <Card
       bordered
       style={{
-        borderRadius: 10,
-        boxShadow: "var(--shadow)",
+        borderRadius: 8,
         background: "#fff",
       }}
-      bodyStyle={{ padding: 20 }}
+      bodyStyle={{ padding: 16 }}
     >
-      <div style={{ marginBottom: 12 }}>
-        <Title level={5} style={{ marginBottom: 4 }}>
+      <div >
+        <Title level={4} style={{ marginBottom: 4 }}>
           {iconMap[typeMain] || <FileTextOutlined />}{" "}
           <span style={{ marginLeft: 8 }}>{name}</span>
         </Title>
-        {description && <Text type="secondary">{description}</Text>}
+        {description && <Text type="secondary" style={{ fontSize: 16 }}>{description}</Text>}
       </div>
 
       {renderPreview()}

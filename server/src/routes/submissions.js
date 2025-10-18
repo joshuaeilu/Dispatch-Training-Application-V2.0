@@ -87,6 +87,67 @@ router.get("/:exerciseId", auth(["trainee", "dispatcher"]), async (req, res) => 
   }
 });
 
+// POST: Mark scenario as completed in walkthrough
+router.post("/scenario_walkthrough", auth(["trainee", "dispatcher"]), async (req, res) => {
+  const { scenarioId } = req.body;
+  const userId = req.user?.id || req.user; // Adjust depending on your auth structure
+
+  if (!scenarioId) {
+    return res.status(400).json({ error: "scenarioId is required" });
+  }
+
+  try {
+    await pool.query(
+      `
+      INSERT INTO scenario_completions (user_id, scenario_id)
+      VALUES ($1, $2)
+      ON CONFLICT (user_id, scenario_id) DO NOTHING
+    `,
+      [userId, scenarioId]
+    );
+
+    return res.status(201).json({ message: "Scenario completion recorded" });
+  } catch (err) {
+    console.error("❌ Error recording scenario completion:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+// GET /submissions/scenario_walkthrough/status?scenario_ids[]=uuid1&scenario_ids[]=uuid2
+router.get("/scenario_walkthrough/status", auth(["trainee", "dispatcher"]), async (req, res) => {
+  const { user } = req;
+  let scenarioIds = req.query.scenario_ids || req.query["scenario_ids[]"];
+
+  if (!scenarioIds) {
+    return res.status(400).json({ error: "Missing scenario_ids" });
+  }
+
+  if (typeof scenarioIds === "string") {
+    scenarioIds = [scenarioIds];
+  }
+
+  if (!Array.isArray(scenarioIds)) {
+    return res.status(400).json({ error: "scenario_ids must be an array" });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT scenario_id
+      FROM scenario_completions
+      WHERE user_id = $1 AND scenario_id = ANY($2::uuid[])
+      `,
+      [user.id, scenarioIds]
+    );
+
+    const completedMap = Object.fromEntries(rows.map((r) => [r.scenario_id, true]));
+
+    res.status(200).json({ completedMap });
+  } catch (err) {
+    console.error("❌ Failed to fetch scenario completion statuses:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 
 

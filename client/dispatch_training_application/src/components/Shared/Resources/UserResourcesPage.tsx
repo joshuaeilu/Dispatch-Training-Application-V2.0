@@ -126,8 +126,8 @@ export default function UserResourcesPage() {
         style={{
           flexShrink: 0,
           background: "#fff",
+          padding:" 1.5rem",
           borderBottom: "1px solid #f0f0f0",
-          padding: "1.5rem",
           position: isMobile ? "relative" : "sticky",
           top: isMobile ? "auto" : 0,
         }}
@@ -157,7 +157,7 @@ export default function UserResourcesPage() {
           </Row>
 
           {/* Filter Buttons */}
-          <div style={{ overflowX: "auto", marginTop: 24 }}>
+          <div style={{ overflowX: "auto", marginTop: 16 }}>
             <Space style={{ display: "inline-flex", gap: 8, paddingBottom: 4 }}>
               {categories.map((cat) => (
                 <Button
@@ -169,18 +169,20 @@ export default function UserResourcesPage() {
                   {cat.label}
                 </Button>
               ))}
-            </Space>
-
-          {/* Count */}
-          <div style={{ marginTop: 16 }}>
-            <Text type="secondary">
+               <div>
+          <Text type="secondary" style={{  fontSize: 14 , marginLeft: 16 }}>
               {filteredResources.length}{" "}
               {filteredResources.length === 1 ? "resource" : "resources"} found
             </Text>
-          </div>
         </div>
-      </div>
+            </Space>
+            
+             
 
+        
+        </div>
+       
+      </div>
       {/* Scrollable Resource Area */}
       <div
         style={{

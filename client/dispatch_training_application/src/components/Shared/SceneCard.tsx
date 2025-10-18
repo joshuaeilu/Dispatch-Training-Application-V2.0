@@ -1,5 +1,5 @@
 import React, { useState,  useRef, useEffect } from "react";
-import { Card, Typography, Tag } from "antd";
+import { Card, Typography, Tag, Divider } from "antd";
 import type { HighlightData, Scene } from "../../types/index.types";
 import {
   BulbOutlined,
@@ -28,7 +28,6 @@ const SceneCard: React.FC<SceneCardProps> = ({
 }) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
-  const [showTip, setShowTip] = useState(false);
 
   useEffect(() => {
     console.log("Scene updated:", scene);
@@ -69,14 +68,11 @@ const SceneCard: React.FC<SceneCardProps> = ({
 
     if (option === scene.correctOption) {
       setLocked(true);
-      setShowTip(false);
 
       // Move to next scene after short delay
       setTimeout(() => {
         onCorrect(index);
       }, 500);
-    } else {
-      setShowTip(true);
     }
   };
 
@@ -85,7 +81,8 @@ const SceneCard: React.FC<SceneCardProps> = ({
       ref={handleRef}
       className="shadow-lg rounded-2xl p-6 md:p-10 w-full"
       bordered
-      style={{ minHeight: "400px" }}
+      style={{marginBottom: 24 }}
+
     >
       {/* Hidden audio element */}
       {audioUrl && (
@@ -104,15 +101,29 @@ const SceneCard: React.FC<SceneCardProps> = ({
         />
       )}
 
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <Title level={4} className="!text-2xl font-bold leading-snug max-w-3xl">
+      {/* Header  */}
+
+  <Title
+    level={3}
+    
+    style={{
+      fontWeight: 600,
+      zIndex: 2,
+        color: "#8C2131",
+        margin:0,
+        padding:0,
+    }}
+  >
+    {scene.speaker} speaking:
+  </Title>
+
+
+
+      {/* Scene Description */}
+        <Title level={4} className="!text-2xl font-bold leading-snug max-w-3xl" style={{ margin:0, paddingTop:12, paddingBottom:16 }}>
           {scene.sceneDescription}
         </Title>
-        <Tag className="text-lg px-4 py-2 rounded-full font-medium bg-gray-100 text-gray-700 border-none">
-          {scene.speaker}
-        </Tag>
-      </div>
+        
 
       {/* Options */}
       {scene.options.length > 0 && (
@@ -159,33 +170,38 @@ const SceneCard: React.FC<SceneCardProps> = ({
       )}
 
       {/* Tip */}
-      {showTip && !locked && (
-        <div className="mt-6 border border-blue-400 bg-blue-50 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <BulbOutlined className="text-blue-500 text-xl" />
-            <Text strong className="text-lg text-blue-800">
-              Tip
-            </Text>
-          </div>
-          <Paragraph className="text-gray-700 text-base mb-3">
-            {scene.tip}
-          </Paragraph>
-          <div className="flex flex-wrap gap-2">
-            {scene.highlights.map((h) => (
-              <Tag
-                key={h.id}
-                color="blue"
-                onClick={() => {
-                  showHighlight(h);
-                }}
-                className="rounded-full px-3 py-1 text-base cursor-pointer hover:opacity-80"
-              >
-                {h.name}
-              </Tag>
-            ))}
-          </div>
-        </div>
-      )}
+    {(scene.tip || scene.highlights?.length > 0) && (
+  <div className="mt-6 border border-blue-400 bg-blue-50 rounded-lg p-4">
+    <div className="flex items-center gap-2 mb-3">
+      <BulbOutlined className="text-blue-500 text-xl" />
+      <Text strong className="text-lg text-blue-800">
+        Tip
+      </Text>
+    </div>
+
+    {scene.tip && (
+      <Paragraph className="text-gray-700 text-base mb-3">
+        {scene.tip}
+      </Paragraph>
+    )}
+
+    {scene.highlights?.length > 0 && (
+      <div className="flex flex-wrap gap-2">
+        {scene.highlights.map((h) => (
+          <Tag
+            key={h.id}
+            color="blue"
+            onClick={() => showHighlight(h)}
+            className="rounded-full px-3 py-1 text-base cursor-pointer hover:opacity-80"
+          >
+            {h.name}
+          </Tag>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
     </Card>
   );
 };

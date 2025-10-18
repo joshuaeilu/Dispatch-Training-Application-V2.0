@@ -21,6 +21,7 @@ import type { HighlightData, Scene } from "../../types/index.types";
 import SceneCard from "./SceneCard";
 import { AuthContext } from "../../contexts/AuthProvider";
 import dayjs from "dayjs";
+import { api } from "../../utils/api";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -53,7 +54,7 @@ export default function ScenarioWalkthrough() {
 
   const handleStart = () => setStarted(true);
 
-  const handleCorrect = (index: number) => {
+  const handleCorrect = async (index: number) => {
     setAnsweredQuestions((prev) => new Set(prev).add(index));
 
     const nextIndex = index + 1;
@@ -67,6 +68,14 @@ export default function ScenarioWalkthrough() {
       }
     } else {
       setCompleted(true);
+      try{
+        // Post submission to server
+        await api.post("/submissions/scenario_walkthrough", {
+          scenarioId: scenarioData.id,
+        })
+      }catch(err){
+        console.error("Failed to submit scenario completion", err);
+      }
 
       setTimeout(() => {
         if (completionRef.current) {
@@ -157,23 +166,44 @@ export default function ScenarioWalkthrough() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-7xl ">
+    <div style={{height:"100vh", backgroundColor:"#fff"}}>
+      <div className="mx-auto max-w-7xl " style={{ height:"100%", overflow:"hidden"}}>
         {/* Header */}
-        <div className="mb-8 text-center">
-          <Title level={1} className="!mb-3 text-4xl font-bold tracking-tight">
-            {scenarioData.name}
-          </Title>
-          <Paragraph
-            type="secondary"
-            className="mx-auto max-w-2xl text-lg leading-relaxed"
-          >
-            {scenarioData.description}
-          </Paragraph>
-        </div>
+<div style={{ height:"20vh",  paddingTop:"1rem", paddingBottom:"1rem" }}>
+        <div
+  className=" py-3 text-center rounded-lg"
+  style={{
+    backgroundColor: "#8C2131", // Calvin maroon
+    color: "white",
+  }}
+>
+  <Title
+    level={2}
+    className="!mb-3  font-bold tracking-tight"
+    style={{
+      color: "white",
+      fontFamily: "Urbanist, Inter, sans-serif",
+    }}
+  >
+    {scenarioData.name}
+  </Title>
+
+  <Paragraph
+    className="mx-auto max-w-2xl  leading-relaxed"
+    style={{
+      color: "#F3F3F3", // soft white for contrast
+      fontFamily: "Inter, sans-serif",
+      fontSize: "16px",
+    }}
+  >
+    {scenarioData.description}
+  </Paragraph>
+</div>
+</div>
+
 
         {/* Progress */}
-        <div className="mb-8">
+        <div style={{height:"10vh"}}>
           <div className="mb-2 flex items-center justify-between text-sm">
             <Text strong>Progress</Text>
             <Text type="secondary">
@@ -183,11 +213,12 @@ export default function ScenarioWalkthrough() {
           <Progress percent={progress} showInfo={false} strokeColor="#52c41a" />
         </div>
 
-        <Row gutter={[24, 24]}>
+       <div style={{ height:"65vh" }}>
+         <Row gutter={[24, 24]} style={{ height:"100%"}}>
           {/* Question Section */}
           <Col xs={24} lg={15}>
             {!started ? (
-              <Card className="p-6 md:p-8 h-full ">
+              <Card className="p-6 md:p-8  " style={{height:"100%"}}>
                 <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
                   <div className="mb-6 rounded-full bg-green-100 p-6">
                     <PlayCircleOutlined className="text-5xl" />
@@ -205,7 +236,8 @@ export default function ScenarioWalkthrough() {
             ) : (
               <div
                 id="questions-container"
-                className="space-y-6 max-h-[600px] overflow-y-auto pr-2"
+                className=" pr-2"
+                style={{ height: "65vh", overflowY: "auto" }}
               >
                 {scenarioData.scenes.map((scene: Scene, index: number) => {
                   const isUnlocked =
@@ -283,16 +315,36 @@ export default function ScenarioWalkthrough() {
           {/* Notes Section */}
           <Col xs={24} lg={9}>
             <Card
-              style={{ height: "100%" }}
               title={<span className="font-bold text-lg">📓 Dispatch Notes</span>}
-              className="sticky p-6 shadow-md border border-gray-200"
-              bodyStyle={{ display: "flex", flexDirection: "column", gap: "12px" }}
+              className="sticky  shadow-md border border-gray-200 "
+              bodyStyle={{ display: "flex", flexDirection: "column", height: "60vh" }}
             >
-              {/* Controls */}
-              <div className="flex items-center justify-between">
+            
+
+              {/* Log area */}
+              <div
+                className="rounded-md border border-gray-300 bg-gray-100 flex-grow"
+              >
+                <TextArea
+                  ref={textAreaRef}
+                  placeholder="[Dispatcher] Begin logging scenario notes..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#333",
+                    fontFamily: "monospace",
+                    boxShadow: "none",
+                  }}
+                />
+              </div>
+
+                {/* Controls */}
+              <div className="flex items-center justify-between mt-3">
                 <Button
                   type="primary"
-                  size="small"
+                  size="middle"
                   icon={<i className="far fa-clock" />}
                   onClick={handleAddTimestamp}
                 >
@@ -303,42 +355,17 @@ export default function ScenarioWalkthrough() {
                   (Shift+Enter for newline)
                 </Text>
               </div>
-
-              {/* Log area */}
-              <div
-                className="rounded-md border border-gray-300 bg-gray-100 p-3 h-100 flex-grow"
-                style={{ overflowY: "auto" }}
-              >
-                <TextArea
-                  ref={textAreaRef}
-                  placeholder="[Dispatcher] Begin logging scenario notes..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  autoSize={{ minRows: 12, maxRows: 16 }}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "#333",
-                    fontFamily: "monospace",
-                    resize: "none",
-                    boxShadow: "none",
-                  }}
-                />
-              </div>
-
-              {/* Footer */}
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                Notes are saved locally as you type.
-              </Text>
             </Card>
           </Col>
         </Row>
+       </div>
       </div>
 
       <Drawer
       
         title="📑 MANUAL OF PROCEDURES"
         placement="right"
+        destroyOnClose
         width="40%"
         onClose={() => setPdfOpen(false)}
         open={pdfOpen}

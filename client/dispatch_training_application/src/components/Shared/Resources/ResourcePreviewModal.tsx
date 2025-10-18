@@ -27,7 +27,7 @@ export default function ResourcePreviewModal({
   if (!resource) return <Skeleton active />;
 
   const { name, description, type, url } = resource;
-  const [resourceType, subtype] = type.split("/");
+  const [resourceType, __] = type.split("/");
 
   const isImage = resourceType === "image";
   const isVideo = resourceType === "video";
@@ -43,7 +43,6 @@ export default function ResourcePreviewModal({
 
 
   useEffect(() => {
-    console.log(url);
     if (!open) {
       // Pause video and reset to start
       if (videoRef.current) {
@@ -74,7 +73,7 @@ export default function ResourcePreviewModal({
   okButtonProps={{ style: { display: "none" } }}
   cancelButtonProps={{ style: { display: "none" } }}
   centered
-  width="80vw"
+  width="50vw"
   bodyStyle={{
     backgroundColor: "var(--color-bg)",
     borderRadius: 8,
@@ -84,11 +83,11 @@ export default function ResourcePreviewModal({
   {/* Custom Header */}
   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start"}}>
     <div>
-      <Title level={4} style={{ color: "var(--color-primary)" }}>
+      <Title level={3} style={{ color: "#8C2131" }}>
         {name}
       </Title>
       {description && (
-        <Text type="secondary" style={{ display: "block" }}>
+        <Text type="secondary" style={{ display: "block", fontSize: 16, }}>
           {description}
         </Text>
       )}
@@ -145,7 +144,7 @@ export default function ResourcePreviewModal({
       )}
 
       {isAudio && (
-        <audio ref={audioRef} controls style={{ width: "100%" }}>
+        <audio ref={audioRef} controls controlsList="nodownload" style={{ width: "100%" }}>
           <source src={url} type={type} />
           Your browser does not support the audio element.
         </audio>
@@ -153,16 +152,17 @@ export default function ResourcePreviewModal({
 
       {isPdf && (
         <iframe
-          src={url}
-          title="PDF Viewer"
-          width="100%"
-          style={{
-            border: "1px solid var(--color-border)",
-            borderRadius: 8,
-            backgroundColor: "white",
-            height: "70vh",
-          }}
-        />
+  src={`${url}#toolbar=0&navpanes=0&scrollbar=0`}
+  title="PDF Viewer"
+  width="100%"
+  style={{
+    border: "1px solid var(--color-border)",
+    borderRadius: 8,
+    backgroundColor: "white",
+    height: "70vh",
+  }}
+/>
+
       )}
 
       {!isPreviewable && (

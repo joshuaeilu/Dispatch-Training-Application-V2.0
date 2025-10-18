@@ -303,6 +303,7 @@ useEffect(() => {
             backgroundColor: "#8C2131",
             borderColor: "#8C2131",
             fontWeight: 600,
+            color: canAddQuestion ? "#FFFFFF" : "rgba(255, 255, 255, 0.6)",
           }}
             onClick={handleAddQuestion}
         >

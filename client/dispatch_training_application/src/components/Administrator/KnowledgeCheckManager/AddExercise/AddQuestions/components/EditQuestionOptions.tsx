@@ -235,11 +235,16 @@ const removeOption = (id: number) => {
       </div>
 
       {options.length > 0 && (
-        <div className="mt-2 text-xs text-gray-500">
-          {correctCount === 0
-            ? "⚠ Please mark at least one option as correct"
-            : `✓ ${correctCount} correct ${correctCount === 1 ? "answer" : "answers"} marked`}
-        </div>
+   <div
+  className={`mt-2 text-xs ${
+    correctCount === 0 ? "text-red-500" : "text-green-600"
+  }`}
+>
+  {correctCount === 0
+    ? "⚠ Please mark at least one option as correct"
+    : `✓ ${correctCount} correct ${correctCount === 1 ? "answer" : "answers"} marked`}
+</div>
+
       )}
     </div>
   );

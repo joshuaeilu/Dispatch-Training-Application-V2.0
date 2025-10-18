@@ -129,7 +129,8 @@ export default function SceneOptionsEditor({
                 <Input
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
-                  onPressEnter={() => {
+                  onPressEnter={(e) => {
+                    e.preventDefault();
                     updateOption(index, editValue);
                     setEditIndex(null);
                     setEditValue('');

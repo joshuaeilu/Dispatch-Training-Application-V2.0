@@ -11,16 +11,20 @@ const { Title, Text } = Typography;
 
 interface Props {
   name: string;
+  type: string;
   completed: boolean;
   questionCount: number;
   date?: string; // ISO or formatted date
+  description?: string;
   onClick: () => void;
 }
 
 export default function KnowledgeCheckCard({
   name,
+  type,
   completed,
   questionCount,
+  description,
   date,
   onClick,
 }: Props) {
@@ -30,7 +34,7 @@ export default function KnowledgeCheckCard({
         hoverable
         onClick={onClick}
         style={{
-          background: "#fff",
+          background: "#f9f9f9",
           border: "1px solid #eaeaea",
           height: "100%",
           display: "flex",
@@ -38,7 +42,6 @@ export default function KnowledgeCheckCard({
           justifyContent: "space-between",
           cursor: "pointer",
           transition: "all 0.2s ease-in-out",
-          opacity: completed ? 0.6 : 1,
         }}
         bodyStyle={{
           display: "flex",
@@ -95,12 +98,13 @@ export default function KnowledgeCheckCard({
           </Col>
         </Row>
 
-        {/* --- Middle: Question Count --- */}
+        {/* --- Middle: Question Count or Description --- */}
         <div
-          style={{
-            marginTop: 12,
-          }}
-        >
+        style={{
+          marginTop: 12,
+        }}
+      >
+        {type === "exercise" && (
           <Text
             style={{
               fontSize: 15,
@@ -114,7 +118,29 @@ export default function KnowledgeCheckCard({
             <ProfileOutlined />
             {questionCount} Question{questionCount !== 1 ? "s" : ""}
           </Text>
-        </div>
+       )}
+       { type === "scenario" && (
+<Text
+  style={{
+    fontSize: 15,
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    fontWeight: 500,
+    color: "#4A4A4A",
+    lineHeight: "1.4em",
+    maxHeight: "2.8em", // 2 lines × line-height
+  }}
+  title={description} // optional: full text on hover
+>
+  {description}
+</Text>
+
+
+        )}
+       </div>
 
         {/* --- Bottom: Date + CTA --- */}
         <Row justify="space-between" align="middle" style={{ marginTop: 8 }}>
@@ -142,7 +168,8 @@ export default function KnowledgeCheckCard({
           <Col>
             {completed ? (
               <Space size={12}>
-                <Text
+              { type === "exercise" ? (
+                  <Text
                   style={{
                     fontWeight: 500,
                     color: "#8C2131",
@@ -155,7 +182,20 @@ export default function KnowledgeCheckCard({
                   }}
                 >
                   View Response <HistoryOutlined />
-                </Text>
+                </Text>) : (  <Text
+                  style={{
+                    fontWeight: 500,
+                    color: "#8C2131",
+                    cursor: "pointer",
+                    transition: "color 0.2s",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // optional: onView handler
+                  }}
+                >
+                  Replay <HistoryOutlined />
+                </Text>)}
            
               </Space>
             ) : (

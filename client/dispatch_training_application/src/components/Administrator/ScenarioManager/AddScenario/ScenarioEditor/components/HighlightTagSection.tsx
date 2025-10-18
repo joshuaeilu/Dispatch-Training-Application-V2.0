@@ -10,7 +10,7 @@ const HighlightTagList: React.FC<HighlightTagListProps> = ({
 }) => {
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '150px', overflowY: 'auto', padding: '8px 8px 16px 0px', border: '1px solid var(--color-border)', borderRadius: '4px' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', margin: '8px 0', gap: '8px', border: '1px solid var(--color-border)', borderRadius: '4px' }}>
       {highlights.map((highlight) => (
         <Tag
           key={highlight.id}

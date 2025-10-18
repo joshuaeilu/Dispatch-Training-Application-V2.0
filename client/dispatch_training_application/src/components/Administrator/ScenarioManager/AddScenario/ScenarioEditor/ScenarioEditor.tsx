@@ -210,9 +210,7 @@ export default function ScenarioEditor() {
          <div
       className="flex items-center text-xs font-normal text-[#595959] bg-white"
       style={{
-        padding: "0 16px",
-        margin: "0 1rem", 
-        borderRadius: 10,
+        padding: "8px 16px",
         height: "4vh",
         gap: 6,
       }}

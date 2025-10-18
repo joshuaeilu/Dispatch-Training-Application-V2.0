@@ -5,7 +5,7 @@ import MOP2025 from "../../assets/MOP2025.pdf"
 import { useEffect, useRef, useState } from 'react';
 import { Button, Input, Space, Spin, Tooltip, Typography } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import { ZoomInOutlined, ZoomOutOutlined, ReloadOutlined, HighlightOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { ZoomInOutlined, ZoomOutOutlined, HighlightOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import type { PdfViewerProps, HighlightData } from '../../types/index.types';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -16,8 +16,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export default function PdfViewer({ highlights, setHighlights, scrollContainerRef, pageRefs }: PdfViewerProps) {
     const [loading, setLoading] = useState(true);
     const [numPages, setNumPages] = useState(0);
-    const [pagesRendered, setPagesRendered] = useState(0);
-    const [zoom, setZoom] = useState(1.0);
+    const [__, setPagesRendered] = useState(0);
+    const [zoom, setZoom] = useState(0.8);
     const [selectedHighlight, setSelectedHighlight] = useState<HighlightData | null>(null);
     const popupRef = useRef<HTMLDivElement | null>(null);
     const [showInput, setShowInput] = useState(false);
@@ -236,14 +236,14 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
     };
 
     return (
-        <div style={{ display: 'flex', width:"100%", flexDirection: 'column', height: '100%' }}>
+        <div style={{ display: 'flex', width:"100%", flexDirection: 'column', height: '100%', backgroundColor: '#fff', borderRadius: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
             <div
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     backgroundColor: "var(--color-bg-base)",
-                    padding: "4px 12px",
+                    padding: "8px 12px",
                 }}
             >
                     <Input.Search
@@ -268,17 +268,15 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                     />
 
                     {matches.length > 0 && (
-                        <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Button icon={<ArrowLeftOutlined />} onClick={handlePrevMatch} />
                             <Text>{activeMatchIndex + 1} / {matches.length}</Text>
                             <Button icon={<ArrowRightOutlined />} onClick={handleNextMatch} />
-                        </>
+                        </div>
                     )}
 
                 <Space align="center" size="middle">
-                    <Text strong style={{ width: 60, textAlign: "right" }}>
-                        {Math.round(zoom * 100)}%
-                    </Text>
+                   
 
                     <Tooltip title="Zoom Out">
                         <Button
@@ -298,18 +296,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                         />
                     </Tooltip>
 
-                    <Tooltip title="Reset Zoom">
-                        <Button
-                            shape="circle"
-                            icon={<ReloadOutlined />}
-                            onClick={() => {
-                                setZoom(1.0);
-                                setPagesRendered(0);
-                                setLoading(true);
-                            }}
-                            disabled={loading}
-                        />
-                    </Tooltip>
+                  
                 </Space>
             </div>
 
@@ -452,7 +439,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                                     placeholder="Name highlight"
                                                     size="small"
                                                     autoFocus
-                                                    style={{ minWidth: 140 }}
+                                                    style={{ minWidth: 140, zIndex: 1001 }}
                                                     onPressEnter={(e) => {
                                                         const name = (e.target as HTMLInputElement).value.trim();
                                                         if (!name) return;
@@ -466,6 +453,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                                 <Button
                                                     type="primary"
                                                     size="small"
+                                                    style={{ zIndex: 1001 }}
                                                     onClick={() => {
                                                         const input = document.querySelector('input[placeholder="Name highlight"]') as HTMLInputElement;
                                                         const name = input?.value.trim();
@@ -484,7 +472,7 @@ export default function PdfViewer({ highlights, setHighlights, scrollContainerRe
                                             <Button
                                                 type="primary"
                                                 icon={<HighlightOutlined />}
-                                                size="middle"
+                                                size="small"
                                                 onClick={() => setShowInput(true)}
                                                 style={{ borderRadius: 6 }}
                                             >
