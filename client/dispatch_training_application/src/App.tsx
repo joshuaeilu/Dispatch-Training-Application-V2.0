@@ -15,7 +15,6 @@ import ManageUsers from './components/Administrator/Dashboard/components/ManageU
 import ResourceManager from './components/Administrator/ResourceManager/ResourceManager'
 import DispatchersSection from './components/Administrator/Dashboard/Dispatchers/DispatchersSection'
 import TraineesSection from './components/Administrator/Dashboard/Trainees/TraineesSection'
-import AdminSection from './components/Administrator/Dashboard/Admins/AdminSection'
 import UserViewKnowledgeChecks from './components/User/KnowledgeChecks/UserViewKnowledgeChecks'
 import ViewKnowledgeCheck from './components/User/KnowledgeChecks/ViewKnowledgeCheck'
 import UserResourcesPage from './components/Shared/Resources/UserResourcesPage'
@@ -51,7 +50,6 @@ function App() {
           <Route path="manage-users" element={<ManageUsers/>} />
           <Route path="dispatchers" element={<DispatchersSection />} />
           <Route path="trainees" element={<TraineesSection />} />
-          <Route path="admins" element={<AdminSection />} />
           </Route>
           <Route path="resource-manager" element={<ResourceManager />} />
           <Route path="/user-knowledge-checks" element={<Outlet />} >

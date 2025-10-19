@@ -2,7 +2,6 @@ import { Card, Row, Col, Typography, Tag } from 'antd';
 import {
     CustomerServiceOutlined,
     UserSwitchOutlined,
-    SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -53,17 +52,7 @@ export default function AdminUsersSection() {
       route: '/dashboard/trainees',
       count: roleCounts.trainee,
     },
-    {
-      title: 'Admins',
-      icon: (
-        <SafetyCertificateOutlined
-          style={{ fontSize: 24, color: 'var(--color-primary)' }}
-        />
-      ),
-      description: 'Manage and oversee admin accounts and activities.',
-      route: '/dashboard/admins',
-      count: roleCounts.admin,
-    },
+ 
   ];
 
   return (
