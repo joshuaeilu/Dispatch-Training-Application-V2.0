@@ -81,7 +81,11 @@ export default function SituationSetterCard() {
   const { token } = useContext(AuthContext);
   const { preferences, setPreferences } = useContext(UniversalContext);
 
-  const scenarioTypes = useMemo(() => preferences?.scenario_types ?? [], [preferences]);
+const scenarioTypes = useMemo(() => {
+  const types = preferences?.scenario_types ?? [];
+  const filtered = types.filter((t) => t !== "+ Custom Type");
+  return [...filtered, "+ Custom Type"];
+}, [preferences]);
 
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const SEASONS = ["Spring", "Summer", "Fall", "Winter"];
@@ -166,8 +170,13 @@ export default function SituationSetterCard() {
 
 
 
-  const finishSituationSetup = () => {
+const finishSituationSetup = async () => {
+  try {
     const time: Dayjs | null = form.getFieldValue("time");
+
+    // ✅ Fetch default MOP PDF filename
+    const mopRes = await api.get("/mop/default");
+    const pdfFilename = mopRes.data?.filename || null;
 
     const scenarioDetails = {
       id: uuidv4(),
@@ -177,44 +186,62 @@ export default function SituationSetterCard() {
       type: form.getFieldValue("type"),
       audience: form.getFieldValue("audience"),
       timing: {
-        time: time ? time.toISOString() : null,  // ✅ serialize here
+        time: time ? time.toISOString() : null,
         day: form.getFieldValue("day"),
         season: form.getFieldValue("season"),
       },
       speakers: speakers,
       scenes: [
-        { id: uuidv4(), speaker: "", sceneDescription: "", options: [], correctOption: null, tip: "", highlights: [] },
+        {
+          id: uuidv4(),
+          speaker: "",
+          sceneDescription: "",
+          options: [],
+          correctOption: null,
+          tip: "",
+          highlights: [],
+        },
       ],
       status: "draft",
+      pdfFilename: pdfFilename, // ✅ attach it here
     };
 
     navigate("/scenario-manager/edit-scenario", {
       state: { scenarioDetails },
       replace: true,
     });
-  };
+  } catch (err) {
+    console.error("❌ Error finishing scenario setup:", err);
+    messageApi.error("Failed to initialize scenario. Check console.");
+  }
+};
 
-  const handleCustomTypeSave = async () => {
-    const trimmed = toTitleCase(customType);
-    if (!trimmed) return;
-    if (scenarioTypes.includes(trimmed)) {
-      form.setFieldsValue({ type: trimmed });
-      setSelectedScenario(trimmed);
-      setCustomType("");
-      return;
-    }
-    const updated = [...scenarioTypes, trimmed];
-    try {
-      await api.patch("/preferences/scenario_types", { value: updated });
-      setPreferences({ ...preferences, scenario_types: updated });
-      form.setFieldsValue({ type: trimmed });
-      setSelectedScenario(trimmed);
-      setCustomType("");
-      messageApi.success("Custom scenario type saved successfully.");
-    } catch (err) {
-      messageApi.error("Could not save custom type.");
-    }
-  };
+
+ const handleCustomTypeSave = async () => {
+  const trimmed = toTitleCase(customType).trim();
+  if (!trimmed || trimmed === "Custom") return;
+
+  if (scenarioTypes.includes(trimmed)) {
+    form.setFieldsValue({ type: trimmed });
+    setSelectedScenario(trimmed);
+    setCustomType("");
+    return;
+  }
+
+  const updated = [...(preferences?.scenario_types || []), trimmed];
+
+  try {
+    await api.patch("/preferences/scenario_types", { value: updated });
+    setPreferences({ ...preferences, scenario_types: updated });
+    form.setFieldsValue({ type: trimmed });
+    setSelectedScenario(trimmed);
+    setCustomType("");
+    messageApi.success("Custom scenario type saved successfully.");
+  } catch (err) {
+    messageApi.error("Could not save custom type.");
+  }
+};
+
 
 
 
@@ -285,7 +312,7 @@ export default function SituationSetterCard() {
                 placeholder="Select a scenario type"
                 onChange={(val) => {
                   setSelectedScenario(val);
-                  if (val !== "Custom") setCustomType("");
+                  if (val !== "+ Custom Type") setCustomType("");
                 }}
               >
                 {scenarioTypes.map((type) => (
@@ -297,7 +324,7 @@ export default function SituationSetterCard() {
             </Form.Item>
 
             {/* Custom Type Field */}
-            {selectedScenario === "Custom" && (
+            {selectedScenario === "+ Custom Type" && (
               <Form.Item label="Custom Type" required>
                 <Space.Compact style={{ width: "100%" }}>
                   <Input

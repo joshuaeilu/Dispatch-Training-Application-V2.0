@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Typography } from "antd";
+import { Button, Divider, Typography } from "antd";
 import {
   ArrowLeftOutlined,
   HistoryOutlined,
@@ -105,6 +105,18 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           </Button>
         )}
       </div>
+<Divider
+  style={{
+    marginBottom: 0,
+    marginTop: 12,
+    borderColor: '#8C2131', // Calvin maroon (or any theme highlight color)
+    borderWidth: 2,
+    borderStyle: 'solid',
+    opacity: 0.9,
+  }}
+>
+  {/* Optional centered label */}
+</Divider>
 
       {/* Mobile: Button below title */}
       {isMobile && showButton && (

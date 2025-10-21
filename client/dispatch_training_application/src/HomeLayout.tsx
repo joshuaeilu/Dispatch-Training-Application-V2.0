@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {  LogoutOutlined, MenuOutlined} from '@ant-design/icons';
 import { Button, Drawer, Grid, Layout, Menu, Typography, } from 'antd';
 import { Outlet } from 'react-router-dom';
@@ -9,11 +9,8 @@ import { useNavigate } from 'react-router-dom';
 const { Header, Content,  Sider } = Layout;
 
 import { Toaster } from 'react-hot-toast';
-import { UniversalContext } from './contexts/UniversalHelpers';
 import type { MenuItem } from './types/index.types';
 import { MENU_BY_ROLE } from './data/data';
-
-
 
 const App: React.FC = () => {
 
@@ -23,7 +20,7 @@ const App: React.FC = () => {
   const isMobile = !screens.md; // true for <768px
 
   const { logout, user,  } = useContext(AuthContext);
-  const { selectedKey, setSelectedKey } = useContext(UniversalContext);
+  const [selectedKey, setSelectedKey] = useState("");
   const role = user?.role as Role;
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = React.useState(false);
@@ -34,6 +31,17 @@ const App: React.FC = () => {
     return MENU_BY_ROLE[role];
   }, [role]);
 
+  
+  // Highlight selected menu item on mount.
+
+  const pathname = window.location.pathname;
+  useEffect(() => {
+    // Find matching menu item for current path
+    const matchedItem = roleItems.find(item => pathname.startsWith(item.key));
+    if (matchedItem) {
+      setSelectedKey(matchedItem.key);
+    }
+  }, [pathname, roleItems]);
 
 
 
@@ -95,7 +103,7 @@ const App: React.FC = () => {
       onClick={({ key }) => {
         navigate(key);
         setSelectedKey(key);
-        sessionStorage.setItem('selectedKey', key);
+
       }}
     />
 
@@ -225,7 +233,6 @@ const App: React.FC = () => {
           onClick={({ key }) => {
             navigate(key);
             setSelectedKey(key);
-            sessionStorage.setItem("selectedKey", key);
             setDrawerOpen(false); // close menu when clicked
           }}
         />

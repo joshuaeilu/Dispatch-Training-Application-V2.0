@@ -17,7 +17,6 @@ router.get("/", auth(['admin', 'trainee']), async (req, res) => {
         s.id,
         s.author_id,
         s.status,
-        s.editing,
         s.scenario_data,
         u.username AS author_name,     -- ✅ change this to your real column
         u.avatar AS author_avatar      -- ✅ change this too
@@ -37,7 +36,7 @@ router.get("/", auth(['admin', 'trainee']), async (req, res) => {
 
 
 router.post("/", auth(["admin"]), async (req, res) => {
-  const { scenario, authorId, status } = req.body;
+  const { scenario, authorId, status, pdfFilename } = req.body;
 
   if (!scenario || !authorId) {
     return res.status(400).json({ error: "Missing scenario or authorId" });
@@ -51,15 +50,16 @@ router.post("/", auth(["admin"]), async (req, res) => {
 
     await pool.query(
       `
-      INSERT INTO scenarios (id, author_id, scenario_data, status)
-      VALUES ($1, $2, $3::jsonb, $4)
+      INSERT INTO scenarios (id, author_id, scenario_data, status, pdf_filename)
+      VALUES ($1, $2, $3::jsonb, $4, $5)
       ON CONFLICT (id)
       DO UPDATE SET
         scenario_data = EXCLUDED.scenario_data,
         status = EXCLUDED.status,
+        pdf_filename = EXCLUDED.pdf_filename,
         updated_at = NOW();
       `,
-      [scenario.id, authorId, JSON.stringify(scenario), status || "draft"]
+      [scenario.id, authorId, JSON.stringify(scenario), status || "draft", pdfFilename || null]
     );
 
     res.status(200).json({ message: "Scenario saved successfully" });

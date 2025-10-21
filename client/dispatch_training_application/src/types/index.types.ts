@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 
 // Authentication Types
 export type Role = 'admin' | 'dispatcher' | 'trainee';
@@ -36,6 +36,7 @@ export type HighlightData = {
 
 export type PdfViewerProps = {
   // pdfUrl: string;
+  fileUrl: string;
   highlights: HighlightData[];
   setHighlights?: (highlights: HighlightData[]) => void;
   scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
@@ -75,6 +76,7 @@ export interface Scenario {
   speakers: Speaker[];
   scenes: Scene[];
   status?: 'draft' | 'published';
+  pdfFilename: string;
 }
 
 export type AdminPreferences = {

@@ -8,11 +8,7 @@ export default defineConfig({
     host: "0.0.0.0", // 👈 allows access from other devices
     port: 5173,
     proxy: {
-      "/api": {
-        target: "http://localhost:5000", // backend
-        changeOrigin: true,
-        secure: false,
-      },
+      "/api": 'http://localhost:5000',
     },
   },
 });

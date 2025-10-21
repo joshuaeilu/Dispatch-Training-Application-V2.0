@@ -12,10 +12,15 @@ export function useAutosaveScenario(
   const lastScenarioRef = useRef<Scenario | null>(null);
   const authorId = getUser()?.id || "";
 
-    const saveToServer = async (scenario: Scenario) => {
+  const saveToServer = async (scenario: Scenario) => {
     try {
       setAutosaving(true);
-      await api.post('/scenarios', {scenario, authorId, status: 'draft' });
+      await api.post('/scenarios', {
+        scenario, 
+        authorId, 
+        status: 'draft', 
+        pdfFilename: scenario.pdfFilename || null // ✅ Get from scenario
+      });
 
       setLastSavedScenario(scenario);
       lastScenarioRef.current = scenario;
@@ -29,7 +34,7 @@ export function useAutosaveScenario(
   const debouncedSave = useRef(
     debounce((scenario: Scenario) => {
       saveToServer(scenario);
-    }, 3000) // 3 seconds of inactivity
+    }, 3000)
   ).current;
 
   useEffect(() => {
@@ -43,9 +48,7 @@ export function useAutosaveScenario(
     if (hasChanged) {
       debouncedSave(scenario);
     }
-  }, [scenario]);
-
-
+  }, [scenario, debouncedSave]);
 
   return { autosaving };
 }

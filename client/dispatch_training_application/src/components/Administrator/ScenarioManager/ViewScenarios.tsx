@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { api } from "../../../utils/api";
 import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
-import type {  ScenarioTableType } from "../../../types/index.types";
+import type { ScenarioTableType } from "../../../types/index.types";
 import { UniversalContext } from "../../../contexts/UniversalHelpers";
 export default function ViewScenarios() {
   const navigate = useNavigate();
@@ -54,9 +54,11 @@ export default function ViewScenarios() {
     fetchScenarios();
   }, []);
 
-  const { preferences } = useContext(UniversalContext);
 
-  const scenarioTypes = (["All Types", preferences?.scenario_types].flat()).filter(t => t !== "Custom")
+  const scenarioTypes = [
+    "All Types",
+    ...Array.from(new Set(scenarioFiles.map(s => s.type).filter(Boolean)))
+  ];
   const scenarioDifficultyOptions = [
     { label: "Easy", value: "easy" },
     { label: "Medium", value: "medium" },
@@ -114,9 +116,9 @@ export default function ViewScenarios() {
       dataIndex: "name",
       key: "name",
       render: (text: string) => (
- <Typography.Text style={{ fontSize: 14, color: "#262626", whiteSpace: "nowrap"  }}>
-        {text}
-      </Typography.Text>      ),
+        <Typography.Text style={{ fontSize: 14, color: "#262626", whiteSpace: "nowrap" }}>
+          {text}
+        </Typography.Text>),
     },
     {
       title: "Type",
@@ -193,7 +195,7 @@ export default function ViewScenarios() {
         </Tag>
       ),
     },
-   
+
     {
       title: "Actions",
       key: "actions",
@@ -255,124 +257,126 @@ export default function ViewScenarios() {
   ];
 
   return (
-    <div style={{  maxWidth: "100%", background: "#f5f5f5" }}>
-      
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Fixed Page Header */}
+      <div style={{ flex: '0 0 auto' }}>
         <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios" showButton buttonText="Add Scenario" onButtonPress={() => navigate("/scenario-manager/add-scenario")} />
-      
-      {/* Filters */}
-      <Card className="shadow-soft" style={{ margin: "1rem"}}>
-        <Form
-          form={form}
-          layout="vertical"
-        // onValuesChange={() => setPage(1)}
+      </div>
+      <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
+        {/* Filters */}
+        <Card className="shadow-soft mb-4" style={{ margin: "0 1.5rem" }}>
+          <Form
+            form={form}
+            layout="vertical"
+          >
+            <Row gutter={[16, 12]}>
+              <Col xs={24} sm={12} md={4}>
+                <Form.Item label="Type" name="type">
+                  <Select
+                    defaultValue={selectedScenarioType}
+                    options={scenarioTypes.map(type => ({ label: type, value: type }))}
+                    onChange={(value) => setSelectedScenarioType(value)}
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} sm={12} md={4}>
+                <Form.Item label="Difficulty" name="difficulty">
+                  <Select placeholder="Select difficulty" options={scenarioDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} sm={12} md={4}>
+                <Form.Item label="Status" name="status">
+                  <Select placeholder="Select status" options={scenarioStatusOptions} onChange={(value) => setSelectedStatus(value)} />
+                </Form.Item>
+              </Col>
+
+
+              <Col xs={24} md={10} >
+                <Form.Item label="Search by name" name="q">
+                  <Input prefix={<SearchOutlined />} placeholder="Type to search…" allowClear onChange={(e) => setSearchQuery(e.target.value)}
+                    onPressEnter={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} md={2} >
+                <Space className="w-full justify-center" style={{ alignItems: "center", justifyContent: "center", alignContent: "center", height: "100%", width: "100%" }}>
+                  <Button
+                    className="border-btn"
+                    size="middle"
+                    icon={<ReloadOutlined />}
+                    onClick={handleResetFilteredFields}
+                  >
+                    Reset
+                  </Button>
+
+                </Space>
+              </Col>
+            </Row>
+          </Form>
+        </Card>
+
+
+        <Card
+          style={{ margin: "1.5rem", overflowX: "auto" }}
+          bodyStyle={{ padding: 16 }}
         >
-          <Row gutter={[16, 12]}>
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item label="Type" name="type">
-                <Select defaultValue={selectedScenarioType} options={scenarioTypes?.map(type => ({ label: type, value: type }))} onChange={(value) => setSelectedScenarioType(value)} />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item label="Difficulty" name="difficulty">
-                <Select placeholder="Select difficulty" options={scenarioDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item label="Status" name="status">
-                <Select placeholder="Select status" options={scenarioStatusOptions} onChange={(value) => setSelectedStatus(value)} />
-              </Form.Item>
-            </Col>
-
-
-            <Col xs={24} md={10} >
-              <Form.Item label="Search by name" name="q">
-                <Input prefix={<SearchOutlined />} placeholder="Type to search…" allowClear onChange={(e) => setSearchQuery(e.target.value)}
-                  onPressEnter={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
-                />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} md={2} >
-              <Space className="w-full justify-center" style={{ alignItems: "center", justifyContent: "center", alignContent: "center", height: "100%", width: "100%" }}>
-                <Button
-                  className="border-btn"
-                  size="middle"
-                  icon={<ReloadOutlined />}
-                  onClick={handleResetFilteredFields}
-                >
-                  Reset
-                </Button>
-
-              </Space>
-            </Col>
-          </Row>
-        </Form>
-      </Card>
-
-
-      <Card
-        style={{
-          margin: "0 1rem 1rem 1rem",
-          width: "100%",
-
-        }}
-        bodyStyle={{ padding: 16 }}
-      >
-        <Space
-          direction="vertical"
-          size={2}
-          style={{
-            width: "100%",
-            padding: "4px 0",
-          }}
-        >
-          <Space>
-      <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
-            <Typography.Title
-              level={4}
-              style={{
-                margin: 0,
-                fontWeight: 600,
-                fontSize: "20px",
-                color: "var(--color-heading, #1f1f1f)",
-              }}
-            >
-              {selectedScenarioType === "All Types" ? "All Scenarios" : selectedScenarioType}
-            </Typography.Title>
-          </Space>
-
-          <Typography.Text
-            type="secondary"
+          <Space
+            direction="vertical"
+            size={2}
             style={{
-              fontSize: "14px",
-              color: "var(--color-text-secondary, #888)",
+              width: "100%",
+              padding: "4px 0",
             }}
           >
-            {filteredData.length} {filteredData.length === 1 ? "scenario" : "scenarios"} found
-          </Typography.Text>
-        </Space>
+            <Space>
+              <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
+              <Typography.Title
+                level={4}
+                style={{
+                  margin: 0,
+                  fontWeight: 600,
+                  fontSize: "20px",
+                  color: "var(--color-heading, #1f1f1f)",
+                }}
+              >
+                {selectedScenarioType === "All Types" ? "All Scenarios" : selectedScenarioType}
+              </Typography.Title>
+            </Space>
 
-        <div className="overflow-auto mt-2" style={{ maxHeight: "60vh" }}>
-          <Table
-            rowKey="id"
-            columns={scenarioTableColumns}
-            dataSource={filteredData}pagination={{
-      pageSize: 10,
-      showQuickJumper: true,
-      showTotal: (total) => `Total ${total} exercises`,
-    }}
-    scroll={{
-      y: 400,
-      x: "max-content",
-    }}
-    sticky
-    bordered
-  
-          />
-        </div>
-      </Card>
+            <Typography.Text
+              type="secondary"
+              style={{
+                fontSize: "14px",
+                color: "var(--color-text-secondary, #888)",
+              }}
+            >
+              {filteredData.length} {filteredData.length === 1 ? "scenario" : "scenarios"} found
+            </Typography.Text>
+          </Space>
+
+          <div className="overflow-auto mt-2" style={{ maxHeight: "60vh" }}>
+            <Table
+              rowKey="id"
+              columns={scenarioTableColumns}
+              dataSource={filteredData} pagination={{
+                pageSize: 10,
+                showQuickJumper: true,
+                showTotal: (total) => `Total ${total} exercises`,
+              }}
+              scroll={{
+                y: 400,
+                x: "max-content",
+              }}
+              sticky
+              bordered
+
+            />
+          </div>
+        </Card>
+      </div>
 
     </div>
   )

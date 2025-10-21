@@ -8,7 +8,6 @@ import {
   Typography,
 } from "antd";
 import {
-  EnvironmentOutlined,
   FileTextOutlined,
   PlaySquareOutlined,
   AudioOutlined,
@@ -19,7 +18,6 @@ import type { ResourcePayload } from "../../../../types/index.types";
 import { v4 as uuidv4 } from "uuid";
 
 const RESOURCE_OPTIONS = [
-  { value: "maps", label: "Maps", icon: <EnvironmentOutlined /> },
   { value: "documents", label: "Documents", icon: <FileTextOutlined /> },
   { value: "videos", label: "Videos", icon: <PlaySquareOutlined /> },
   { value: "audio", label: "Audio", icon: <AudioOutlined /> },

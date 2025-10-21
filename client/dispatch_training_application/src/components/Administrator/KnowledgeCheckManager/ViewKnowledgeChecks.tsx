@@ -286,18 +286,27 @@ export default function KnowledgeCheckViewExercises() {
   ];
 
   
-const { preferences } = useContext(UniversalContext);
-
-
-const exerciseTypes = (["All Types", preferences?.exercise_types].flat()).filter(t => t !== "Custom")
-
+const allExerciseTypes = [
+  "All Types",
+  ...Array.from(new Set(exerciseFiles.map(e => e.type).filter(Boolean)))
+];
 
 
   return (
-    <div  style={{ maxWidth: "100%",  }} >
-      {/* Page Header */}
-             <PageHeader title="View Exercises" subtitle="Filter, search and manager exercises" showButton buttonText="Add Exercise" onButtonPress={() => navigate("/knowledge-checks/edit-exercise")} />
-     
+   <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+         {/* Fixed Page Header */}
+    <div style={{ flex: '0 0 auto' }}>
+      <PageHeader
+        title="View Exercises"
+        subtitle="Filter, search and manage exercises"
+        showButton
+        buttonText="Add Exercise"
+        onButtonPress={() => navigate("/knowledge-checks/edit-exercise")}
+      />
+    </div>
+
+        {/* Scrollable Content */}
+    <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
 
       {/* Filters */}
       <Card className="shadow-soft mb-4" style={{ margin: "0 1.5rem"}}>
@@ -308,7 +317,11 @@ const exerciseTypes = (["All Types", preferences?.exercise_types].flat()).filter
           <Row gutter={[16, 12]}>
             <Col xs={24} sm={12} md={4}>
               <Form.Item label="Type" name="type">
-                <Select defaultValue={selectedExerciseType} options={exerciseTypes?.map(type => ({ label: type, value: type }))} onChange={(value) => setSelectedExerciseType(value)} />
+<Select
+  defaultValue={selectedExerciseType}
+  options={allExerciseTypes.map(type => ({ label: type, value: type }))}
+  onChange={(value) => setSelectedExerciseType(value)}
+/>
               </Form.Item>
             </Col>
 
@@ -401,7 +414,7 @@ const exerciseTypes = (["All Types", preferences?.exercise_types].flat()).filter
     bordered
   />
 </Card>
-
+</div>
 
 
       {/* View Exercise Modal */}

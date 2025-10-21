@@ -268,13 +268,8 @@ const columns: TableColumnType<ResourceTableType>[] = [
     // First, apply search across all data
     const searchFiltered = data.filter(matchesQuery);
 
-    // Build counts from the search-filtered set so badges update as you type
-    const counts = searchFiltered.reduce((acc, item) => {
-        acc[item.type] = (acc[item.type] || 0) + 1;
-        acc["all"] = (acc["all"] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-
+  
+    
     // Then apply the category filter for the table
     const filteredData =
         selectedResource.key === "all"

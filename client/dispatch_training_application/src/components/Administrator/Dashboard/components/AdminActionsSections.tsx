@@ -2,6 +2,7 @@ import { Card, Row, Col, Typography } from "antd";
 import {
   UserAddOutlined,
   SettingOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
@@ -17,8 +18,14 @@ const actions = [
   {
     title: "Manage Users",
     description: "Edit, delete, or view all registered users.",
-    icon: <SettingOutlined />,
+    icon: <TeamOutlined />,
     route: "/dashboard/manage-users",
+  },
+  {
+    title: "Settings",
+    description: "Configure preferences and settings.",
+    icon: <SettingOutlined />,
+    route: "/dashboard/settings",
   },
 ];
 

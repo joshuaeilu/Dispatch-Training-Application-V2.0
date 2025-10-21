@@ -3,7 +3,7 @@ import { ArrowLeftOutlined,  CheckCircleOutlined, SaveOutlined } from "@ant-desi
 import SceneEditor from "./SceneEditor";
 import 'antd/dist/reset.css'; // AntD v5
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { HighlightData, Scenario } from "../../../../../types/index.types";
 import PdfViewer from "../../../../Shared/PdfViewer";
 import { useLocation } from "react-router-dom";
@@ -15,6 +15,7 @@ import {  toast } from 'react-hot-toast';
 import { useScenarioManager } from "../../../../../hooks/useScenarioManager";
 import { useAutosaveScenario } from "../../../../../hooks/useAutoSaveScenario";
 import { useNavigate } from "react-router-dom";
+import { getToken } from "../../../../../contexts/AuthProvider";
 
 const { Text} = Typography;
 export default function ScenarioEditor() {
@@ -24,12 +25,12 @@ export default function ScenarioEditor() {
   const { scenarioDetails } = location.state || {};
 
   const { scenario, setScenario} = useScenarioManager({ scenarioId, scenarioDetails });
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const token = getToken();
 
   const [__, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
 
-  const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario);
   const [isPublishing, setIsPublishing] = useState(false);
-
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -54,6 +55,7 @@ export default function ScenarioEditor() {
     setPlaying(false);
   }
 };
+
 
 
 
@@ -87,8 +89,14 @@ export default function ScenarioEditor() {
   };
   const [saveStatus, setSaveStatus] = useState<'draft' | 'published'>('published');
 
+  useEffect(() => {
+    if(scenario?.pdfFilename) {
+      const url = `http://localhost:5000/data/mop/${scenario.pdfFilename}?token=${token}`;
+      setPdfUrl(url);
+    }
+  }, [scenario?.pdfFilename, token]);
 
-
+const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario);
 
 
 
@@ -99,6 +107,7 @@ export default function ScenarioEditor() {
         scenario,
         authorId: user?.id,
         status: saveStatus, // ✅ explicit
+        pdfFilename: scenario?.pdfFilename || null,
       });
 
       if(saveStatus === 'published') {
@@ -195,7 +204,7 @@ export default function ScenarioEditor() {
 
 
         <div className="w-full md:w-1/3 h-full ">
-            <PdfViewer highlights={scenario?.scenes[currentIndex]?.highlights || []} setHighlights={(highlights) => {
+            <PdfViewer fileUrl={pdfUrl || ""} highlights={scenario?.scenes[currentIndex]?.highlights || []} setHighlights={(highlights) => {
           
             setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, highlights } : s) });
           }}
