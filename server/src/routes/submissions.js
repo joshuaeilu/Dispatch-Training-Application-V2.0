@@ -5,6 +5,33 @@ const { auth } = require("../middleware/auth");
 
 
 
+
+// GET /api/submissions/exercises/:userId
+router.get("/exercises/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    const query = `
+      SELECT DISTINCT exercise_id
+      FROM exercise_submissions
+      WHERE user_id = $1
+    `;
+
+    const { rows } = await pool.query(query, [userId]);
+
+    const exerciseIds = rows.map(row => row.exercise_id);
+
+    return res.status(200).json({ userId, exerciseIds });
+  } catch (error) {
+    console.error("Error fetching exercise IDs:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // routes/submissions.js
 router.post("/", auth(["trainee", "dispatcher"]), async (req, res) => {
   const { user } = req;
@@ -29,36 +56,75 @@ router.post("/", auth(["trainee", "dispatcher"]), async (req, res) => {
   }
 });
 
-// GET /submissions/status?exercise_ids[]=uuid1&exercise_ids[]=uuid2...
-router.get("/status", auth(["trainee", "dispatcher"]), async (req, res) => {
-  const { user } = req;
-
-  // Support both forms: exercise_ids and exercise_ids[]
-  const exerciseIds =
-    req.query.exercise_ids || req.query["exercise_ids[]"];
 
 
-  if (!Array.isArray(exerciseIds) || exerciseIds.length === 0) {
-    return res.status(400).json({ error: "Missing or invalid exercise_ids" });
+// ✅ Define totals route FIRST
+router.get("/summary/totals", async (_req, res) => {
+  try {
+    const [exerciseTotalRes, scenarioTotalRes] = await Promise.all([
+      pool.query(`SELECT COUNT(*) AS total FROM exercises WHERE status = 'published'`),
+      pool.query(`SELECT COUNT(*) AS total FROM scenarios WHERE status = 'published'`),
+    ]);
+
+    const totalExercises = Number(exerciseTotalRes.rows[0]?.total || 0);
+    const totalScenarios = Number(scenarioTotalRes.rows[0]?.total || 0);
+
+    return res.status(200).json({
+      totals: {
+        exercises: totalExercises,
+        scenarios: totalScenarios,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching totals:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ✅ Define user summary route AFTER
+router.get("/summary/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
   }
 
   try {
-    const { rows } = await pool.query(
-      `
-      SELECT exercise_id
-      FROM exercise_submissions
-      WHERE user_id = $1 AND exercise_id = ANY($2)
-      `,
-      [user.id, exerciseIds]
-    );
+    const [exerciseCompletedRes, scenarioCompletedRes] = await Promise.all([
+      pool.query(
+        `SELECT COUNT(DISTINCT exercise_id) AS count
+         FROM exercise_submissions
+         WHERE user_id = $1`,
+        [userId]
+      ),
+      pool.query(
+        `SELECT COUNT(DISTINCT scenario_id) AS count
+         FROM scenario_completions
+         WHERE user_id = $1`,
+        [userId]
+      ),
+    ]);
 
-    const completedMap = Object.fromEntries(rows.map((r) => [r.exercise_id, true]));
-    res.status(200).json({ completedMap });
-  } catch (err) {
-    console.error("❌ Failed to fetch submission statuses:", err);
-    res.status(500).json({ error: "Server error" });
+    const exercisesCompleted = Number(exerciseCompletedRes.rows[0]?.count || 0);
+    const scenariosCompleted = Number(scenarioCompletedRes.rows[0]?.count || 0);
+
+    return res.status(200).json({
+      userId,
+      completed: {
+        exercises: exercisesCompleted,
+        scenarios: scenariosCompleted,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching user progress:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+
+
+
 
 
 
@@ -113,43 +179,31 @@ router.post("/scenario_walkthrough", auth(["trainee", "dispatcher"]), async (req
   }
 });
 
-// GET /submissions/scenario_walkthrough/status?scenario_ids[]=uuid1&scenario_ids[]=uuid2
-router.get("/scenario_walkthrough/status", auth(["trainee", "dispatcher"]), async (req, res) => {
-  const { user } = req;
-  let scenarioIds = req.query.scenario_ids || req.query["scenario_ids[]"];
+// GET /api/submissions/scenarios/:userId
+router.get("/scenarios/:userId", async (req, res) => {
+  const { userId } = req.params;
 
-  if (!scenarioIds) {
-    return res.status(400).json({ error: "Missing scenario_ids" });
-  }
-
-  if (typeof scenarioIds === "string") {
-    scenarioIds = [scenarioIds];
-  }
-
-  if (!Array.isArray(scenarioIds)) {
-    return res.status(400).json({ error: "scenario_ids must be an array" });
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
   }
 
   try {
-    const { rows } = await pool.query(
-      `
-      SELECT scenario_id
+    const query = `
+      SELECT DISTINCT scenario_id
       FROM scenario_completions
-      WHERE user_id = $1 AND scenario_id = ANY($2::uuid[])
-      `,
-      [user.id, scenarioIds]
-    );
+      WHERE user_id = $1
+    `;
 
-    const completedMap = Object.fromEntries(rows.map((r) => [r.scenario_id, true]));
+    const { rows } = await pool.query(query, [userId]);
 
-    res.status(200).json({ completedMap });
-  } catch (err) {
-    console.error("❌ Failed to fetch scenario completion statuses:", err);
-    res.status(500).json({ error: "Server error" });
+    const scenarioIds = rows.map(row => row.scenario_id);
+
+    return res.status(200).json({ userId, scenarioIds });
+  } catch (error) {
+    console.error("❌ Error fetching scenario completions:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
-
-
 
 
 

@@ -1,7 +1,7 @@
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo, memo } from 'react';
 import { Button, Input, Space, Spin, Tooltip, Typography } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -13,6 +13,7 @@ import {
   ArrowRightOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons';
 import type { PdfViewerProps, HighlightData } from '../../types/index.types';
 
@@ -25,6 +26,92 @@ const ZOOM_STEP = 0.2;
 const MIN_ZOOM = 0.4;
 const MAX_ZOOM = 3;
 const DEBOUNCE_DELAY = 300;
+const PRELOAD_PAGES = 2;
+
+// Memoized Page Overlay Component
+const PageOverlay = memo(({ 
+  pageIndex, 
+  highlights, 
+  matches, 
+  activeMatchIndex, 
+  pageWidth, 
+  pageHeight 
+}: {
+  pageIndex: number;
+  highlights: HighlightData[];
+  matches: HighlightData[];
+  activeMatchIndex: number;
+  pageWidth: number;
+  pageHeight: number;
+}) => {
+  const pageHighlights = useMemo(
+    () => highlights.filter((h) => h.page === pageIndex + 1),
+    [highlights, pageIndex]
+  );
+
+  const pageMatches = useMemo(
+    () => matches.filter((m) => m.page === pageIndex + 1),
+    [matches, pageIndex]
+  );
+
+  return (
+    <>
+      {/* Highlights */}
+      {pageHighlights.flatMap((h, hi) =>
+        h.rects.map((rect, ri) => (
+          <div
+            key={`highlight-${h.id}-${ri}`}
+            style={{
+              position: 'absolute',
+              left: rect.x * pageWidth,
+              top: rect.y * pageHeight,
+              width: rect.width * pageWidth,
+              height: rect.height * pageHeight,
+              backgroundColor: 'rgba(255, 235, 59, 0.4)',
+              mixBlendMode: 'multiply',
+              borderRadius: 2,
+              pointerEvents: 'none',
+            }}
+          />
+        ))
+      )}
+
+      {/* Search Matches */}
+      {pageMatches.flatMap((m, mi) => {
+        const isActive = matches[activeMatchIndex]?.id === m.id;
+        return m.rects.map((rect, ri) => (
+          <div
+            key={`match-${m.id}-${ri}`}
+            style={{
+              position: 'absolute',
+              left: rect.x * pageWidth,
+              top: rect.y * pageHeight,
+              width: rect.width * pageWidth,
+              height: rect.height * pageHeight,
+              backgroundColor: isActive ? 'rgba(255, 87, 34, 0.5)' : 'rgba(76, 175, 80, 0.4)',
+              borderRadius: 2,
+              pointerEvents: 'none',
+              border: isActive ? '2px solid #ff5722' : '1px solid #4caf50',
+              boxSizing: 'border-box',
+              transition: 'all 0.2s ease',
+            }}
+          />
+        ));
+      })}
+    </>
+  );
+}, (prev, next) => {
+  return (
+    prev.pageIndex === next.pageIndex &&
+    prev.highlights === next.highlights &&
+    prev.matches === next.matches &&
+    prev.activeMatchIndex === next.activeMatchIndex &&
+    prev.pageWidth === next.pageWidth &&
+    prev.pageHeight === next.pageHeight
+  );
+});
+
+PageOverlay.displayName = 'PageOverlay';
 
 export default function PdfViewer({
   fileUrl,
@@ -38,27 +125,50 @@ export default function PdfViewer({
   // State management
   const [loading, setLoading] = useState(true);
   const [numPages, setNumPages] = useState(0);
+  const [loadedPages, setLoadedPages] = useState<Set<number>>(new Set());
+  const [allPagesLoaded, setAllPagesLoaded] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [selectedHighlight, setSelectedHighlight] = useState<HighlightData | null>(null);
   const [showInput, setShowInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [matches, setMatches] = useState<HighlightData[]>([]);
   const [activeMatchIndex, setActiveMatchIndex] = useState(0);
+  const [isSearching, setIsSearching] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [visiblePages, setVisiblePages] = useState<Set<number>>(new Set([1, 2, 3]));
 
   // Refs
   const popupRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pdfDocRef = useRef<any>(null);
+  const textCacheRef = useRef<Map<number, any>>(new Map());
+  const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Track page loading progress
+  const handlePageLoadSuccess = useCallback((pageNum: number) => {
+    setLoadedPages(prev => {
+      const newSet = new Set(prev);
+      newSet.add(pageNum);
+      return newSet;
+    });
+  }, []);
+
+  // Check if all pages are loaded
+  useEffect(() => {
+    if (numPages > 0 && loadedPages.size === numPages) {
+      setAllPagesLoaded(true);
+    }
+  }, [loadedPages, numPages]);
 
   // Responsive zoom calculation
   const getInitialZoom = useCallback(() => {
     if (typeof window === 'undefined') return 1;
     const width = window.innerWidth;
-    if (width < 640) return 0.5; // mobile
-    if (width < 1024) return 0.7; // tablet
-    return 1; // desktop
+    if (width < 640) return 0.5;
+    if (width < 1024) return 0.7;
+    return 1;
   }, []);
 
   // Initialize zoom based on screen size
@@ -66,12 +176,66 @@ export default function PdfViewer({
     setZoom(getInitialZoom());
 
     const handleResize = () => {
-      setZoom(getInitialZoom());
+      if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+      zoomTimeoutRef.current = setTimeout(() => {
+        setZoom(getInitialZoom());
+      }, 150);
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+    };
   }, [getInitialZoom]);
+
+  // Aggressive page preloading - load all pages immediately
+  useEffect(() => {
+    if (numPages > 0) {
+      // Load all pages immediately for fastest rendering
+      const allPages = new Set<number>();
+      for (let i = 1; i <= numPages; i++) {
+        allPages.add(i);
+      }
+      setVisiblePages(allPages);
+    }
+  }, [numPages]);
+
+  // Intersection Observer for tracking which pages are in viewport
+  useEffect(() => {
+    if (!scrollContainerRef?.current || numPages === 0) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const pageNum = parseInt(entry.target.getAttribute('data-page-number') || '0');
+          
+          if (entry.isIntersecting) {
+            // Ensure nearby pages are loaded
+            const newVisiblePages = new Set(visiblePages);
+            for (let i = Math.max(1, pageNum - PRELOAD_PAGES); i <= Math.min(numPages, pageNum + PRELOAD_PAGES); i++) {
+              newVisiblePages.add(i);
+            }
+            if (newVisiblePages.size !== visiblePages.size) {
+              setVisiblePages(newVisiblePages);
+            }
+          }
+        });
+      },
+      {
+        root: scrollContainerRef.current,
+        rootMargin: '500px',
+        threshold: 0.01,
+      }
+    );
+
+    const pageElements = scrollContainerRef.current.querySelectorAll('[data-page-number]');
+    pageElements.forEach((el) => observerRef.current?.observe(el));
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [numPages, scrollContainerRef, visiblePages]);
 
   // Fullscreen handling
   const toggleFullscreen = useCallback(async () => {
@@ -99,13 +263,19 @@ export default function PdfViewer({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Optimized zoom handlers with loading state
+  // Debounced zoom handlers
   const handleZoomIn = useCallback(() => {
-    setZoom((z) => Math.min(z + ZOOM_STEP, MAX_ZOOM));
+    if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+    zoomTimeoutRef.current = setTimeout(() => {
+      setZoom((z) => Math.min(z + ZOOM_STEP, MAX_ZOOM));
+    }, 50);
   }, []);
 
   const handleZoomOut = useCallback(() => {
-    setZoom((z) => Math.max(z - ZOOM_STEP, MIN_ZOOM));
+    if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+    zoomTimeoutRef.current = setTimeout(() => {
+      setZoom((z) => Math.max(z - ZOOM_STEP, MIN_ZOOM));
+    }, 50);
   }, []);
 
   // Optimized text selection for highlights
@@ -191,112 +361,151 @@ export default function PdfViewer({
     [matches, pageRefs, scrollContainerRef]
   );
 
-  // Optimized search with caching
+  // Optimized search with caching and lazy loading
+  const searchInPage = useCallback(async (pageNum: number, searchTerm: string, pdf: any) => {
+    const results: HighlightData[] = [];
+    
+    try {
+      let textContent = textCacheRef.current.get(pageNum);
+      let viewport;
+
+      if (!textContent) {
+        const page = await pdf.getPage(pageNum);
+        textContent = await page.getTextContent();
+        viewport = page.getViewport({ scale: 1 });
+        
+        textCacheRef.current.set(pageNum, { textContent, viewport });
+      } else {
+        viewport = textContent.viewport;
+        textContent = textContent.textContent;
+      }
+
+      let fullText = '';
+      const textItems: any[] = [];
+
+      textContent.items.forEach((item: any) => {
+        const itemStart = fullText.length;
+        fullText += item.str;
+        textItems.push({
+          ...item,
+          startIndex: itemStart,
+          endIndex: fullText.length,
+        });
+      });
+
+      let searchIndex = 0;
+      while ((searchIndex = fullText.toLowerCase().indexOf(searchTerm, searchIndex)) !== -1) {
+        const matchEnd = searchIndex + searchTerm.length;
+
+        const startItem = textItems.find(
+          (item) => searchIndex >= item.startIndex && searchIndex < item.endIndex
+        );
+        const endItem = textItems.find(
+          (item) => matchEnd > item.startIndex && matchEnd <= item.endIndex
+        );
+
+        if (startItem && endItem) {
+          const startItemIndex = textItems.indexOf(startItem);
+          const endItemIndex = textItems.indexOf(endItem);
+          const matchItems = textItems.slice(startItemIndex, endItemIndex + 1);
+
+          if (matchItems.length > 0) {
+            let minX = Infinity,
+              minY = Infinity,
+              maxX = -Infinity,
+              maxY = -Infinity;
+
+            matchItems.forEach((item) => {
+              const transform = item.transform;
+              const [scaleX, , , scaleY, translateX, translateY] = transform;
+
+              const itemWidth = item.width || item.str.length * Math.abs(scaleX);
+              const itemHeight = Math.abs(scaleY);
+
+              const x = translateX;
+              const y = viewport.height - translateY - itemHeight;
+
+              minX = Math.min(minX, x);
+              minY = Math.min(minY, y);
+              maxX = Math.max(maxX, x + itemWidth);
+              maxY = Math.max(maxY, y + itemHeight);
+            });
+
+            const rect = {
+              x: minX / viewport.width,
+              y: minY / viewport.height,
+              width: (maxX - minX) / viewport.width,
+              height: (maxY - minY) / viewport.height,
+            };
+
+            results.push({
+              id: uuidv4(),
+              text: fullText.substring(searchIndex, matchEnd),
+              name: `Search: ${searchTerm}`,
+              page: pageNum,
+              containerIndex: -1,
+              startOffset: searchIndex,
+              endOffset: matchEnd,
+              rects: [rect],
+            });
+          }
+        }
+
+        searchIndex = matchEnd;
+      }
+    } catch (error) {
+      console.error(`Search error on page ${pageNum}:`, error);
+    }
+
+    return results;
+  }, []);
+
   const handleSearch = useCallback(async () => {
+    if (!allPagesLoaded) {
+      return; // Don't search if pages aren't loaded
+    }
+
     if (!searchQuery.trim()) {
       setMatches([]);
       setActiveMatchIndex(0);
       return;
     }
 
-    const results: HighlightData[] = [];
+    setIsSearching(true);
     const searchTerm = searchQuery.toLowerCase();
+    const allResults: HighlightData[] = [];
 
     try {
-      // Use cached PDF document
       const pdf = pdfDocRef.current || (await pdfjs.getDocument(fileUrl).promise);
       if (!pdfDocRef.current) pdfDocRef.current = pdf;
 
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const textContent = await page.getTextContent();
-        const viewport = page.getViewport({ scale: 1 });
-
-        let fullText = '';
-        const textItems: any[] = [];
-
-        textContent.items.forEach((item: any) => {
-          const itemStart = fullText.length;
-          fullText += item.str;
-          textItems.push({
-            ...item,
-            startIndex: itemStart,
-            endIndex: fullText.length,
-          });
-        });
-
-        let searchIndex = 0;
-        while ((searchIndex = fullText.toLowerCase().indexOf(searchTerm, searchIndex)) !== -1) {
-          const matchEnd = searchIndex + searchTerm.length;
-
-          const startItem = textItems.find(
-            (item) => searchIndex >= item.startIndex && searchIndex < item.endIndex
-          );
-          const endItem = textItems.find(
-            (item) => matchEnd > item.startIndex && matchEnd <= item.endIndex
-          );
-
-          if (startItem && endItem) {
-            const startItemIndex = textItems.indexOf(startItem);
-            const endItemIndex = textItems.indexOf(endItem);
-            const matchItems = textItems.slice(startItemIndex, endItemIndex + 1);
-
-            if (matchItems.length > 0) {
-              let minX = Infinity,
-                minY = Infinity,
-                maxX = -Infinity,
-                maxY = -Infinity;
-
-              matchItems.forEach((item) => {
-                const transform = item.transform;
-                const [scaleX, , , scaleY, translateX, translateY] = transform;
-
-                const itemWidth = item.width || item.str.length * Math.abs(scaleX);
-                const itemHeight = Math.abs(scaleY);
-
-                const x = translateX;
-                const y = viewport.height - translateY - itemHeight;
-
-                minX = Math.min(minX, x);
-                minY = Math.min(minY, y);
-                maxX = Math.max(maxX, x + itemWidth);
-                maxY = Math.max(maxY, y + itemHeight);
-              });
-
-              const rect = {
-                x: minX / viewport.width,
-                y: minY / viewport.height,
-                width: (maxX - minX) / viewport.width,
-                height: (maxY - minY) / viewport.height,
-              };
-
-              results.push({
-                id: uuidv4(),
-                text: fullText.substring(searchIndex, matchEnd),
-                name: `Search: ${searchQuery}`,
-                page: pageNum,
-                containerIndex: -1,
-                startOffset: searchIndex,
-                endOffset: matchEnd,
-                rects: [rect],
-              });
-            }
-          }
-
-          searchIndex = matchEnd;
+      const BATCH_SIZE = 5;
+      for (let i = 1; i <= pdf.numPages; i += BATCH_SIZE) {
+        const batch = [];
+        for (let j = i; j < Math.min(i + BATCH_SIZE, pdf.numPages + 1); j++) {
+          batch.push(searchInPage(j, searchTerm, pdf));
+        }
+        
+        const batchResults = await Promise.all(batch);
+        allResults.push(...batchResults.flat());
+        
+        if (allResults.length > 0) {
+          setMatches([...allResults]);
         }
       }
 
-      setMatches(results);
+      setMatches(allResults);
       setActiveMatchIndex(0);
-      if (results.length > 0) {
-        scrollToMatch(0, results);
+      if (allResults.length > 0) {
+        scrollToMatch(0, allResults);
       }
     } catch (error) {
       console.error('Search error:', error);
       setMatches([]);
+    } finally {
+      setIsSearching(false);
     }
-  }, [searchQuery, fileUrl, scrollToMatch]);
+  }, [searchQuery, fileUrl, scrollToMatch, searchInPage, allPagesLoaded]);
 
   // Debounced search
   const handleSearchInput = useCallback(
@@ -312,11 +521,15 @@ export default function PdfViewer({
         return;
       }
 
+      if (!allPagesLoaded) {
+        return; // Don't search if pages aren't loaded
+      }
+
       searchTimeoutRef.current = setTimeout(() => {
         handleSearch();
       }, DEBOUNCE_DELAY);
     },
-    [handleSearch]
+    [handleSearch, allPagesLoaded]
   );
 
   const handleNextMatch = useCallback(() => {
@@ -346,70 +559,6 @@ export default function PdfViewer({
     [selectedHighlight, highlights, setHighlights]
   );
 
-  // Memoized highlight overlays
-  const renderHighlights = useMemo(
-    () => (pageIndex: number) => {
-      const pageWidth = pageRefs?.current?.[pageIndex]?.offsetWidth ?? 0;
-      const pageHeight = pageRefs?.current?.[pageIndex]?.offsetHeight ?? 0;
-
-      return highlights
-        .filter((h) => h.page === pageIndex + 1)
-        .flatMap((h, hi) =>
-          h.rects.map((rect, ri) => (
-            <div
-              key={`highlight-${hi}-${ri}`}
-              style={{
-                position: 'absolute',
-                left: rect.x * pageWidth,
-                top: rect.y * pageHeight,
-                width: rect.width * pageWidth,
-                height: rect.height * pageHeight,
-                backgroundColor: 'rgba(255, 235, 59, 0.4)',
-                mixBlendMode: 'multiply',
-                borderRadius: 2,
-                pointerEvents: 'none',
-              }}
-            />
-          ))
-        );
-    },
-    [highlights, pageRefs]
-  );
-
-  // Memoized search match overlays
-  const renderMatches = useMemo(
-    () => (pageIndex: number) => {
-      const pageWidth = pageRefs?.current?.[pageIndex]?.offsetWidth ?? 0;
-      const pageHeight = pageRefs?.current?.[pageIndex]?.offsetHeight ?? 0;
-
-      return matches
-        .filter((m) => m.page === pageIndex + 1)
-        .flatMap((m, mi) => {
-          const isActive = matches[activeMatchIndex]?.id === m.id;
-
-          return m.rects.map((rect, ri) => (
-            <div
-              key={`match-${mi}-${ri}`}
-              style={{
-                position: 'absolute',
-                left: rect.x * pageWidth,
-                top: rect.y * pageHeight,
-                width: rect.width * pageWidth,
-                height: rect.height * pageHeight,
-                backgroundColor: isActive ? 'rgba(255, 87, 34, 0.5)' : 'rgba(76, 175, 80, 0.4)',
-                borderRadius: 2,
-                pointerEvents: 'none',
-                border: isActive ? '2px solid #ff5722' : '1px solid #4caf50',
-                boxSizing: 'border-box',
-                transition: 'all 0.2s ease',
-              }}
-            />
-          ));
-        });
-    },
-    [matches, activeMatchIndex, pageRefs]
-  );
-
   return (
     <div
       ref={containerRef}
@@ -437,15 +586,34 @@ export default function PdfViewer({
           gap: '8px',
         }}
       >
-        <Input.Search
-          placeholder="Search in PDF"
-          allowClear
-          value={searchQuery}
-          onChange={(e) => handleSearchInput(e.target.value)}
-          onSearch={handleSearch}
-          style={{ width: '300px', maxWidth: '100%' }}
-          enterButton={<SearchOutlined />}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Input.Search
+            placeholder={allPagesLoaded ? "Search in PDF" : "Loading pages..."}
+            allowClear
+            value={searchQuery}
+            onChange={(e) => handleSearchInput(e.target.value)}
+            onSearch={handleSearch}
+            style={{ width: '300px', maxWidth: '100%' }}
+            enterButton={<SearchOutlined />}
+            disabled={!allPagesLoaded}
+          />
+          
+          {!allPagesLoaded && (
+            <Tooltip title={`Loading pages: ${loadedPages.size} / ${numPages}`}>
+              <Spin 
+                indicator={<LoadingOutlined style={{ fontSize: 16 }} spin />} 
+                size="small"
+              />
+            </Tooltip>
+          )}
+          
+          {isSearching && (
+            <Spin 
+              indicator={<LoadingOutlined style={{ fontSize: 16 }} spin />} 
+              size="small"
+            />
+          )}
+        </div>
 
         {matches.length > 0 && (
           <Space align="center" size="small">
@@ -522,85 +690,116 @@ export default function PdfViewer({
             }}
             loading={null}
           >
-            {Array.from({ length: numPages }, (_, index) => (
-              <div
-                key={`page_${index + 1}`}
-                id={`pdf-page-${index + 1}`}
-                ref={(el) => {
-                  if (pageRefs?.current) {
-                    pageRefs.current[index] = el;
-                  }
-                }}
-                style={{
-                  marginBottom: '20px',
-                  position: 'relative',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                  backgroundColor: '#fff',
-                }}
-              >
-                <Page
-                  pageNumber={index + 1}
-                  scale={zoom}
-                  renderTextLayer={true}
-                  renderAnnotationLayer={true}
-                  loading={null}
-                />
+            {Array.from({ length: numPages }, (_, index) => {
+              const pageNum = index + 1;
+              const shouldRender = visiblePages.has(pageNum);
 
-                {renderHighlights(index)}
-                {renderMatches(index)}
+              return (
+                <div
+                  key={`page_${pageNum}`}
+                  id={`pdf-page-${pageNum}`}
+                  data-page-number={pageNum}
+                  ref={(el) => {
+                    if (pageRefs?.current) {
+                      pageRefs.current[index] = el;
+                    }
+                  }}
+                  style={{
+                    marginBottom: '20px',
+                    position: 'relative',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    backgroundColor: '#fff',
+                    minHeight: shouldRender ? 'auto' : '800px',
+                  }}
+                >
+                  {shouldRender ? (
+                    <>
+                      <Page
+                        pageNumber={pageNum}
+                        scale={zoom}
+                        renderTextLayer={true}
+                        renderAnnotationLayer={true}
+                        loading={null}
+                        onLoadSuccess={() => handlePageLoadSuccess(pageNum)}
+                      />
 
-                {/* Highlight popup */}
-                {setHighlights && selectedHighlight?.page === index + 1 && (
-                  <div
-                    ref={popupRef}
-                    style={{
-                      position: 'absolute',
-                      top: selectedHighlight.rects[0].y * (pageRefs?.current?.[index]?.offsetHeight ?? 0) - 50,
-                      left: selectedHighlight.rects[0].x * (pageRefs?.current?.[index]?.offsetWidth ?? 0),
-                      backgroundColor: '#fff',
-                      border: '1px solid #d9d9d9',
-                      padding: '8px',
-                      zIndex: 1000,
-                      borderRadius: '4px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    }}
-                  >
-                    {showInput ? (
-                      <Space>
-                        <Input
-                          placeholder="Name highlight"
-                          size="small"
-                          autoFocus
-                          style={{ width: 150 }}
-                          onPressEnter={(e) => saveHighlight((e.target as HTMLInputElement).value.trim())}
-                        />
-                        <Button
-                          type="primary"
-                          size="small"
-                          onClick={() => {
-                            const input = document.querySelector(
-                              'input[placeholder="Name highlight"]'
-                            ) as HTMLInputElement;
-                            saveHighlight(input?.value.trim() || '');
+                      <PageOverlay
+                        pageIndex={index}
+                        highlights={highlights}
+                        matches={matches}
+                        activeMatchIndex={activeMatchIndex}
+                        pageWidth={pageRefs?.current?.[index]?.offsetWidth ?? 0}
+                        pageHeight={pageRefs?.current?.[index]?.offsetHeight ?? 0}
+                      />
+
+                      {/* Highlight popup */}
+                      {setHighlights && selectedHighlight?.page === pageNum && (
+                        <div
+                          ref={popupRef}
+                          style={{
+                            position: 'absolute',
+                            top: selectedHighlight.rects[0].y * (pageRefs?.current?.[index]?.offsetHeight ?? 0) - 50,
+                            left: selectedHighlight.rects[0].x * (pageRefs?.current?.[index]?.offsetWidth ?? 0),
+                            backgroundColor: '#fff',
+                            border: '1px solid #d9d9d9',
+                            padding: '8px',
+                            zIndex: 1000,
+                            borderRadius: '4px',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                           }}
                         >
-                          Save
-                        </Button>
-                      </Space>
-                    ) : (
-                      <Button
-                        type="primary"
-                        icon={<HighlightOutlined />}
-                        size="small"
-                        onClick={() => setShowInput(true)}
-                      >
-                        Highlight
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                          {showInput ? (
+                            <Space>
+                              <Input
+                                placeholder="Name highlight"
+                                size="small"
+                                autoFocus
+                                style={{ width: 150 }}
+                                onPressEnter={(e) => saveHighlight((e.target as HTMLInputElement).value.trim())}
+                              />
+                              <Button
+                                type="primary"
+                                size="small"
+                                onClick={() => {
+                                  const input = document.querySelector(
+                                    'input[placeholder="Name highlight"]'
+                                  ) as HTMLInputElement;
+                                  saveHighlight(input?.value.trim() || '');
+                                }}
+                              >
+                                Save
+                              </Button>
+                            </Space>
+                          ) : (
+                            <Button
+                              type="primary"
+                              icon={<HighlightOutlined />}
+                              size="small"
+                              onClick={() => setShowInput(true)}
+                            >
+                              Highlight
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '800px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#999',
+                      }}
+                    >
+                      Page {pageNum}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </Document>
         </div>
       </div>

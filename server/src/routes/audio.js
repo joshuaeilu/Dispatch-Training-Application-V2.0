@@ -1,10 +1,13 @@
 const textToSpeech = require('@google-cloud/text-to-speech');
 const express = require('express');
 const router = express.Router();
+const dotenv = require("dotenv");
+dotenv.config();
+
 const { auth } = require('../middleware/auth');
 
 const client = new textToSpeech.TextToSpeechClient({
-  keyFilename: "C:/Users/Josh Eilu/Downloads/dispatch-training-application-69f023e14169.json"
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
 });
 router.get("/", auth(["admin"]), async (req, res) => {
   try {

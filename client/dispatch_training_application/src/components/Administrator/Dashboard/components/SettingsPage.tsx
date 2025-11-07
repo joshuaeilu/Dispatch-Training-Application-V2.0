@@ -160,6 +160,8 @@ export default function SettingsPage() {
                 <PageHeader
                     title="System Settings"
                     subtitle="Manage types and upload procedures"
+                    onBack={() =>window.history.back()}
+                    showBackButton
                 />
             </div>
 

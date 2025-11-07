@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button} from "antd";
+import { Button } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 
 import type { Exercise } from "../../../types/index.types";
@@ -10,7 +10,6 @@ import KnowledgeCheckResults from "./components/KnowledgeCheckResults";
 import { checkIsMobile } from "../../../contexts/AuthProvider";
 import { useLocation } from "react-router-dom";
 import { api } from "../../../utils/api";
-
 
 export default function KnowledgeCheckPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -65,12 +64,11 @@ export default function KnowledgeCheckPage() {
   // Submit answers
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    try{
+    try {
       await api.post(`/submissions`, { exerciseId, answers: userAnswers });
       setShowResults(true);
       setIsSubmitting(false);
-    }
-    catch(err){
+    } catch (err) {
       console.error(err);
       setIsSubmitting(false);
     }
@@ -84,78 +82,161 @@ export default function KnowledgeCheckPage() {
   return (
     <div
       style={{
-        maxWidth: 800,
-        margin: checkIsMobile() ? "1rem" : "1rem auto",
-        paddingBottom: 64,
-        overflowX: "hidden",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "#f5f7fa",
+        padding: checkIsMobile() ? "0.75rem" : "1.5rem",
       }}
     >
-      <AnimatePresence mode="wait">
-        {!showResults ? (
-          <motion.div
-            key="quiz"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-          >
-            <KnowledgeCheckHeader
-              current={currentIndex + 1}
-              total={exercise?.questions.length}
-            />
-
-            <QuestionSection
-              question={currentQuestion}
-              index={currentIndex}
-              total={exercise?.questions.length}
-              userAnswer={currentQuestion ? userAnswers[currentQuestion.id] : undefined}
-              setUserAnswer={handleAnswer}
-            />
-
-            <QuestionNavigation
-              currentIndex={currentIndex}
-              total={exercise?.questions.length}
-              isAnswered={isAnswered}
-              onNext={handleNext}
-              onPrev={handlePrev}
-              isSubmitting={isSubmitting}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="results"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -40 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          >
-            <KnowledgeCheckResults
-              name={exercise?.name}
-              questions={exercise?.questions || []}
-              userAnswers={userAnswers}
-            />
-             <div
+      <div
         style={{
-          textAlign: "center",
-          marginTop: 32,
+          width: "100%",
+          maxWidth: 750,
+          margin: "0 auto",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <Button
-        size="large"
-          type="primary"
-          className="regular-btn"
-          style={{
-            fontSize: 16,
-            borderRadius: 10,
-          }}
-          onClick={()=> handleFinish()}
-        >
-          Finish
-        </Button>
+        <AnimatePresence mode="wait">
+          {!showResults ? (
+            <motion.div
+              key="quiz"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1.25rem",
+                paddingBottom: "1.5rem",
+              }}
+            >
+              <KnowledgeCheckHeader
+                current={currentIndex + 1}
+                total={exercise?.questions.length}
+                answeredCount={Object.keys(userAnswers).length}
+              />
+
+              <div
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderRadius: 12,
+                  padding: checkIsMobile() ? "1.25rem" : "2rem",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                  minHeight: checkIsMobile() ? "auto" : 350,
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <QuestionSection
+                  question={currentQuestion}
+                  index={currentIndex}
+                  total={exercise?.questions.length}
+                  userAnswer={
+                    currentQuestion ? userAnswers[currentQuestion.id] : undefined
+                  }
+                  setUserAnswer={handleAnswer}
+                />
+              </div>
+
+              <QuestionNavigation
+                currentIndex={currentIndex}
+                total={exercise?.questions.length}
+                isAnswered={isAnswered}
+                onNext={handleNext}
+                onPrev={handlePrev}
+                isSubmitting={isSubmitting}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="results"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1.5rem",
+                paddingBottom: "1.5rem",
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderRadius: 12,
+                  padding: checkIsMobile() ? "1.25rem" : "2rem",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                }}
+              >
+                <KnowledgeCheckResults
+                  name={exercise?.name}
+                  questions={exercise?.questions || []}
+                  userAnswers={userAnswers}
+                />
+              </div>
+
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: checkIsMobile() ? "0.75rem 0" : "1rem 0",
+                }}
+              >
+                <Button
+                  size="large"
+                  type="primary"
+                  className="regular-btn"
+                  style={{
+                    fontSize: checkIsMobile() ? 15 : 16,
+                    borderRadius: 10,
+                    height: checkIsMobile() ? 42 : 46,
+                    padding: "0 2.5rem",
+                    fontWeight: 500,
+                    boxShadow: "0 4px 12px rgba(24, 144, 255, 0.25)",
+                  }}
+                  onClick={() => handleFinish()}
+                >
+                  Finish
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+      {/* Responsive styles */}
+      <style>{`
+        @media (max-width: 768px) {
+          .ant-btn-lg {
+            width: 100%;
+            max-width: 280px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .ant-btn-lg {
+            max-width: 100%;
+          }
+        }
+
+        /* Smooth transitions for all interactive elements */
+        .regular-btn {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .regular-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(24, 144, 255, 0.35) !important;
+        }
+
+        .regular-btn:active {
+          transform: translateY(0);
+        }
+      `}</style>
     </div>
   );
 }

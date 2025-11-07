@@ -86,6 +86,14 @@ export function getUsers() {
   };
 }
 
+
+export async function getDefaultMOP(){
+
+  const defaultMOP = await api.get('/mop/default');
+  return defaultMOP;
+
+}
+
 export function getPreferences(){
   const { preferences, setPreferences } = useContext(UniversalContext);
   return {

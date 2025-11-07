@@ -54,20 +54,14 @@ const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const exercisesData: Exercise[] = res.data;
     setExercises(exercisesData);
 
-    const exerciseIds = exercisesData.map((e) => e.id);
-    if (exerciseIds.length === 0) return;
+    const userId = user.id;
+    const submissionRes = await api.get(`/submissions/exercises/${userId}`);
+    const completedMap = submissionRes.data?.exerciseIds.reduce((acc: Record<string, boolean>, id: string) => {
+      acc[id] = true;
+      return acc;
+    }, {});
+    setSubmittedMap(completedMap || {});
 
-const params = new URLSearchParams();
-exerciseIds.forEach(id => params.append("exercise_ids[]", id));
-
-
-const statusRes = await api.get(`/submissions/status?${params.toString()}`);
-
-
-
-
-    const completedMap = statusRes.data?.completedMap || {};
-    setSubmittedMap(completedMap);
   } catch (err) {
     console.error("❌ Error fetching exercises or submission statuses:", err);
   }
@@ -236,6 +230,9 @@ const filteredExercises = exercises.filter((e) => {
         ))}
       </div>
       </div>
+
+
+    {/* Result Modal */}
      <Modal
   open={showResultModal}
   centered

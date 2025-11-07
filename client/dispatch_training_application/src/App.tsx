@@ -20,6 +20,8 @@ import ViewKnowledgeCheck from './components/User/KnowledgeChecks/ViewKnowledgeC
 import UserResourcesPage from './components/Shared/Resources/UserResourcesPage'
 import { getUser } from './contexts/AuthProvider'
 import SettingsPage from './components/Administrator/Dashboard/components/SettingsPage'
+import ViewMop from './components/Shared/ViewMop'
+import UserProgressPage from './components/Administrator/Dashboard/components/UserProgressPage'
 function App() {
 
   const user = getUser();
@@ -44,6 +46,8 @@ function App() {
             <Route path="dispatchers" element={<DispatchersSection />} />
             <Route path="trainees" element={<TraineesSection />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="user-progress" element={<UserProgressPage />} />
+            
           </Route>
 
           <Route path="/scenario-manager" element={<Outlet />} >
@@ -52,10 +56,7 @@ function App() {
             <Route path="edit-scenario" element={<ScenarioEditor />} />
           </Route>
 
-          <Route path="/scenario-walkthroughs" element={<Outlet />}>
-            <Route index element={<UserViewScenarios />} />
-            <Route path="view-scenario" element={<ScenarioWalkthrough />} />
-          </Route>
+        
 
           <Route path="/knowledge-checks" element={<Outlet />} >
             <Route index element={<ViewKnowledgeChecks />} />
@@ -66,6 +67,11 @@ function App() {
 
           {/* User Routes */}
 
+            <Route path="/scenario-walkthroughs" element={<Outlet />}>
+            <Route index element={<UserViewScenarios />} />
+            <Route path="view-scenario" element={<ScenarioWalkthrough />} />
+          </Route>
+
           <Route path="/user-knowledge-checks" element={<Outlet />} >
             <Route index element={<UserViewKnowledgeChecks />} />
             <Route path="view-exercise" element={<ViewKnowledgeCheck />} />
@@ -73,6 +79,7 @@ function App() {
 
 
           <Route path="/resources" element={<UserResourcesPage />} />
+          <Route path='/mop' element={<ViewMop />} />
         </Route>
       </Routes>
     </Router>

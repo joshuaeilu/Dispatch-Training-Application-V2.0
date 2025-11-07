@@ -2,10 +2,12 @@
 const textToSpeech = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const path = require('path');
+const dotenv = require("dotenv");
+dotenv.config();
 const { writeFile } = require('fs/promises');
 // Initialize Google Cloud TTS client with your service account
 const client = new textToSpeech.TextToSpeechClient({
-  keyFilename: "C:/Users/Josh Eilu/Downloads/dispatch-training-application-69f023e14169.json"
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
 });
 
 // List of Chirp3 voice names
