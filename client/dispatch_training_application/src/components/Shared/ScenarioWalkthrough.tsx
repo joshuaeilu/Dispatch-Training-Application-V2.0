@@ -9,15 +9,13 @@ import {
   Col,
   Space,
 } from "antd";
-import { Drawer } from "antd";
-import PdfViewer from "../../components/Shared/PdfViewer"; 
 
 import {
   PlayCircleOutlined,
   CheckCircleTwoTone,
 } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
-import type { HighlightData, Scene } from "../../types/index.types";
+import type {  Scene } from "../../types/index.types";
 import SceneCard from "./SceneCard";
 import { AuthContext } from "../../contexts/AuthProvider";
 import dayjs from "dayjs";
@@ -127,45 +125,7 @@ export default function ScenarioWalkthrough() {
     }
   };
 
-  const scrollToHighlight = (h: HighlightData) => {
-    console.log('Scrolling to highlight:', h);
-    
-    const wasOpen = pdfOpen;
-    if (!wasOpen) {
-      setPdfOpen(true);
-    }
 
-    const delay = wasOpen ? 300 : 1000;
-    
-    setTimeout(() => {
-      const container = scrollContainerRef.current;
-      const pageEl = pageRefs.current[h.page - 1];
-      
-      console.log('Container:', container);
-      console.log('Page element:', pageEl);
-      console.log('Highlight rects:', h.rects);
-      
-      if (!container || !pageEl || !h.rects?.length) {
-        console.log('Missing required elements for scrolling');
-        return;
-      }
-
-      const pageTop = pageEl.offsetTop;
-      const r = h.rects[0];
-
-      const highlightTop = pageTop + r.y * pageEl.offsetHeight;
-      const highlightHeight = r.height * pageEl.offsetHeight;
-
-      const targetTop = highlightTop - (container.clientHeight / 2) + (highlightHeight / 2);
-
-      console.log('Scrolling to top:', targetTop);
-
-      container.scrollTo({
-        top: Math.max(0, targetTop),
-        behavior: 'smooth',
-      });
-    }, delay);
-  };
 
   return (
     <div 
@@ -322,9 +282,7 @@ export default function ScenarioWalkthrough() {
                             scene={scene}
                             index={index}
                             onCorrect={handleCorrect}
-                            showHighlight={(highlight: HighlightData) => {
-                              scrollToHighlight(highlight);
-                            }}
+                           
                             audioUrl={`http://localhost:5000/data/scenario_audios/${scenarioData.id}/scene-${index}.mp3?token=${token}`}
                           />
                         ) : (
@@ -513,27 +471,7 @@ export default function ScenarioWalkthrough() {
         </div>
       </div>
 
-      <Drawer
-        title="📑 MANUAL OF PROCEDURES"
-        placement="right"
-        destroyOnClose
-        width={window.innerWidth < 768 ? "90%" : window.innerWidth < 1024 ? "70%" : "40%"}
-        onClose={() => setPdfOpen(false)}
-        open={pdfOpen}
-        bodyStyle={{ 
-          padding: 0, 
-          display: "flex", 
-          flexDirection: "column", 
-          height: '100%' 
-        }}
-      >
-        <PdfViewer
-          fileUrl={`http://localhost:5000/data/mop/${scenarioData.pdfFilename}?token=${token}`}
-          highlights={scenarioData.scenes.flatMap((scene: Scene) => scene.highlights || [])}
-          scrollContainerRef={scrollContainerRef}
-          pageRefs={pageRefs}
-        />
-      </Drawer>
+   
     </div>
   );
 }

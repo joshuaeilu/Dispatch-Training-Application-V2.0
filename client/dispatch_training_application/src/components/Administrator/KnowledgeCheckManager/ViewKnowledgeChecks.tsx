@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Row, Col, Form, Select, Input, Button, Table, Tag, Space, Tooltip, Popconfirm, message, type TableColumnType, Switch, Typography } from "antd";
 import { ReloadOutlined, SearchOutlined, EditOutlined,  FileTextOutlined, DeleteOutlined, SnippetsOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,6 @@ import {  AUDIENCE_COLORS, STATUS_COLORS } from "../../../data/data";
 import ViewExerciseModal from "./AddExercise/ViewQuestions/components/ViewExerciseModal";
 import { PageHeader } from "../../Shared/PageHeader";
 import {  exerciseDifficultyOptions, exerciseStatusOptions } from "../../../data/data";
-import { UniversalContext } from "../../../contexts/UniversalHelpers";
 import { toTitleCase } from "../../../utils/tools";
 
 

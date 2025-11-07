@@ -20,7 +20,6 @@ import ViewKnowledgeCheck from './components/User/KnowledgeChecks/ViewKnowledgeC
 import UserResourcesPage from './components/Shared/Resources/UserResourcesPage'
 import { getUser } from './contexts/AuthProvider'
 import SettingsPage from './components/Administrator/Dashboard/components/SettingsPage'
-import ViewMop from './components/Shared/ViewMop'
 import UserProgressPage from './components/Administrator/Dashboard/components/UserProgressPage'
 function App() {
 
@@ -79,7 +78,6 @@ function App() {
 
 
           <Route path="/resources" element={<UserResourcesPage />} />
-          <Route path='/mop' element={<ViewMop />} />
         </Route>
       </Routes>
     </Router>

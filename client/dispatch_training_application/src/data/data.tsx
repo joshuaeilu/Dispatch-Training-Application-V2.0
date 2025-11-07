@@ -1,4 +1,4 @@
-import { ApartmentOutlined, AppstoreFilled, AudioOutlined, BookOutlined, DeleteOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, SearchOutlined, SnippetsOutlined, UploadOutlined, UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
+import { ApartmentOutlined, AppstoreFilled, AudioOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, UserOutlined,} from "@ant-design/icons";
 import type {  ResourceCategory, ResourceKey, Role, MenuItem } from '../types/index.types';
 
 import React from "react";
@@ -100,13 +100,11 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
     { key: '/user-knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
     { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
-    { key: '/mop', icon: <EnvironmentOutlined />, label: 'MOP' },
   ],
   trainee: [
     { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
     { key: '/user-knowledge-checks', icon: <QuestionCircleFilled />, label: 'Knowledge Checks' },
     { key: '/scenario-walkthroughs', icon: <ApartmentOutlined />, label: 'Scenario Walkthroughs' },
-    { key: '/mop', icon: <BookOutlined />, label: 'MOP' },
   ],
 };
 

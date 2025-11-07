@@ -108,7 +108,7 @@ const filteredExercises = exercises.filter((e) => {
   const handleCardClick = async (exercise: Exercise) => {
   if (submittedMap[exercise.id]) {
     try {
-      const res = await api.get(`/submissions/${exercise.id}`);
+      const res = await api.get(`/submissions/${exercise.id}`, { params: { userId: user?.id } });
       setSelectedSubmission({
         ...res.data,
       });
@@ -233,41 +233,44 @@ const filteredExercises = exercises.filter((e) => {
 
 
     {/* Result Modal */}
-     <Modal
-  open={showResultModal}
-  centered
-  width={800}
-  closable={false}
-  footer={
-    <div style={{ textAlign: "right", marginTop: 16, marginBottom: 16 }}>
-      <Button
-        type="default"
-        size="large"
-        onClick={() => setShowResultModal(false)}
-        style={{
-          borderRadius: 8,
-          fontWeight: 500,
-        }}
-      >
-        Close
-      </Button>
-    </div>
-  }
-  modalRender={(node) => (
-    <div style={{ maxHeight: "80vh", overflow: "auto" }}>{node}</div>
-  )}
->
-  {selectedSubmission ? (
-    <KnowledgeCheckResults
-      name={selectedExercise?.name}
-      questions={selectedExercise?.questions || []}
-      userAnswers={selectedSubmission?.answers || {}}
-    />
-  ) : (
-    <Text type="secondary">Loading submission...</Text>
-  )}
-</Modal>
-
+  <Modal
+    open={showResultModal}
+    centered
+    width={800}
+    maskClosable={true} // ✅ allows closing when clicking outside
+    closable={false}
+    onCancel={() => setShowResultModal(false)} // ✅ handle close event
+    footer={
+      <div style={{ textAlign: "right", marginTop: 16, marginBottom: 16 }}>
+        <Button
+          type="default"
+          size="large"
+          onClick={() => setShowResultModal(false)}
+          style={{
+            borderRadius: 8,
+            fontWeight: 500,
+          }}
+        >
+          Close
+        </Button>
+      </div>
+    }
+    bodyStyle={{
+      maxHeight: "80vh",
+      overflowY: "auto", // ✅ scrollable content area
+      paddingRight: 16,
+    }}
+  >
+    {selectedSubmission ? (
+      <KnowledgeCheckResults
+        name={selectedExercise?.name}
+        questions={selectedExercise?.questions || []}
+        userAnswers={selectedSubmission?.answers || {}}
+      />
+    ) : (
+      <Text type="secondary">Loading submission...</Text>
+    )}
+  </Modal>
 
     </div>
   );

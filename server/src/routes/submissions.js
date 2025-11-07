@@ -129,8 +129,8 @@ router.get("/summary/:userId", async (req, res) => {
 
 
 // Get submissions for a specific user
-router.get("/:exerciseId", auth(["trainee", "dispatcher"]), async (req, res) => {
-  const { user } = req;
+router.get("/:exerciseId", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
+  const { userId } = req.query;
   const { exerciseId } = req.params;
 
   try {
@@ -139,7 +139,7 @@ router.get("/:exerciseId", auth(["trainee", "dispatcher"]), async (req, res) => 
       SELECT answers, submitted_at FROM exercise_submissions
       WHERE user_id = $1 AND exercise_id = $2
       `,
-      [user.id, exerciseId]
+      [userId, exerciseId]
     );
 
     if (rows.length === 0) {

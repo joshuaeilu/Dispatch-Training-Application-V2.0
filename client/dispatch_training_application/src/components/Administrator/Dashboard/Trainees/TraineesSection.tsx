@@ -80,7 +80,7 @@ export default function TraineesSection() {
                   imageUrl={`${PROFILE_PIC_URL}${user.avatar}?token=${token}`}
                   completed={completed}
                   totalAssignments={exerciseTotals + scenarioTotals}
-                  onClick={() => navigate('/dashboard/user-progress', { state: { user: { id: user.id, name: user.name, role: user.role } } })}
+                  onClick={() => navigate('/dashboard/user-progress', { state: { user: { id: user.id, name: user.name, role: user.role, avatar: user.avatar } } })}
                 />
               </Col>
             );

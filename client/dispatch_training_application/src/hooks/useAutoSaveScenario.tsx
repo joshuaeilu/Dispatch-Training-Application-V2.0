@@ -18,8 +18,7 @@ export function useAutosaveScenario(
       await api.post('/scenarios', {
         scenario, 
         authorId, 
-        status: 'draft', 
-        pdfFilename: scenario.pdfFilename || null // ✅ Get from scenario
+        status: 'draft'
       });
 
       setLastSavedScenario(scenario);
