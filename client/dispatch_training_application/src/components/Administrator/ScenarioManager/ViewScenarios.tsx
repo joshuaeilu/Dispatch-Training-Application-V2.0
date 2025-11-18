@@ -2,12 +2,11 @@
 import { Button, Card, Col, Row, Space, Form, Select, Input, Typography, Table, type TableColumnType, Tag, Tooltip, Popconfirm } from "antd";
 import { PageHeader } from "../../Shared/PageHeader"
 import { useNavigate } from "react-router-dom"
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { api } from "../../../utils/api";
 import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
 import type { ScenarioTableType } from "../../../types/index.types";
-import { UniversalContext } from "../../../contexts/UniversalHelpers";
 export default function ViewScenarios() {
   const navigate = useNavigate();
   const [form] = Form.useForm();

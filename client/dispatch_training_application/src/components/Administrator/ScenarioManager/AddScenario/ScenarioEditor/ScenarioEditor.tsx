@@ -4,8 +4,7 @@ import SceneEditor from "./SceneEditor";
 import 'antd/dist/reset.css'; // AntD v5
 
 import { useState, useRef, useEffect } from "react";
-import type { HighlightData, Scenario } from "../../../../../types/index.types";
-import PdfViewer from "../../../../Shared/PdfViewer";
+import type { Scenario } from "../../../../../types/index.types";
 import { useLocation } from "react-router-dom";
 import SceneOverview from "./SceneOverview";
 import { api } from "../../../../../utils/api";
@@ -25,8 +24,6 @@ export default function ScenarioEditor() {
   const { scenarioDetails } = location.state || {};
 
   const { scenario, setScenario} = useScenarioManager({ scenarioId, scenarioDetails });
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const token = getToken();
 
   const [__, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
 
@@ -35,10 +32,6 @@ export default function ScenarioEditor() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const { user } = useContext(AuthContext);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
   // Audio playback ref
@@ -59,42 +52,9 @@ export default function ScenarioEditor() {
 
 
 
-  const scrollToHighlight = (h: HighlightData) => {
-    const container = scrollContainerRef.current;
-    const pageEl = pageRefs.current[h.page - 1];
-    if (!container || !pageEl || !h.rects?.length) return;
 
-
-    const pageTop = pageEl.offsetTop;
-    const pageLeft = pageEl.offsetLeft;
-
-    const r = h.rects[0]; // First highlight rect
-
-    // Calculate the position of the highlight inside the scroll container
-    const highlightTop = pageTop + r.y * pageEl.offsetHeight;
-    const highlightLeft = pageLeft + r.x * pageEl.offsetWidth;
-
-    const highlightHeight = r.height * pageEl.offsetHeight;
-    const highlightWidth = r.width * pageEl.offsetWidth;
-
-    // Center the highlight vertically and horizontally
-    const targetTop = highlightTop - (container.clientHeight / 2) + (highlightHeight / 2);
-    const targetLeft = highlightLeft - (container.clientWidth / 2) + (highlightWidth / 2);
-
-    container.scrollTo({
-      top: targetTop,
-      left: targetLeft,
-      behavior: 'smooth',
-    });
-  };
   const [saveStatus, setSaveStatus] = useState<'draft' | 'published'>('published');
 
-  useEffect(() => {
-    if(scenario?.pdfFilename) {
-      const url = `http://localhost:5000/data/mop/${scenario.pdfFilename}?token=${token}`;
-      setPdfUrl(url);
-    }
-  }, [scenario?.pdfFilename, token]);
 
 const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario);
 
@@ -107,7 +67,6 @@ const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario)
         scenario,
         authorId: user?.id,
         status: saveStatus, // ✅ explicit
-        pdfFilename: scenario?.pdfFilename || null,
       });
 
       if(saveStatus === 'published') {
@@ -196,21 +155,16 @@ const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario)
 
         {/* Main Content Area */}
 <div className="flex flex-col md:flex-row h-[87vh] overflow-hidden gap-4" style={{ padding: 16 }}>
-        <div className="w-full md:w-1/3 h-full ">
-          <SceneEditor scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollHighlight={(highlight: HighlightData) => scrollToHighlight(highlight)} playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
+        <div className="w-full md:w-1/2 h-full ">
+          <SceneEditor scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex}
+           playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
 
 </div>
 
 
 
-        <div className="w-full md:w-1/3 h-full ">
-            <PdfViewer fileUrl={pdfUrl || ""} highlights={scenario?.scenes[currentIndex]?.highlights || []} setHighlights={(highlights) => {
-          
-            setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, highlights } : s) });
-          }}
-            scrollContainerRef={scrollContainerRef} pageRefs={pageRefs} />
-          </div>
-                  <div className="w-full md:w-1/3 h-full ">
+   
+                  <div className="w-full md:w-1/2 h-full ">
 
           <SceneOverview scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} stopAudio={stopAudio} />
         </div>

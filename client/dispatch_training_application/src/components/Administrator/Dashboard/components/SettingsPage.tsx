@@ -3,30 +3,22 @@ import {
     Card,
     Input,
     Space,
-    Typography,
     Table,
     Popconfirm,
-    Upload,
 } from "antd";
 import {
     DeleteOutlined,
     PlusOutlined,
-    FilePdfOutlined,
-    UploadOutlined,
 } from "@ant-design/icons";
 import { useContext, useState } from "react";
 import { PageHeader } from "../../../Shared/PageHeader";
 import { UniversalContext } from "../../../../contexts/UniversalHelpers";
 import { api } from "../../../../utils/api";
 import { toast } from "react-hot-toast";
-import SettingsMopSection from "./SettingsMopSection";
 
 export default function SettingsPage() {
     const [newExerciseType, setNewExerciseType] = useState("");
     const [newScenarioType, setNewScenarioType] = useState("");
-    const [currentMop, setCurrentMop] = useState("Calvin_MOP_v2.pdf");
-    const [newMopFile, setNewMopFile] = useState<File | null>(null);
-
     const { preferences, setPreferences } = useContext(UniversalContext);
 
     const handleAdd = async (
@@ -137,22 +129,6 @@ export default function SettingsPage() {
         />
     );
 
-    const uploadProps = {
-        beforeUpload: (file: File) => {
-            setNewMopFile(file);
-            return false;
-        },
-        maxCount: 1,
-        accept: ".pdf",
-    };
-
-    const saveMop = () => {
-        if (newMopFile) {
-            setCurrentMop(newMopFile.name);
-            setNewMopFile(null);
-            toast.success("MOP updated");
-        }
-    };
 
     return (
         <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -160,6 +136,8 @@ export default function SettingsPage() {
                 <PageHeader
                     title="System Settings"
                     subtitle="Manage types and upload procedures"
+                    onBack={() =>window.history.back()}
+                    showBackButton
                 />
             </div>
 
@@ -235,9 +213,6 @@ export default function SettingsPage() {
                         {renderTable("Scenario Type", preferences?.scenario_types || [], "scenario_types")}
                     </Card>
 
-                    {/* MOP Section */}
-
-                    <SettingsMopSection />
                 </Space>
             </div>
         </div>

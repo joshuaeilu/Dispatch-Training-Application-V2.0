@@ -15,7 +15,7 @@ import { api } from "../../../utils/api";
 import type { Scenario } from "../../../types/index.types";
 import { useNavigate } from "react-router-dom";
 import UserPageHeader from "../../Shared/UserPageHeader";
-import { checkIsMobile } from "../../../contexts/AuthProvider";
+import { AuthContext, checkIsMobile } from "../../../contexts/AuthProvider";
 
 const { Title, Text } = Typography;
 
@@ -28,25 +28,13 @@ const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [__, setLoading] = useState(false);
+  const { user } = useContext(AuthContext);
 
   const scenarioTypes = preferences?.scenario_types || ["No types found"];
   const navigate = useNavigate();
 
-  // Fetch completion status map
-  async function fetchScenarioCompletionMap(scenarioIds: string[]) {
-  if (!scenarioIds.length) return {};
 
-  try {
-    const res = await api.get("/submissions/scenario_walkthrough/status", {
-      params: { scenario_ids: scenarioIds },
-    });
-    setCompletedMap(res.data.completedMap);
 
-  } catch (err) {
-    console.error("❌ Error fetching scenario completion map:", err);
-    return {};
-  }
-}
 
 
   // Fetch scenarios
@@ -61,9 +49,13 @@ useEffect(() => {
 
       setScenarios(data);
 
-      // 👉 Extract IDs and fetch completion map
-      const scenarioIds = data.map((s: any) => s.id);
-      await fetchScenarioCompletionMap(scenarioIds);
+      // Fetch completed scenarios
+      const submissionRes = await api.get(`/submissions/scenarios/${user?.id}`);
+      const completedMap = submissionRes.data?.scenarioIds.reduce((acc: Record<string, boolean>, id: string) => {
+        acc[id] = true;
+        return acc;
+      }, {});
+      setCompletedMap(completedMap);
     } catch (err) {
       console.error("Failed to fetch scenarios", err);
     } finally {

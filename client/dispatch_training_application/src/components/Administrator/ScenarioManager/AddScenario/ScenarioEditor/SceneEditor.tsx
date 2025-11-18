@@ -6,7 +6,7 @@ import ActiveTabs from "../../../KnowledgeCheckManager/AddExercise/AddQuestions/
 
 
 
-export default function SceneEditor({ scenario, setScenario, currentIndex, setCurrentIndex, scrollHighlight, playing, setPlaying, audioRef }: SceneEditorProps) {
+export default function SceneEditor({ scenario, setScenario, currentIndex, setCurrentIndex, playing, setPlaying, audioRef }: SceneEditorProps) {
     const [activeTab, setActiveTab] = useState('2');
     
     
@@ -36,7 +36,7 @@ export default function SceneEditor({ scenario, setScenario, currentIndex, setCu
 )}
 
 {activeTab === '2' && (
-        <SceneEditorPage scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} scrollHighlight={scrollHighlight} playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
+        <SceneEditorPage scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex}  playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
 )}
 
         </div>

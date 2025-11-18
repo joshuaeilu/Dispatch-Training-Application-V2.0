@@ -30,7 +30,6 @@ export function useScenarioManager({ scenarioId, scenarioDetails }: UseScenarioM
                     speakers: data.scenario_data.speakers,
                     scenes: data.scenario_data.scenes,
                     status: data.scenario_data.status,
-                    pdfFilename: data.pdf_filename
                 };
                 
                 setScenario(loaded);

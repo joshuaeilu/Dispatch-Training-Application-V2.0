@@ -1,4 +1,4 @@
-import { ApartmentOutlined, AppstoreFilled, AudioOutlined, DeleteOutlined, EditOutlined, EnvironmentOutlined, EyeOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, SearchOutlined, SnippetsOutlined, UploadOutlined, UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
+import { ApartmentOutlined, AppstoreFilled, AudioOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, UserOutlined,} from "@ant-design/icons";
 import type {  ResourceCategory, ResourceKey, Role, MenuItem } from '../types/index.types';
 
 import React from "react";

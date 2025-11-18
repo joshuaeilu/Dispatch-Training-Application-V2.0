@@ -54,20 +54,14 @@ const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const exercisesData: Exercise[] = res.data;
     setExercises(exercisesData);
 
-    const exerciseIds = exercisesData.map((e) => e.id);
-    if (exerciseIds.length === 0) return;
+    const userId = user.id;
+    const submissionRes = await api.get(`/submissions/exercises/${userId}`);
+    const completedMap = submissionRes.data?.exerciseIds.reduce((acc: Record<string, boolean>, id: string) => {
+      acc[id] = true;
+      return acc;
+    }, {});
+    setSubmittedMap(completedMap || {});
 
-const params = new URLSearchParams();
-exerciseIds.forEach(id => params.append("exercise_ids[]", id));
-
-
-const statusRes = await api.get(`/submissions/status?${params.toString()}`);
-
-
-
-
-    const completedMap = statusRes.data?.completedMap || {};
-    setSubmittedMap(completedMap);
   } catch (err) {
     console.error("❌ Error fetching exercises or submission statuses:", err);
   }
@@ -114,7 +108,7 @@ const filteredExercises = exercises.filter((e) => {
   const handleCardClick = async (exercise: Exercise) => {
   if (submittedMap[exercise.id]) {
     try {
-      const res = await api.get(`/submissions/${exercise.id}`);
+      const res = await api.get(`/submissions/${exercise.id}`, { params: { userId: user?.id } });
       setSelectedSubmission({
         ...res.data,
       });
@@ -236,41 +230,47 @@ const filteredExercises = exercises.filter((e) => {
         ))}
       </div>
       </div>
-     <Modal
-  open={showResultModal}
-  centered
-  width={800}
-  closable={false}
-  footer={
-    <div style={{ textAlign: "right", marginTop: 16, marginBottom: 16 }}>
-      <Button
-        type="default"
-        size="large"
-        onClick={() => setShowResultModal(false)}
-        style={{
-          borderRadius: 8,
-          fontWeight: 500,
-        }}
-      >
-        Close
-      </Button>
-    </div>
-  }
-  modalRender={(node) => (
-    <div style={{ maxHeight: "80vh", overflow: "auto" }}>{node}</div>
-  )}
->
-  {selectedSubmission ? (
-    <KnowledgeCheckResults
-      name={selectedExercise?.name}
-      questions={selectedExercise?.questions || []}
-      userAnswers={selectedSubmission?.answers || {}}
-    />
-  ) : (
-    <Text type="secondary">Loading submission...</Text>
-  )}
-</Modal>
 
+
+    {/* Result Modal */}
+  <Modal
+    open={showResultModal}
+    centered
+    width={800}
+    maskClosable={true} // ✅ allows closing when clicking outside
+    closable={false}
+    onCancel={() => setShowResultModal(false)} // ✅ handle close event
+    footer={
+      <div style={{ textAlign: "right", marginTop: 16, marginBottom: 16 }}>
+        <Button
+          type="default"
+          size="large"
+          onClick={() => setShowResultModal(false)}
+          style={{
+            borderRadius: 8,
+            fontWeight: 500,
+          }}
+        >
+          Close
+        </Button>
+      </div>
+    }
+    bodyStyle={{
+      maxHeight: "80vh",
+      overflowY: "auto", // ✅ scrollable content area
+      paddingRight: 16,
+    }}
+  >
+    {selectedSubmission ? (
+      <KnowledgeCheckResults
+        name={selectedExercise?.name}
+        questions={selectedExercise?.questions || []}
+        userAnswers={selectedSubmission?.answers || {}}
+      />
+    ) : (
+      <Text type="secondary">Loading submission...</Text>
+    )}
+  </Modal>
 
     </div>
   );

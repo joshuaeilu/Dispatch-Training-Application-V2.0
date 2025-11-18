@@ -1,10 +1,21 @@
-import { PageHeader } from "../../Shared/PageHeader";
-import AdminActionsSection from "./components/AdminActionsSections";
-import AdminUsersSection from "./components/AdminUsersSection";
+import {  useRef } from 'react';
+import { PageHeader } from '../../Shared/PageHeader';
+import AdminUsersSection from './components/AdminUsersSection';
+import AdminActionsSection from './components/AdminActionsSections';
 
 export default function AdminDashboard() {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div 
+      style={{ 
+        height: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflow: 'hidden', 
+        position: 'relative' 
+      }}
+    >
       {/* Fixed Header */}
       <div style={{ flex: '0 0' }}>
         <PageHeader
@@ -14,10 +25,19 @@ export default function AdminDashboard() {
       </div>
 
       {/* Scrollable Section */}
-      <div style={{ flex: '1 1', overflowY: 'auto', paddingBottom: 24 }}>
+      <div 
+        ref={scrollContainerRef}
+        style={{ 
+          flex: '1 1', 
+          overflowY: 'auto', 
+          paddingBottom: 24 
+        }}
+      >
         <AdminUsersSection />
         <AdminActionsSection />
       </div>
+
+
     </div>
   );
 }

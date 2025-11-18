@@ -17,37 +17,8 @@ export type Speaker = {
   voice: string | undefined;
 }
 
-type HighlightRect = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
-export type HighlightData = {
-  id: string;
-  text: string;               // Highlighted text
-  name: string;               // User-defined name
-  page: number;               // Page number where highlight appears
-  containerIndex: number;     // Index of the span (optional if no longer used)
-  startOffset: number;        // Start offset in the span
-  endOffset: number;          // End offset in the span
-  rects: HighlightRect[];     // Bounding boxes of the highlighted area
-};
 
-export type PdfViewerProps = {
-  // pdfUrl: string;
-  fileUrl: string;
-  highlights: HighlightData[];
-  setHighlights?: (highlights: HighlightData[]) => void;
-  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
-  pageRefs?: React.RefObject<(HTMLDivElement | null)[]>;
-};
 
-export interface HighlightTagListProps {
-  highlights: HighlightData[];
-  setHighlights: (highlights: HighlightData[] ) => void;
-  scrollToHighlight: (highlight: HighlightData) => void;
-}
 
 export interface ScenarioTime{
   time: Dayjs | null | string;
@@ -62,7 +33,6 @@ export interface Scene {
   options: string[];
   correctOption: string | null;
   tip: string;
-  highlights: HighlightData[];
 }
 
 export interface Scenario {
@@ -76,7 +46,6 @@ export interface Scenario {
   speakers: Speaker[];
   scenes: Scene[];
   status?: 'draft' | 'published';
-  pdfFilename: string;
 }
 
 export type AdminPreferences = {
@@ -93,7 +62,6 @@ export interface SceneEditorProps {
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   currentIndex: number;
   setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
-  scrollHighlight: (highlight: HighlightData) => void;
 }
 
 

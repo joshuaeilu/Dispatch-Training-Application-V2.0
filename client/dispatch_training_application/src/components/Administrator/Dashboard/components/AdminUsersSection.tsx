@@ -1,4 +1,4 @@
-import { Card, Row, Col, Typography, Tag } from 'antd';
+import { Card, Row, Col, Typography } from 'antd';
 import {
     CustomerServiceOutlined,
     UserSwitchOutlined,
@@ -39,7 +39,7 @@ export default function AdminUsersSection() {
       ),
       description: 'Manage and oversee dispatcher and activities.',
       route: '/dashboard/dispatchers',
-      count: roleCounts.dispatcher,
+      
     },
     {
       title: 'Trainees',
@@ -50,13 +50,12 @@ export default function AdminUsersSection() {
       ),
       description: 'Manage and oversee trainee and activities.',
       route: '/dashboard/trainees',
-      count: roleCounts.trainee,
     },
  
   ];
 
   return (
-    <div style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
+    <div style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingTop: '0.5rem' }}>
       <Row gutter={[24, 24]}>
         {actions.map((action, index) => (
           <Col key={index} xs={24} sm={12} md={8} lg={6}>
@@ -95,19 +94,6 @@ export default function AdminUsersSection() {
                   </Paragraph>
                 </div>
 
-                <Tag
-                  color="rgba(140, 33, 49, 0.1)"
-                  style={{
-                    color: '#8C2131',
-                    fontWeight: 500,
-                    borderRadius: 6,
-                    width: 'fit-content',
-                    padding: '2px 10px',
-                    marginTop: 4,
-                  }}
-                >
-                  {action.count} active
-                </Tag>
               </div>
             </Card>
           </Col>

@@ -23,6 +23,7 @@ import {
   SearchOutlined,
   UploadOutlined,
   LockOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-hot-toast";
 import { api } from "../../../../utils/api";
@@ -274,7 +275,7 @@ export default function ManageUsers() {
                   src={
                     user.avatar
                       ? `${PROFILE_PIC_URL}${user.avatar}?token=${token}`
-                      : undefined
+                      : <UserOutlined style={{ fontSize: 48, color: "#8C2131" }} />
                   }
                   size={96}
                   className="border mb-3"

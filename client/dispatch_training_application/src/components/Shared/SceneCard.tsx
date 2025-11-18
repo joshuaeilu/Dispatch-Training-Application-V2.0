@@ -1,6 +1,6 @@
 import React, { useState,  useRef, useEffect } from "react";
-import { Card, Typography, Tag, Divider } from "antd";
-import type { HighlightData, Scene } from "../../types/index.types";
+import { Card, Typography } from "antd";
+import type { Scene } from "../../types/index.types";
 import {
   BulbOutlined,
   CheckCircleTwoTone,
@@ -16,7 +16,6 @@ interface SceneCardProps {
   scenarioId: string;
   autoProceed?: boolean;
   audioUrl?: string;
-  showHighlight: (highlight: HighlightData) => void;
 }
 
 const SceneCard: React.FC<SceneCardProps> = ({
@@ -24,7 +23,6 @@ const SceneCard: React.FC<SceneCardProps> = ({
   index,
   onCorrect,
   audioUrl,
-  showHighlight,
 }) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
@@ -170,7 +168,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
       )}
 
       {/* Tip */}
-    {(scene.tip || scene.highlights?.length > 0) && (
+    {(scene.tip ) && (
   <div className="mt-6 border border-blue-400 bg-blue-50 rounded-lg p-4">
     <div className="flex items-center gap-2 mb-3">
       <BulbOutlined className="text-blue-500 text-xl" />
@@ -185,20 +183,6 @@ const SceneCard: React.FC<SceneCardProps> = ({
       </Paragraph>
     )}
 
-    {scene.highlights?.length > 0 && (
-      <div className="flex flex-wrap gap-2">
-        {scene.highlights.map((h) => (
-          <Tag
-            key={h.id}
-            color="blue"
-            onClick={() => showHighlight(h)}
-            className="rounded-full px-3 py-1 text-base cursor-pointer hover:opacity-80"
-          >
-            {h.name}
-          </Tag>
-        ))}
-      </div>
-    )}
   </div>
 )}
 

@@ -2,36 +2,66 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../../db'); // PostgreSQL pool
 const { auth } = require('../middleware/auth');
+const dotenv = require("dotenv");
+dotenv.config();
 const textToSpeech = require('@google-cloud/text-to-speech');
 const client = new textToSpeech.TextToSpeechClient({
-  keyFilename: "C:/Users/Josh Eilu/Downloads/dispatch-training-application-69f023e14169.json"
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
 });
+
 const path = require('path');
 const fs = require('fs');
 
-router.get("/", auth(['admin', 'trainee']), async (req, res) => {
+router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
   try {
-    const result = await pool.query(
-      `
+    const { role } = req.user; // role comes from auth middleware
+
+    // Base query (shared by all roles)
+    let query = `
       SELECT 
         s.id,
         s.author_id,
         s.status,
         s.scenario_data,
-        u.username AS author_name,     -- ✅ change this to your real column
-        u.avatar AS author_avatar      -- ✅ change this too
+        s.pdf_filename,
+        s.updated_at,
+        u.username AS author_name,
+        u.avatar AS author_avatar
       FROM scenarios s
       JOIN users u ON u.id = s.author_id
-      ORDER BY s.created_at DESC;
-      `
-    );
+    `;
+    const params = [];
 
-    res.json({ scenarios: result.rows });
+    if (role === "admin") {
+      // 🔹 Admin sees all scenarios (draft + published)
+      query += ` ORDER BY s.created_at DESC;`;
+    } else {
+      // 🔹 Trainees and Dispatchers see only published scenarios
+      // 🔹 And only those with audience = 'All' or matching their role
+      const normalizedRole =
+        role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()+'s'; // 'Trainee' / 'Dispatcher'
+      params.push(normalizedRole);
+
+      query += `
+        WHERE s.status = 'published'
+        AND (
+          LOWER(s.scenario_data->>'audience') = LOWER($1)
+          OR LOWER(s.scenario_data->>'audience') = 'all'
+        )
+        ORDER BY s.created_at DESC;
+      `;
+    }
+
+    const result = await pool.query(query, params);
+
+    res.status(200).json({ scenarios: result.rows });
   } catch (err) {
     console.error("❌ Error fetching scenarios:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
 
 
 

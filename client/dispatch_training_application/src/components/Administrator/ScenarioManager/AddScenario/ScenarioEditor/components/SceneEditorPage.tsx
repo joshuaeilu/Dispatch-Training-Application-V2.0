@@ -1,9 +1,8 @@
-import { Button, Divider, Empty, Input, Popover, Select, Typography, message, Form } from "antd";
+import { Button, Divider, Input, Popover, Select, Typography, message, Form } from "antd";
 import { PauseCircleFilled, PlayCircleFilled, PlusOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import type { SceneEditorProps } from "../../../../../../types/index.types";
 import SceneOptionsEditor from "./SceneOptionsEditor";
-import HighlightTagSection from "./HighlightTagSection";
 import AudioEditorModal from "./AudioEditorModal";
 import { voices } from "../../SituationSetter"
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +16,7 @@ export default function SceneEditorPage({
   setScenario,
   currentIndex,
   setCurrentIndex,
-  scrollHighlight, audioRef,
+ audioRef,
   playing, setPlaying
 }: SceneEditorProps) {
   const scene = scenario?.scenes[currentIndex];
@@ -236,27 +235,6 @@ export default function SceneEditorPage({
         </div>
 
 
-
-        {/* Highlights */}
-        <Text>Highlights</Text>
-
-        {scene?.highlights && scene.highlights.length > 0 ? (
-          <HighlightTagSection
-            highlights={scene.highlights}
-            setHighlights={(highlights) =>
-              setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, highlights } : s) })
-            }
-            scrollToHighlight={scrollHighlight}
-          />
-        ) : (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={
-              <p style={{ fontSize: 12, margin: 0 }}>No highlights available</p>
-            }
-            style={{ padding: 8, margin: 0 }}
-          />
-        )}
 
         {/* Scene Options */}
         <Text>Scene Options</Text>

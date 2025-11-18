@@ -69,47 +69,59 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
   try {
     const user = req.user; // decoded from JWT by auth middleware
 
+    // Base SELECT
     let query = `
-      SELECT exercises.id,
-             exercises.name,
-             exercises.type,
-             exercises.status,
-             exercises.difficulty,
-             exercises.visibility,
-             exercises.audience,
-             exercises.questions,
-             exercises.created_at,
-             json_build_object(
-               'id', users.id,
-               'name', users.username,
-               'avatar_url', users.avatar
-             ) AS created_by
-      FROM exercises
-      JOIN users ON users.id = exercises.created_by
+      SELECT 
+        e.id,
+        e.name,
+        e.type,
+        e.status,
+        e.difficulty,
+        e.visibility,
+        e.audience,
+        e.questions,
+        e.created_at,
+        json_build_object(
+          'id', u.id,
+          'name', u.username,
+          'avatar_url', u.avatar
+        ) AS created_by
+      FROM exercises e
+      JOIN users u ON u.id = e.created_by
     `;
 
     const values = [];
 
-    // If the user is a trainee, restrict what they can see
-    if (user.role === "trainee") {
-      query += ` WHERE exercises.audience IN ($1, $2)`;
+    // 🧠 Role-based filtering
+    if (user.role === "admin") {
+      // Admins can see everything
+      query += ` ORDER BY e.created_at DESC;`;
+    } else if (user.role === "trainee") {
+      // Trainees see only published + audience matches
+      query += `
+        WHERE e.status = 'published'
+        AND e.audience IN ($1, $2)
+        ORDER BY e.created_at DESC;
+      `;
       values.push("Trainees", "All");
-    }
-
-    if (user.role === "dispatcher"){
-      query += ` WHERE exercises.audience IN ($1, $2)`;
+    } else if (user.role === "dispatcher") {
+      // Dispatchers see only published + audience matches
+      query += `
+        WHERE e.status = 'published'
+        AND e.audience IN ($1, $2)
+        ORDER BY e.created_at DESC;
+      `;
       values.push("Dispatchers", "All");
     }
 
-    query += ` ORDER BY exercises.created_at DESC;`;
-
     const { rows } = await pool.query(query, values);
-    res.status(200).json(rows);
+    return res.status(200).json(rows);
   } catch (error) {
     console.error("❌ Failed to fetch exercises:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 // 🔹 Get a single exercise by ID

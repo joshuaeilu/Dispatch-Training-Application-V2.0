@@ -266,31 +266,6 @@ const handleDeleteScene = (indexToDelete: number) => {
                 {scene.sceneDescription}
               </Typography.Paragraph> </>)}
 
-              {/* Higlights Selected */}
-             {/* Highlights Section */}
-{scene.highlights.length > 0 && (
- <>
- <Typography.Text strong style={{ display: "block", marginBottom: 4 }}>
-                    Highlights:
-                  </Typography.Text>
-                  <Space size={[6, 6]} wrap>
-                    {scene.highlights.map((highlight, idx) => (
-                      <Tag
-                        key={idx}
-                        color="gold"
-                        style={{
-                          fontSize: 12,
-                          padding: "2px 6px",
-                          borderRadius: 6,
-                        }}
-                      >
-                        {highlight.name}
-                      </Tag>
-                    ))}
-                  </Space>
- </>
-)}
-
 
               {/* Options with correct answer highlight */}
               {scene.options.length > 0 && (
