@@ -138,8 +138,16 @@ router.get('/:filename', auth(['admin']), async (req, res) => {
     return res.status(404).json({ error: 'File not found' });
   }
 
-  res.sendFile(filePath); // serve the file securely
+  // Detect PDF and set correct MIME type
+  const ext = path.extname(fileName).toLowerCase();
+
+  if (ext === ".pdf") {
+    res.setHeader("Content-Type", "application/pdf");
+  }
+
+  res.sendFile(filePath);
 });
+
 
 
 module.exports = router;

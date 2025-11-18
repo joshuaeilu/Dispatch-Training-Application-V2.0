@@ -147,7 +147,7 @@ const handleFinish = async (values: any) => {
             name="username"
             rules={[{ required: true, message: 'Please enter a username' }]}
           >
-            <Input placeholder="Enter username" />
+            <Input placeholder="Enter username" autoComplete='new-username' />
           </Form.Item>
 
           <Form.Item
@@ -155,7 +155,7 @@ const handleFinish = async (values: any) => {
             name="password"
             rules={[{ required: true, message: 'Please enter a password' }]}
           >
-            <Input.Password placeholder="Enter password" />
+            <Input.Password placeholder="Enter password" autoComplete='new-password' />
           </Form.Item>
 
           <Form.Item label="Profile Image (from your computer)">

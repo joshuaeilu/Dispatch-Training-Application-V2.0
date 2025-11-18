@@ -6,7 +6,8 @@ import { getUser } from "../contexts/AuthProvider";
 
 export function useAutosaveScenario(
   scenario: Scenario | null,
-  setLastSavedScenario: (s: Scenario) => void
+  setLastSavedScenario: (s: Scenario) => void,
+  status: 'draft' | 'published'
 ) {
   const [autosaving, setAutosaving] = useState(false);
   const lastScenarioRef = useRef<Scenario | null>(null);
@@ -18,8 +19,10 @@ export function useAutosaveScenario(
       await api.post('/scenarios', {
         scenario, 
         authorId, 
-        status: 'draft'
+        status: status,
       });
+      console.log(status);
+      
 
       setLastSavedScenario(scenario);
       lastScenarioRef.current = scenario;

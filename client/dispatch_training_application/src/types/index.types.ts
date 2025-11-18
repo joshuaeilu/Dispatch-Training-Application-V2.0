@@ -74,6 +74,7 @@ export type ScenarioTableType = {
   questionsCount: number;
   status: string;
   audience: string;
+  scenes: Scene[];
   created_by: {
     name: string;
     avatar_url: string;

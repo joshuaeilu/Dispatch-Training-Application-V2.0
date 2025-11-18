@@ -3,7 +3,7 @@ import { ArrowLeftOutlined,  CheckCircleOutlined, SaveOutlined } from "@ant-desi
 import SceneEditor from "./SceneEditor";
 import 'antd/dist/reset.css'; // AntD v5
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import type { Scenario } from "../../../../../types/index.types";
 import { useLocation } from "react-router-dom";
 import SceneOverview from "./SceneOverview";
@@ -14,7 +14,6 @@ import {  toast } from 'react-hot-toast';
 import { useScenarioManager } from "../../../../../hooks/useScenarioManager";
 import { useAutosaveScenario } from "../../../../../hooks/useAutoSaveScenario";
 import { useNavigate } from "react-router-dom";
-import { getToken } from "../../../../../contexts/AuthProvider";
 
 const { Text} = Typography;
 export default function ScenarioEditor() {
@@ -23,7 +22,7 @@ export default function ScenarioEditor() {
   const {scenarioId} = location.state || {};
   const { scenarioDetails } = location.state || {};
 
-  const { scenario, setScenario} = useScenarioManager({ scenarioId, scenarioDetails });
+  const { scenario, setScenario, status} = useScenarioManager({ scenarioId, scenarioDetails });
 
   const [__, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
 
@@ -56,7 +55,7 @@ export default function ScenarioEditor() {
   const [saveStatus, setSaveStatus] = useState<'draft' | 'published'>('published');
 
 
-const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario);
+const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario, status );
 
 
 

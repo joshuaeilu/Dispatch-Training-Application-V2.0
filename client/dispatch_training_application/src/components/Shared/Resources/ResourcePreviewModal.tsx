@@ -1,8 +1,27 @@
-import { Modal, Typography, Divider, Button, Skeleton } from "antd";
-import { useEffect, useRef } from "react";
-import { CloseOutlined, PlusCircleFilled } from "@ant-design/icons";
+import { Modal, Typography, Divider, Button, Skeleton, Slider, Space } from "antd";
+import { useEffect, useRef, useState } from "react";
+import {
+  CloseOutlined,
+  PlusCircleFilled,
+  LeftOutlined,
+  RightOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
+  FullscreenOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons";
 import { Image } from "antd";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
 const { Title, Text } = Typography;
+
+// Set up PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
 interface ResourcePreviewModalProps {
   open: boolean;
@@ -12,7 +31,7 @@ interface ResourcePreviewModalProps {
   resource?: {
     name: string;
     description: string;
-    type: string; // e.g. "video/mp4"
+    type: string;
     url: string;
   };
 }
@@ -24,23 +43,15 @@ export default function ResourcePreviewModal({
   useResource,
   resource,
 }: ResourcePreviewModalProps) {
-  if (!resource) return <Skeleton active />;
-
-  const { name, description, type, url } = resource;
-  const [resourceType, __] = type.split("/");
-
-  const isImage = resourceType === "image";
-  const isVideo = resourceType === "video";
-  const isAudio = resourceType === "audio";
-  const isPdf = type === "application/pdf";
-  const isPreviewable = isImage || isVideo || isAudio || isPdf;
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [scale, setScale] = useState<number>(1.0);
+  const [containerWidth, setContainerWidth] = useState<number>(800);
 
   // Refs to control media
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-
-
-
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
@@ -55,128 +66,431 @@ export default function ResourcePreviewModal({
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
+
+      // Reset PDF state when modal closes
+      setPageNumber(1);
+      setNumPages(0);
+      setScale(1.0);
     }
   }, [open]);
 
-  useEffect(() =>{
-    console.log(resource);
-  }, [resource]);
+  // Calculate container width for PDF
+  useEffect(() => {
+    const updateWidth = () => {
+      if (pdfContainerRef.current && open) {
+        const width = pdfContainerRef.current.offsetWidth - 40;
+        setContainerWidth(width);
+      }
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, [open]);
+
+  // Early return if no resource
+  if (!resource) {
+    return open ? (
+      <Modal open={open} onCancel={onClose} footer={null} centered>
+        <Skeleton active paragraph={{ rows: 4 }} />
+      </Modal>
+    ) : null;
+  }
+
+  const { name, description, type, url } = resource;
+  const [resourceType] = type.split("/");
+
+  const isImage = resourceType === "image";
+  const isVideo = resourceType === "video";
+  const isAudio = resourceType === "audio";
+  const isPdf = type === "application/pdf";
+  const isPreviewable = isImage || isVideo || isAudio || isPdf;
+
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setPageNumber(1);
+  };
+
+  const onDocumentLoadError = (error: Error) => {
+    console.error("Error loading PDF:", error);
+  };
+
+  const goToPrevPage = () => {
+    setPageNumber((prev) => Math.max(prev - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setPageNumber((prev) => Math.min(prev + 1, numPages));
+  };
+
+  const zoomIn = () => {
+    setScale((prev) => Math.min(prev + 0.25, 3.0));
+  };
+
+  const zoomOut = () => {
+    setScale((prev) => Math.max(prev - 0.25, 0.5));
+  };
+
+  const resetZoom = () => {
+    setScale(1.0);
+  };
+
+  const handleFullscreen = () => {
+    if (pdfContainerRef.current) {
+      if (pdfContainerRef.current.requestFullscreen) {
+        pdfContainerRef.current.requestFullscreen();
+      }
+    }
+  };
+
+  // Determine modal width based on screen size
+  const getModalWidth = () => {
+    if (typeof window !== "undefined") {
+      if (window.innerWidth < 768) return "95vw"; // Mobile
+      if (window.innerWidth < 1024) return "90vw"; // Tablet
+      return "85vw"; // Desktop
+    }
+    return "85vw";
+  };
 
   return (
     <Modal
-  title={null}
-  open={open}
-  
-  destroyOnClose
-  onCancel={onClose}
-  closeIcon={null} // hide default close button
-  okButtonProps={{ style: { display: "none" } }}
-  cancelButtonProps={{ style: { display: "none" } }}
-  centered
-  width="50vw"
-  bodyStyle={{
-    backgroundColor: "var(--color-bg)",
-    borderRadius: 8,
-    maxHeight: "80vh",
-  }}
->
-  {/* Custom Header */}
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start"}}>
-    <div>
-      <Title level={3} style={{ color: "#8C2131" }}>
-        {name}
-      </Title>
-      {description && (
-        <Text type="secondary" style={{ display: "block", fontSize: 16, }}>
-          {description}
-        </Text>
-      )}
-    </div>
-
-  {isExercise ? (
-    <Button onClick={useResource} size="large" icon={<PlusCircleFilled />} className="regular-btn" type="primary">
-      Use Resource
-    </Button>
-  ): (
-    <Button
-    type="primary"
-  aria-label="Close"
-  onClick={onClose}
-  icon={<CloseOutlined />}
-  variant="filled"
-  size="large"
-  style={{
-    color: "#fff",
-    backgroundColor: "#8C2131",
-  }}
->
-</Button>
-  )}
-  </div>
-
-  <Divider style={{ margin: "12px 0" }} />
-
-      {isImage && (
-        <div style={{ textAlign: "center" }}>
-          <Image
-          src={url}
-          alt={name}
-          style={{
-            width: "100%",
-            maxHeight: "70vh",
-            objectFit: "contain",
-            borderRadius: 8,
-          }}
-        />
+      title={null}
+      open={open}
+      destroyOnClose
+      onCancel={onClose}
+      closeIcon={null}
+      okButtonProps={{ style: { display: "none" } }}
+      cancelButtonProps={{ style: { display: "none" } }}
+      centered
+      width={getModalWidth()}
+      styles={{
+        body: {
+          backgroundColor: "#fafafa",
+          borderRadius: 8,
+          padding: "16px 20px",
+          height: "85vh",
+          display: "flex",
+          flexDirection: "column",
+        },
+      }}
+    >
+      {/* Custom Header - Fixed */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: 12,
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Title 
+            level={3} 
+            style={{ 
+              color: "#8C2131", 
+              marginBottom: 4,
+              fontSize: "clamp(18px, 3vw, 24px)",
+            }}
+            ellipsis={{ rows: 1 }}
+          >
+            {name}
+          </Title>
+          {description && (
+            <Text 
+              type="secondary" 
+              style={{ 
+                display: "block", 
+                fontSize: "clamp(13px, 2vw, 15px)",
+              }}
+            >
+              {description}
+            </Text>
+          )}
         </div>
-      )}
 
-      {isVideo && (
-        <video ref={videoRef} controls   style={{
-            width: "100%",
-            maxHeight: "70vh",
-            objectFit: "contain",
-            borderRadius: 8,
+        <div style={{ marginLeft: 16, flexShrink: 0 }}>
+          {isExercise ? (
+            <Button
+              onClick={useResource}
+              size="large"
+              icon={<PlusCircleFilled />}
+              className="regular-btn"
+              type="primary"
+            >
+              Use Resource
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              aria-label="Close"
+              onClick={onClose}
+              icon={<CloseOutlined />}
+              size="large"
+              style={{
+                color: "#fff",
+                backgroundColor: "#8C2131",
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      <Divider style={{ margin: "8px 0 12px 0", flexShrink: 0 }} />
+
+      {/* Content Area - Scrollable */}
+      <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {/* IMAGE PREVIEW */}
+        {isImage && (
+          <div style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            height: "100%",
           }}>
-          <source src={url} type={type} />
-          Your browser does not support the video tag.
-        </video>
-      )}
+            <Image
+              src={url}
+              alt={name}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain",
+                borderRadius: 8,
+              }}
+            />
+          </div>
+        )}
 
-      {isAudio && (
-        <audio ref={audioRef} controls controlsList="nodownload" style={{ width: "100%" }}>
-          <source src={url} type={type} />
-          Your browser does not support the audio element.
-        </audio>
-      )}
+        {/* VIDEO PREVIEW */}
+        {isVideo && (
+          <div style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            height: "100%",
+          }}>
+            <video
+              ref={videoRef}
+              controls
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain",
+                borderRadius: 8,
+              }}
+            >
+              <source src={url} type={type} />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        )}
 
-      {isPdf && (
-        <iframe
-  src={`${url}#toolbar=0&navpanes=0&scrollbar=0`}
-  title="PDF Viewer"
-  width="100%"
-  style={{
-    border: "1px solid var(--color-border)",
-    borderRadius: 8,
-    backgroundColor: "white",
-    height: "70vh",
-  }}
-/>
+        {/* AUDIO PREVIEW */}
+        {isAudio && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              padding: "2rem",
+            }}
+          >
+            <audio
+              ref={audioRef}
+              controls
+              controlsList="nodownload"
+              style={{ width: "100%", maxWidth: 600 }}
+            >
+              <source src={url} type={type} />
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        )}
 
-      )}
+        {/* PDF PREVIEW */}
+        {isPdf && (
+          <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            height: "100%",
+            gap: 12,
+          }}>
+            {/* PDF Controls - Fixed */}
+            <div
+              style={{
+                background: "#fff",
+                padding: "10px 16px",
+                borderRadius: 8,
+                border: "1px solid #e8e8e8",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 12,
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                {/* Page Navigation */}
+                <Space size="small">
+                  <Button
+                    icon={<LeftOutlined />}
+                    onClick={goToPrevPage}
+                    disabled={pageNumber <= 1}
+                    size="middle"
+                  >
+                    Prev
+                  </Button>
+                  <div
+                    style={{
+                      padding: "6px 12px",
+                      background: "#fafafa",
+                      borderRadius: 6,
+                      border: "1px solid #e8e8e8",
+                      minWidth: 100,
+                      textAlign: "center",
+                    }}
+                  >
+                    <Text strong style={{ fontSize: 13 }}>
+                      {pageNumber} / {numPages || "?"}
+                    </Text>
+                  </div>
+                  <Button
+                    icon={<RightOutlined />}
+                    onClick={goToNextPage}
+                    disabled={pageNumber >= numPages}
+                    size="middle"
+                  >
+                    Next
+                  </Button>
+                </Space>
 
-      {!isPreviewable && (
-        <div style={{ padding: "1rem", textAlign: "center" }}>
-          <Text>
-            This file type is not previewable.{" "}
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              Download it instead.
-            </a>
-          </Text>
-        </div>
-      )}
+                {/* Zoom Controls */}
+                <Space align="center" size="small">
+                  <Button
+                    icon={<ZoomOutOutlined />}
+                    onClick={zoomOut}
+                    disabled={scale <= 0.5}
+                    size="middle"
+                  />
+                  <Slider
+                    min={50}
+                    max={300}
+                    step={25}
+                    value={scale * 100}
+                    onChange={(value) => setScale(value / 100)}
+                    style={{ width: 120, margin: "0 8px" }}
+                    tooltip={{ formatter: (value) => `${value}%` }}
+                  />
+                  <div
+                    style={{
+                      minWidth: 50,
+                      textAlign: "center",
+                      padding: "4px 8px",
+                      background: "#fafafa",
+                      borderRadius: 6,
+                      border: "1px solid #e8e8e8",
+                    }}
+                  >
+                    <Text strong style={{ fontSize: 12 }}>
+                      {Math.round(scale * 100)}%
+                    </Text>
+                  </div>
+                  <Button
+                    icon={<ZoomInOutlined />}
+                    onClick={zoomIn}
+                    disabled={scale >= 3.0}
+                    size="middle"
+                  />
+                  <Button onClick={resetZoom} size="middle">
+                    Reset
+                  </Button>
+                </Space>
 
-  
+                {/* Additional Controls */}
+                <Space size="small">
+                  <Button
+                    icon={<FullscreenOutlined />}
+                    onClick={handleFullscreen}
+                    size="middle"
+                    title="Fullscreen"
+                  />
+                  <Button
+                    icon={<DownloadOutlined />}
+                    href={url}
+                    target="_blank"
+                    size="middle"
+                    title="Download PDF"
+                  >
+                    Download
+                  </Button>
+                </Space>
+              </div>
+            </div>
+
+            {/* PDF Viewer - Scrollable with fixed height */}
+            <div
+              ref={pdfContainerRef}
+              style={{
+                flex: 1,
+                overflow: "auto",
+                background: "#fff",
+                borderRadius: 8,
+                border: "1px solid #e8e8e8",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                padding: 20,
+              }}
+            >
+              <Document
+                file={{ url }}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                loading={
+                  <div style={{ padding: "3rem", textAlign: "center" }}>
+                    <Skeleton active paragraph={{ rows: 8 }} />
+                    <Text
+                      type="secondary"
+                      style={{ display: "block", marginTop: "1rem" }}
+                    >
+                      Loading PDF...
+                    </Text>
+                  </div>
+                }
+              >
+                <div
+                  style={{
+                    display: "inline-block",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    background: "#fff",
+                  }}
+                >
+                  <Page
+                    pageNumber={pageNumber}
+                    width={containerWidth}
+                    scale={scale}
+                    renderAnnotationLayer={true}
+                    renderTextLayer={true}
+                    loading={
+                      <div style={{ padding: "3rem", textAlign: "center" }}>
+                        <Skeleton active paragraph={{ rows: 6 }} />
+                      </div>
+                    }
+                  />
+                </div>
+              </Document>
+            </div>
+          </div>
+        )}
+
+      
+      </div>
     </Modal>
   );
 }

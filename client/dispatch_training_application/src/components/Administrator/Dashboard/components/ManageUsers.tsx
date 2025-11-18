@@ -65,7 +65,7 @@ export default function ManageUsers() {
       setAllUsers(globalUsers);
       setFilteredUsers(globalUsers);
     }
-  }, [globalUsers]);
+  }, [globalUsers, isModalOpen]);
 
   // === Search + Role Filter Logic ===
   useEffect(() => {

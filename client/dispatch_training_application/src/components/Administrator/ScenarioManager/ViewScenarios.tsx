@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { api } from "../../../utils/api";
 import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
-import type { ScenarioTableType } from "../../../types/index.types";
+import type { Scenario, ScenarioTableType } from "../../../types/index.types";
+import ViewScenarioModal from "./components/ViewScenarioModal";
 export default function ViewScenarios() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -15,6 +16,8 @@ export default function ViewScenarios() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [scenarioFiles, setScenarioFiles] = useState<ScenarioTableType[]>([]);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState<ScenarioTableType | undefined>(undefined);
 
   const handleResetFilteredFields = () => {
     form.resetFields();
@@ -38,6 +41,7 @@ export default function ViewScenarios() {
           questionsCount: scenario.scenario_data?.scenes?.length || 0,
           status: scenario.status,
           audience: scenario.scenario_data?.audience || "N/A",
+          scenes: scenario.scenario_data?.scenes || [],
           created_by: {
             name: scenario.author_name || "Unknown",
             avatar_url: scenario.author_avatar || "/assets/avatars/avatar1.svg",
@@ -80,6 +84,7 @@ export default function ViewScenarios() {
     questionsCount: file.questionsCount,
     status: file.status,
     audience: file.audience,
+    scenes: file.scenes,
     created_by: file.created_by
   }));
 
@@ -209,7 +214,8 @@ export default function ViewScenarios() {
               color="geekblue"
 
               onClick={() => {
-                navigate(`/scenario-manager/view-scenario/`, { state: { scenario: record } });
+                setSelectedScenario(record);
+                setViewModalOpen(true);
               }}
             >View</Button>
           </Tooltip>
@@ -376,6 +382,12 @@ export default function ViewScenarios() {
           </div>
         </Card>
       </div>
+
+      <ViewScenarioModal
+        open={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        scenario={selectedScenario}
+      />
 
     </div>
   )

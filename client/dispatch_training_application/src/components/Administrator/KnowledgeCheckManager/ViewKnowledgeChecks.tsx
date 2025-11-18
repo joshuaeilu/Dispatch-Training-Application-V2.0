@@ -260,7 +260,7 @@ export default function KnowledgeCheckViewExercises() {
           </Tooltip>
           <Tooltip title="Delete">
             <Popconfirm
-              title="Are you sure to delete this exercise?"
+              title="Are you sure you want to delete this exercise?"
               okText="Delete"
               okButtonProps={{ danger: true }}
               cancelText="Cancel"

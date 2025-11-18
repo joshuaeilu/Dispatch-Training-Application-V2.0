@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../../../utils/api";
 import { useEffect, useState } from "react";
 import type { GetUser } from "../../../../types/index.types";
+import UserCardSkeleton from "../components/UserCardSkeleton";
 
 export default function TraineesSection() {
   const { users } = getUsers();
@@ -17,7 +18,7 @@ export default function TraineesSection() {
     const [scenarioTotals, setScenarioTotals] = useState(0);
     const [trainees, setTrainees] = useState<GetUser[]>([]);
     const [completedProgress, setCompletedProgress] = useState<Record<string, { completedExercises: number; completedScenarios: number }>>({});
-  
+    const [loading, setLoading] = useState(true);
 
   const fetchCompleted = async () => {
     try {
@@ -28,6 +29,7 @@ export default function TraineesSection() {
         params: { userIds: userIds.join(',') },
       });
       setCompletedProgress(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("❌ Failed to fetch completed progress:", error);
     }
@@ -66,7 +68,12 @@ export default function TraineesSection() {
 
       <div style={{ padding: "0 1.5rem" }}>
         <Row gutter={[24, 24]}>
-          {trainees.map((user) => {
+          {loading ? Array.from({ length: trainees.length }).map((_, i) => (
+            <Col key={i} xs={24} sm={12} md={8} lg={6}>
+              <UserCardSkeleton />
+            </Col>
+          )) :
+          trainees.map((user) => {
             const progress = completedProgress[user.id];
             const completed =
               progress

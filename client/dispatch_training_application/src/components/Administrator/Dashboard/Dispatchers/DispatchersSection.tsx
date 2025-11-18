@@ -3,11 +3,13 @@ import { getUsers } from "../../../../contexts/UniversalHelpers";
 import UserCard from "../../../Shared/UserCard";
 import { PROFILE_PIC_URL } from "../../../../data/data";
 import { getToken } from "../../../../contexts/AuthProvider";
-import { Row, Col } from "antd";
+import { Row, Col, Card, Skeleton } from "antd";
 import { useEffect, useState } from "react";
 import { api } from "../../../../utils/api";
 import type { GetUser } from "../../../../types/index.types";
 import { useNavigate } from "react-router-dom";
+import { set } from "lodash";
+import UserCardSkeleton from "../components/UserCardSkeleton";
 
 export default function DispatchersSection() {
   const { users } = getUsers();
@@ -17,7 +19,7 @@ export default function DispatchersSection() {
   const [scenarioTotals, setScenarioTotals] = useState(0);
   const [dispatchers, setDispatchers] = useState<GetUser[]>([]);
   const [completedProgress, setCompletedProgress] = useState<Record<string, { completedExercises: number; completedScenarios: number }>>({});
-
+  const [loading, setLoading] = useState(true);
   const fetchTotals = async () => {
     try {
       const response = await api.get('/progress/totals', { params: { role: 'Dispatchers' } });
@@ -37,6 +39,7 @@ export default function DispatchersSection() {
         params: { userIds: userIds.join(',') },
       });
       setCompletedProgress(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("❌ Failed to fetch completed progress:", error);
     }
@@ -51,6 +54,7 @@ export default function DispatchersSection() {
   useEffect(() => {
     if (dispatchers.length > 0) {
       fetchCompleted();
+      
     }
   }, [dispatchers]);
 
@@ -65,7 +69,12 @@ export default function DispatchersSection() {
 
       <div style={{ padding: "0 1.5rem" }}>
         <Row gutter={[24, 24]}>
-          {dispatchers.map((user) => {
+          {loading ? Array.from({ length: dispatchers.length }).map((_, i) => (
+             <Col key={i} xs={24} sm={12} md={8} lg={6}>
+        <UserCardSkeleton />
+    </Col>
+          )) :
+          dispatchers.map((user) => {
             const progress = completedProgress[user.id];
             const completed =
               progress
@@ -79,7 +88,7 @@ export default function DispatchersSection() {
                   imageUrl={`${PROFILE_PIC_URL}${user.avatar}?token=${token}`}
                   completed={completed}
                   totalAssignments={exerciseTotals + scenarioTotals}
-                  onClick={() => navigate('/dashboard/user-progress', { state: { user: { id: user.id, name: user.name, role: user.role } } })}
+                  onClick={() => navigate('/dashboard/user-progress', { state: { user: { id: user.id, name: user.name, role: user.role, avatar: user.avatar } } })}
                 />
               </Col>
             );

@@ -11,6 +11,7 @@ import {
   Empty,
   Modal,
   Button,
+  Skeleton,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -40,7 +41,11 @@ export default function UserProgressPage() {
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<any>(null);
+  const [loadingExercises, setLoadingExercises] = useState(true);
+  const [loadingScenarios, setLoadingScenarios] = useState(true);
+  const [loadingSubmission, setLoadingSubmission] = useState(false);
   const token = getToken();
+
   // Calculate stats
   const getStats = () => {
     const totalExercises = exercises.reduce((sum, sec) => sum + sec.items.length, 0);
@@ -67,7 +72,7 @@ export default function UserProgressPage() {
   const stats = getStats();
 
   const handleCompletedCardClick = async (exerciseId: string) => {
-
+    setLoadingSubmission(true);
     try {
       const exerciseResult = await api.get(`/submissions/${exerciseId}`, { params: { userId: user.id } });
       setSelectedSubmission({...exerciseResult.data});
@@ -76,11 +81,14 @@ export default function UserProgressPage() {
     catch(err){
       console.error("❌ Error fetching exercise submission:", err);
     }
-
+    finally {
+      setLoadingSubmission(false);
+    }
   };
 
   // ✅ Fetch Exercises + Completed Map
   const fetchExercises = async () => {
+    setLoadingExercises(true);
     try {
       const { data } = await api.get("/exercises");
       const audienceExercises = data.filter(
@@ -126,11 +134,14 @@ export default function UserProgressPage() {
       setSubmittedMap(completedMap || {});
     } catch (err) {
       console.error("❌ Error fetching exercises:", err);
+    } finally {
+      setLoadingExercises(false);
     }
   };
 
   // ✅ Fetch Scenarios (with audience inside scenario_data)
   const fetchScenarios = async () => {
+    setLoadingScenarios(true);
     try {
       const { data } = await api.get("/scenarios");
       const audienceScenarios = data.scenarios.filter((sc: any) => {
@@ -178,6 +189,8 @@ export default function UserProgressPage() {
       setScenarioMap(completedMap || {});
     } catch (err) {
       console.error("❌ Error fetching scenarios:", err);
+    } finally {
+      setLoadingScenarios(false);
     }
   };
 
@@ -187,6 +200,24 @@ export default function UserProgressPage() {
       fetchScenarios();
     }
   }, [user]);
+
+  // 🧩 Loading skeleton for cards
+  const renderLoadingSkeleton = () => (
+    <Row gutter={[20, 20]}>
+      {[1, 2, 3, 4].map((i) => (
+        <Col xs={24} sm={12} md={8} lg={6} key={i}>
+          <Card
+            style={{
+              borderRadius: 16,
+              height: "100%",
+            }}
+          >
+            <Skeleton active paragraph={{ rows: 3 }} />
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
 
   // 🧩 Reusable Card with refined design
   const renderCard = (item: any, isScenario = false) => {
@@ -382,8 +413,6 @@ export default function UserProgressPage() {
     );
   };
 
-
-
   return (
     <div style={{ background: "#fafafa", minHeight: "100vh", display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
       {/* Hero Section with Trainee Info - STICKY */}
@@ -398,99 +427,96 @@ export default function UserProgressPage() {
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
         }}
       >
-      
-
-        <div >
-       
-        <Row gutter={[32, 32]} align="middle">
-  {/* Left section: Back + Avatar + Name */}
-  <Col xs={24} md={14}>
-    <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-      {/* Back button */}
-      <div
-        onClick={() => window.history.back()}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          cursor: "pointer",
-          padding: "8px 16px",
-          borderRadius: 8,
-          background: "rgba(255, 255, 255, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          transition: "all 0.2s",
-        }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)")
-        }
-      >
-        <ArrowLeftOutlined style={{ fontSize: 16 }} />
-        <Text style={{ color: "#fff", fontWeight: 500 }}>Back</Text>
-      </div>
-
-      {/* Avatar + Name */}
-      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-        <div
-          style={{
-            width: 100,
-            height: 100,
-            borderRadius: "50%",
-            background: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
-            flexShrink: 0,
-          }}
-        >
-          {user?.avatar ? (
-            <img
-              src={`${PROFILE_PIC_URL}${user.avatar}?token=${token}`}
-              alt={user.name}
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <UserOutlined style={{ fontSize: 48, color: "#8C2131" }} />
-          )}
-        </div>
         <div>
-          <Title
-            level={1}
-            style={{
-              color: "#fff",
-              margin: 0,
-              marginBottom: 8,
-              fontSize: 32,
-              fontWeight: 700,
-            }}
-          >
-            {toTitleCase(user?.name || "Unknown User")}
-          </Title>
-          <Text
-            style={{
-              color: "rgba(255, 255, 255, 0.9)",
-              fontSize: 16,
-              fontWeight: 500,
-            }}
-          >
-            {toTitleCase(user?.role || "Trainee")}
-          </Text>
-        </div>
-      </div>
-    </div>
-  </Col>
+          <Row gutter={[32, 32]} align="middle">
+            {/* Left section: Back + Avatar + Name */}
+            <Col xs={24} md={14}>
+              <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+                {/* Back button */}
+                <div
+                  onClick={() => window.history.back()}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    cursor: "pointer",
+                    padding: "8px 16px",
+                    borderRadius: 8,
+                    background: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)")
+                  }
+                >
+                  <ArrowLeftOutlined style={{ fontSize: 16 }} />
+                  <Text style={{ color: "#fff", fontWeight: 500 }}>Back</Text>
+                </div>
 
-  {/* Right section: Stats */}
-  <Col xs={24} md={10}>
-    <Row gutter={16}>
+                {/* Avatar + Name */}
+                <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+                  <div
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: "50%",
+                      background: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {user?.avatar ? (
+                      <img
+                        src={`${PROFILE_PIC_URL}${user.avatar}?token=${token}`}
+                        alt={user.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <UserOutlined style={{ fontSize: 48, color: "#8C2131" }} />
+                    )}
+                  </div>
+                  <div>
+                    <Title
+                      level={1}
+                      style={{
+                        color: "#fff",
+                        margin: 0,
+                        marginBottom: 8,
+                        fontSize: 32,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {toTitleCase(user?.name || "Unknown User")}
+                    </Title>
+                    <Text
+                      style={{
+                        color: "rgba(255, 255, 255, 0.9)",
+                        fontSize: 16,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {toTitleCase(user?.role || "Trainee")}
+                    </Text>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            {/* Right section: Stats */}
+            <Col xs={24} md={10}>
+              <Row gutter={16}>
                 <Col span={8}>
                   <Card
                     style={{
@@ -589,229 +615,243 @@ export default function UserProgressPage() {
                     </Text>
                   </Card>
                 </Col>
-    </Row>
-  </Col>
-</Row>
-
+              </Row>
+            </Col>
+          </Row>
         </div>
       </div>
 
       {/* Tabs Section - SCROLLABLE */}
       <div style={{ flex: 1, overflow: "auto" }}>
         <div>
-        <Tabs
-          activeKey={activeKey}
-          onChange={setActiveKey}
-          size="large"
-          style={{
-            background: "#fff",
-            padding: "8px 24px 0",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-          }}
-          items={[
-            {
-              key: "exercises",
-              label: (
-                <span style={{ fontSize: 16, fontWeight: 500 }}>
-                  Exercises
-                  <Tag
-                    color="blue"
-                    style={{ marginLeft: 8, borderRadius: 10 }}
-                  >
-                    {stats.completedExercises}/{stats.totalExercises}
-                  </Tag>
-                </span>
-              ),
-              children: (
-                <div style={{ padding: "1rem 0" }}>
-                  {exercises.length === 0 ? (
-                    <Empty
-                      description="No exercises assigned yet"
-                      style={{ padding: "60px 0" }}
-                    />
-                  ) : (
-                    <Collapse
-                      bordered={false}
-                      defaultActiveKey={exercises.map((_, idx) => idx.toString())}
-                      expandIconPosition="end"
-                      style={{
-                        background: "transparent",
-                      }}
+          <Tabs
+            activeKey={activeKey}
+            onChange={setActiveKey}
+            size="large"
+            style={{
+              background: "#fff",
+              padding: "8px 24px 0",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+            }}
+            items={[
+              {
+                key: "exercises",
+                label: (
+                  <span style={{ fontSize: 16, fontWeight: 500 }}>
+                    Exercises
+                    <Tag
+                      color="blue"
+                      style={{ marginLeft: 8, borderRadius: 10 }}
                     >
-                      {exercises.map((section, idx) => (
-                        <Panel
-                          key={idx}
-                          header={
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <Title
-                                level={4}
+                      {stats.completedExercises}/{stats.totalExercises}
+                    </Tag>
+                  </span>
+                ),
+                children: (
+                  <div style={{ padding: "1rem 0" }}>
+                    {loadingExercises ? (
+                      <div style={{ padding: "24px" }}>
+                        {renderLoadingSkeleton()}
+                      </div>
+                    ) : exercises.length === 0 ? (
+                      <Empty
+                        description="No exercises assigned yet"
+                        style={{ padding: "60px 0" }}
+                      />
+                    ) : (
+                      <Collapse
+                        bordered={false}
+                        defaultActiveKey={exercises.map((_, idx) => idx.toString())}
+                        expandIconPosition="end"
+                        style={{
+                          background: "transparent",
+                        }}
+                      >
+                        {exercises.map((section, idx) => (
+                          <Panel
+                            key={idx}
+                            header={
+                              <div
                                 style={{
-                                  color: "#8C2131",
-                                  margin: 0,
-                                  fontWeight: 600,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
                                 }}
                               >
-                                {section.date}
-                              </Title>
-                              <Tag color="default" style={{ borderRadius: 8 }}>
-                                {section.items.length}{" "}
-                                {section.items.length === 1 ? "item" : "items"}
-                              </Tag>
-                            </div>
-                          }
-                          style={{
-                            marginBottom: 16,
-                            background: "#fff",
-                            borderRadius: 16,
-                            border: "1px solid #f0f0f0",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <Row gutter={[20, 20]} style={{ marginTop: 16 }}>
-                            {section.items.map((ex: any) => (
-                              <Col xs={24} sm={12} md={8} lg={6} key={ex.id}>
-                                {renderCard(ex)}
-                              </Col>
-                            ))}
-                          </Row>
-                        </Panel>
-                      ))}
-                    </Collapse>
-                  )}
-                </div>
-              ),
-            },
-            {
-              key: "scenarios",
-              label: (
-                <span style={{ fontSize: 16, fontWeight: 500 }}>
-                  Scenarios
-                  <Tag
-                    color="purple"
-                    style={{ marginLeft: 8, borderRadius: 10 }}
-                  >
-                    {stats.completedScenarios}/{stats.totalScenarios}
-                  </Tag>
-                </span>
-              ),
-              children: (
-                <div style={{ padding: "24px 0" }}>
-                  {scenarios.length === 0 ? (
-                    <Empty
-                      description="No scenarios assigned yet"
-                      style={{ padding: "60px 0" }}
-                    />
-                  ) : (
-                    <Collapse
-                      bordered={false}
-                      defaultActiveKey={scenarios.map((_, idx) => idx.toString())}
-                      expandIconPosition="end"
-                      style={{
-                        background: "transparent",
-                      }}
+                                <Title
+                                  level={4}
+                                  style={{
+                                    color: "#8C2131",
+                                    margin: 0,
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {section.date}
+                                </Title>
+                                <Tag color="default" style={{ borderRadius: 8 }}>
+                                  {section.items.length}{" "}
+                                  {section.items.length === 1 ? "item" : "items"}
+                                </Tag>
+                              </div>
+                            }
+                            style={{
+                              marginBottom: 16,
+                              background: "#fff",
+                              borderRadius: 16,
+                              border: "1px solid #f0f0f0",
+                              overflow: "hidden",
+                            }}
+                          >
+                            <Row gutter={[20, 20]} style={{ marginTop: 16 }}>
+                              {section.items.map((ex: any) => (
+                                <Col xs={24} sm={12} md={8} lg={6} key={ex.id}>
+                                  {renderCard(ex)}
+                                </Col>
+                              ))}
+                            </Row>
+                          </Panel>
+                        ))}
+                      </Collapse>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: "scenarios",
+                label: (
+                  <span style={{ fontSize: 16, fontWeight: 500 }}>
+                    Scenarios
+                    <Tag
+                      color="purple"
+                      style={{ marginLeft: 8, borderRadius: 10 }}
                     >
-                      {scenarios.map((section, idx) => (
-                        <Panel
-                          key={idx}
-                          header={
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <Title
-                                level={4}
+                      {stats.completedScenarios}/{stats.totalScenarios}
+                    </Tag>
+                  </span>
+                ),
+                children: (
+                  <div style={{ padding: "24px 0" }}>
+                    {loadingScenarios ? (
+                      <div style={{ padding: "24px" }}>
+                        {renderLoadingSkeleton()}
+                      </div>
+                    ) : scenarios.length === 0 ? (
+                      <Empty
+                        description="No scenarios assigned yet"
+                        style={{ padding: "60px 0" }}
+                      />
+                    ) : (
+                      <Collapse
+                        bordered={false}
+                        defaultActiveKey={scenarios.map((_, idx) => idx.toString())}
+                        expandIconPosition="end"
+                        style={{
+                          background: "transparent",
+                        }}
+                      >
+                        {scenarios.map((section, idx) => (
+                          <Panel
+                            key={idx}
+                            header={
+                              <div
                                 style={{
-                                  color: "#8C2131",
-                                  margin: 0,
-                                  fontWeight: 600,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
                                 }}
                               >
-                                {section.date}
-                              </Title>
-                              <Tag color="default" style={{ borderRadius: 8 }}>
-                                {section.items.length}{" "}
-                                {section.items.length === 1 ? "item" : "items"}
-                              </Tag>
-                            </div>
-                          }
-                          style={{
-                            marginBottom: 16,
-                            background: "#fff",
-                            borderRadius: 16,
-                            border: "1px solid #f0f0f0",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <Row gutter={[20, 20]} style={{ marginTop: 16 }}>
-                            {section.items.map((sc: any) => (
-                              <Col xs={24} sm={12} md={8} lg={6} key={sc.id}>
-                                {renderCard(sc, true)}
-                              </Col>
-                            ))}
-                          </Row>
-                        </Panel>
-                      ))}
-                    </Collapse>
-                  )}
-                </div>
-              ),
-            },
-          ]}
-        />
+                                <Title
+                                  level={4}
+                                  style={{
+                                    color: "#8C2131",
+                                    margin: 0,
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {section.date}
+                                </Title>
+                                <Tag color="default" style={{ borderRadius: 8 }}>
+                                  {section.items.length}{" "}
+                                  {section.items.length === 1 ? "item" : "items"}
+                                </Tag>
+                              </div>
+                            }
+                            style={{
+                              marginBottom: 16,
+                              background: "#fff",
+                              borderRadius: 16,
+                              border: "1px solid #f0f0f0",
+                              overflow: "hidden",
+                            }}
+                          >
+                            <Row gutter={[20, 20]} style={{ marginTop: 16 }}>
+                              {section.items.map((sc: any) => (
+                                <Col xs={24} sm={12} md={8} lg={6} key={sc.id}>
+                                  {renderCard(sc, true)}
+                                </Col>
+                              ))}
+                            </Row>
+                          </Panel>
+                        ))}
+                      </Collapse>
+                    )}
+                  </div>
+                ),
+              },
+            ]}
+          />
         </div>
       </div>
 
-      
-    {/* Result Modal */}
-<Modal
-  open={showResultModal}
-  centered
-  width={800}
-  maskClosable={true} // ✅ allows closing when clicking outside
-  closable={false}
-  onCancel={() => setShowResultModal(false)} // ✅ handle close event
-  footer={
-    <div style={{ textAlign: "right", marginTop: 16, marginBottom: 16 }}>
-      <Button
-        type="default"
-        size="large"
-        onClick={() => setShowResultModal(false)}
-        style={{
-          borderRadius: 8,
-          fontWeight: 500,
+      {/* Result Modal */}
+      <Modal
+        open={showResultModal}
+        centered
+        width={800}
+        maskClosable={true}
+        closable={false}
+        onCancel={() => {
+          setShowResultModal(false);
+          setSelectedSubmission(null);
+        }}
+        footer={
+          <div style={{ textAlign: "right", marginTop: 16, marginBottom: 16 }}>
+            <Button
+              type="default"
+              size="large"
+              onClick={() => {
+                setShowResultModal(false);
+                setSelectedSubmission(null);
+              }}
+              style={{
+                borderRadius: 8,
+                fontWeight: 500,
+              }}
+            >
+              Close
+            </Button>
+          </div>
+        }
+        bodyStyle={{
+          maxHeight: "80vh",
+          overflowY: "auto",
+          paddingRight: 16,
         }}
       >
-        Close
-      </Button>
-    </div>
-  }
-  bodyStyle={{
-    maxHeight: "80vh",
-    overflowY: "auto", // ✅ scrollable content area
-    paddingRight: 16,
-  }}
->
-  {selectedSubmission ? (
-    <KnowledgeCheckResults
-      name={selectedExercise?.name}
-      questions={selectedExercise?.questions || []}
-      userAnswers={selectedSubmission?.answers || {}}
-    />
-  ) : (
-    <Text type="secondary">Loading submission...</Text>
-  )}
-</Modal>
-
-
+        {loadingSubmission ? (
+          <div style={{ padding: "24px" }}>
+            <Skeleton active paragraph={{ rows: 8 }} />
+          </div>
+        ) : selectedSubmission ? (
+          <KnowledgeCheckResults
+            name={selectedExercise?.name}
+            questions={selectedExercise?.questions || []}
+            userAnswers={selectedSubmission?.answers || {}}
+          />
+        ) : (
+          <Empty description="No submission data available" />
+        )}
+      </Modal>
     </div>
   );
 }

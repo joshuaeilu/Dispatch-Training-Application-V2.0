@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const textToSpeech = require('@google-cloud/text-to-speech');
 const client = new textToSpeech.TextToSpeechClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+  keyFilename:  __dirname + '../../../google_credentials/dispatch-training-application-69f023e14169.json'
 });
 
 const path = require('path');
@@ -66,7 +66,8 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
 
 
 router.post("/", auth(["admin"]), async (req, res) => {
-  const { scenario, authorId, status, pdfFilename } = req.body;
+  const { scenario, authorId, status } = req.body;
+  console.log(status);
 
   if (!scenario || !authorId) {
     return res.status(400).json({ error: "Missing scenario or authorId" });
@@ -80,16 +81,15 @@ router.post("/", auth(["admin"]), async (req, res) => {
 
     await pool.query(
       `
-      INSERT INTO scenarios (id, author_id, scenario_data, status, pdf_filename)
-      VALUES ($1, $2, $3::jsonb, $4, $5)
+      INSERT INTO scenarios (id, author_id, scenario_data, status)
+      VALUES ($1, $2, $3::jsonb, $4)
       ON CONFLICT (id)
       DO UPDATE SET
         scenario_data = EXCLUDED.scenario_data,
         status = EXCLUDED.status,
-        pdf_filename = EXCLUDED.pdf_filename,
         updated_at = NOW();
       `,
-      [scenario.id, authorId, JSON.stringify(scenario), status || "draft", pdfFilename || null]
+      [scenario.id, authorId, JSON.stringify(scenario), status ]
     );
 
     res.status(200).json({ message: "Scenario saved successfully" });
@@ -146,6 +146,20 @@ router.delete("/:id",auth(['admin']), async (req, res) => {
 
     if (authorId && scenario.author_id !== authorId) {
       return res.status(403).json({ error: "You are not authorized to make this delete." });
+    }
+
+    const folderPath = path.join(
+      __dirname,
+      "../..",
+      "src/scenario_audios",
+      `${scenarioId}`
+    );
+
+    if (fs.existsSync(folderPath)) {
+      fs.rmSync(folderPath, { recursive: true, force: true });
+      console.log("🗑 Deleted audio folder:", folderPath);
+    } else {
+      console.log("⚠ Folder did not exist:", folderPath);
     }
 
     // Delete scenario
