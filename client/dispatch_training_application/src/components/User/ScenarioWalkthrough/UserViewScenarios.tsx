@@ -18,7 +18,6 @@ import type { Scenario } from "../../../types/index.types";
 import { useNavigate } from "react-router-dom";
 import UserPageHeader from "../../Shared/UserPageHeader";
 import { AuthContext, checkIsMobile } from "../../../contexts/AuthProvider";
-
 const { Title, Text } = Typography;
 
 export default function UserViewScenarios() {

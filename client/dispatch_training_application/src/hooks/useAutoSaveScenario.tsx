@@ -1,56 +1,45 @@
-import { useEffect, useState, useRef } from "react";
-import { debounce } from "lodash";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../utils/api";
-import type { Scenario } from "../types/index.types";
-import { getUser } from "../contexts/AuthProvider";
+import deepEqual from "fast-deep-equal"; // if you use it. Else remove.
 
 export function useAutosaveScenario(
-  scenario: Scenario | null,
-  setLastSavedScenario: (s: Scenario) => void,
-  status: 'draft' | 'published'
+  scenario: any,
+  setLastSavedScenario: (s: any) => void,
+  autosaveEnabled: boolean,
+  intervalMs: number = 3000 // 3 seconds default
 ) {
   const [autosaving, setAutosaving] = useState(false);
-  const lastScenarioRef = useRef<Scenario | null>(null);
-  const authorId = getUser()?.id || "";
-
-  const saveToServer = async (scenario: Scenario) => {
-    try {
-      setAutosaving(true);
-      await api.post('/scenarios', {
-        scenario, 
-        authorId, 
-        status: status,
-      });
-      console.log(status);
-      
-
-      setLastSavedScenario(scenario);
-      lastScenarioRef.current = scenario;
-    } catch (err) {
-      console.error("❌ Autosave failed:", err);
-    } finally {
-      setAutosaving(false);
-    }
-  };
-
-  const debouncedSave = useRef(
-    debounce((scenario: Scenario) => {
-      saveToServer(scenario);
-    }, 3000)
-  ).current;
+  const lastSavedRef = useRef(scenario);
 
   useEffect(() => {
-    if (!scenario?.name) return;
-    
-    const prev = lastScenarioRef.current;
+    if (!autosaveEnabled) return;       // ⛔ Autosave paused
+    if (!scenario) return;
 
-    const hasChanged =
-      JSON.stringify(scenario) !== JSON.stringify(prev);
+    const timer = setTimeout(async () => {
+      // Prevent saving if unchanged
+      if (deepEqual(scenario, lastSavedRef.current)) return;
 
-    if (hasChanged) {
-      debouncedSave(scenario);
-    }
-  }, [scenario, debouncedSave]);
+      try {
+        setAutosaving(true);
+
+        const response = await api.post("/scenarios/autosave", {
+          scenario,
+        });
+
+        if (response.status === 200) {
+          lastSavedRef.current = scenario;
+          setLastSavedScenario(scenario);
+        }
+
+      } catch (err) {
+        console.error("Autosave error:", err);
+      } finally {
+        setAutosaving(false);
+      }
+    }, intervalMs);
+
+    return () => clearTimeout(timer);
+  }, [scenario, autosaveEnabled]);
 
   return { autosaving };
 }

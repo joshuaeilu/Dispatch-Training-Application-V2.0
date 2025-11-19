@@ -1,5 +1,4 @@
-
-import { Button, Card, Col, Row, Space, Form, Select, Input, Typography, Table, type TableColumnType, Tag, Tooltip, Popconfirm } from "antd";
+import { Button, Card, Col, Row, Space, Form, Select, Input, Typography, Table, type TableColumnType, Tag, Tooltip, Popconfirm, Skeleton } from "antd";
 import { PageHeader } from "../../Shared/PageHeader"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react";
@@ -8,6 +7,7 @@ import { api } from "../../../utils/api";
 import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
 import type { Scenario, ScenarioTableType } from "../../../types/index.types";
 import ViewScenarioModal from "./components/ViewScenarioModal";
+
 export default function ViewScenarios() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -18,6 +18,7 @@ export default function ViewScenarios() {
   const [scenarioFiles, setScenarioFiles] = useState<ScenarioTableType[]>([]);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<ScenarioTableType | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
 
   const handleResetFilteredFields = () => {
     form.resetFields();
@@ -30,6 +31,7 @@ export default function ViewScenarios() {
   // Get all scenarios from the database
   useEffect(() => {
     async function fetchScenarios() {
+      setLoading(true);
       try {
         const { data } = await api.get('/scenarios');
         setScenarioFiles(data.scenarios.map((scenario: any) => ({
@@ -39,7 +41,7 @@ export default function ViewScenarios() {
           type: scenario.scenario_data?.type || "Unknown",
           difficulty: scenario.scenario_data?.difficulty || "N/A",
           questionsCount: scenario.scenario_data?.scenes?.length || 0,
-          status: scenario.status,
+          status: scenario.scenario_data?.status || "draft",
           audience: scenario.scenario_data?.audience || "N/A",
           scenes: scenario.scenario_data?.scenes || [],
           created_by: {
@@ -51,6 +53,9 @@ export default function ViewScenarios() {
         console.log("✅ Fetched scenarios from DB.");
       } catch (error) {
         console.error("❌ Failed to fetch scenarios:", error);
+        toast.error("Failed to load scenarios");
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -112,7 +117,6 @@ export default function ViewScenarios() {
 
     return matchesType && matchesDifficulty && matchesStatus;
   });
-
 
   const scenarioTableColumns: TableColumnType<ScenarioTableType>[] = [
     {
@@ -270,57 +274,77 @@ export default function ViewScenarios() {
       <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
         {/* Filters */}
         <Card className="shadow-soft mb-4" style={{ margin: "0 1.5rem" }}>
-          <Form
-            form={form}
-            layout="vertical"
-          >
+          {loading ? (
             <Row gutter={[16, 12]}>
               <Col xs={24} sm={12} md={4}>
-                <Form.Item label="Type" name="type">
-                  <Select
-                    defaultValue={selectedScenarioType}
-                    options={scenarioTypes.map(type => ({ label: type, value: type }))}
-                    onChange={(value) => setSelectedScenarioType(value)}
-                  />
-                </Form.Item>
+                <Skeleton.Input active block style={{ height: 32, marginBottom: 8 }} />
               </Col>
-
               <Col xs={24} sm={12} md={4}>
-                <Form.Item label="Difficulty" name="difficulty">
-                  <Select placeholder="Select difficulty" options={scenarioDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
-                </Form.Item>
+                <Skeleton.Input active block style={{ height: 32, marginBottom: 8 }} />
               </Col>
-
               <Col xs={24} sm={12} md={4}>
-                <Form.Item label="Status" name="status">
-                  <Select placeholder="Select status" options={scenarioStatusOptions} onChange={(value) => setSelectedStatus(value)} />
-                </Form.Item>
+                <Skeleton.Input active block style={{ height: 32, marginBottom: 8 }} />
               </Col>
-
-
-              <Col xs={24} md={10} >
-                <Form.Item label="Search by name" name="q">
-                  <Input prefix={<SearchOutlined />} placeholder="Type to search…" allowClear onChange={(e) => setSearchQuery(e.target.value)}
-                    onPressEnter={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
-                  />
-                </Form.Item>
+              <Col xs={24} md={10}>
+                <Skeleton.Input active block style={{ height: 32, marginBottom: 8 }} />
               </Col>
-
-              <Col xs={24} md={2} >
-                <Space className="w-full justify-center" style={{ alignItems: "center", justifyContent: "center", alignContent: "center", height: "100%", width: "100%" }}>
-                  <Button
-                    className="border-btn"
-                    size="middle"
-                    icon={<ReloadOutlined />}
-                    onClick={handleResetFilteredFields}
-                  >
-                    Reset
-                  </Button>
-
-                </Space>
+              <Col xs={24} md={2}>
+                <Skeleton.Button active block style={{ height: 32 }} />
               </Col>
             </Row>
-          </Form>
+          ) : (
+            <Form
+              form={form}
+              layout="vertical"
+            >
+              <Row gutter={[16, 12]}>
+                <Col xs={24} sm={12} md={4}>
+                  <Form.Item label="Type" name="type">
+                    <Select
+                      defaultValue={selectedScenarioType}
+                      options={scenarioTypes.map(type => ({ label: type, value: type }))}
+                      onChange={(value) => setSelectedScenarioType(value)}
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} sm={12} md={4}>
+                  <Form.Item label="Difficulty" name="difficulty">
+                    <Select placeholder="Select difficulty" options={scenarioDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} sm={12} md={4}>
+                  <Form.Item label="Status" name="status">
+                    <Select placeholder="Select status" options={scenarioStatusOptions} onChange={(value) => setSelectedStatus(value)} />
+                  </Form.Item>
+                </Col>
+
+
+                <Col xs={24} md={10} >
+                  <Form.Item label="Search by name" name="q">
+                    <Input prefix={<SearchOutlined />} placeholder="Type to search…" allowClear onChange={(e) => setSearchQuery(e.target.value)}
+                      onPressEnter={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} md={2} >
+                  <Space className="w-full justify-center" style={{ alignItems: "center", justifyContent: "center", alignContent: "center", height: "100%", width: "100%" }}>
+                    <Button
+                      className="border-btn"
+                      size="middle"
+                      icon={<ReloadOutlined />}
+                      onClick={handleResetFilteredFields}
+                    >
+                      Reset
+                    </Button>
+
+                  </Space>
+                </Col>
+              </Row>
+            </Form>
+          )}
         </Card>
 
 
@@ -328,58 +352,74 @@ export default function ViewScenarios() {
           style={{ margin: "1.5rem", overflowX: "auto" }}
           bodyStyle={{ padding: 16 }}
         >
-          <Space
-            direction="vertical"
-            size={2}
-            style={{
-              width: "100%",
-              padding: "4px 0",
-            }}
-          >
-            <Space>
-              <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
-              <Typography.Title
-                level={4}
+          {loading ? (
+            <>
+              <Space direction="vertical" size={2} style={{ width: "100%", padding: "4px 0" }}>
+                <Skeleton.Input active style={{ width: 200, height: 28 }} />
+                <Skeleton.Input active style={{ width: 150, height: 20 }} />
+              </Space>
+              <div className="mt-2">
+                <Skeleton active paragraph={{ rows: 8 }} />
+              </div>
+            </>
+          ) : (
+            <>
+              <Space
+                direction="vertical"
+                size={2}
                 style={{
-                  margin: 0,
-                  fontWeight: 600,
-                  fontSize: "20px",
-                  color: "var(--color-heading, #1f1f1f)",
+                  width: "100%",
+                  padding: "4px 0",
                 }}
               >
-                {selectedScenarioType === "All Types" ? "All Scenarios" : selectedScenarioType}
-              </Typography.Title>
-            </Space>
+                <Space>
+                  <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
+                  <Typography.Title
+                    level={4}
+                    style={{
+                      margin: 0,
+                      fontWeight: 600,
+                      fontSize: "20px",
+                      color: "var(--color-heading, #1f1f1f)",
+                    }}
+                  >
+                    {selectedScenarioType === "All Types" ? "All Scenarios" : selectedScenarioType}
+                  </Typography.Title>
+                </Space>
 
-            <Typography.Text
-              type="secondary"
-              style={{
-                fontSize: "14px",
-                color: "var(--color-text-secondary, #888)",
-              }}
-            >
-              {filteredData.length} {filteredData.length === 1 ? "scenario" : "scenarios"} found
-            </Typography.Text>
-          </Space>
+                <Typography.Text
+                  type="secondary"
+                  style={{
+                    fontSize: "14px",
+                    color: "var(--color-text-secondary, #888)",
+                  }}
+                >
+                  {filteredData.length} {filteredData.length === 1 ? "scenario" : "scenarios"} found
+                </Typography.Text>
+              </Space>
 
-          <div className="overflow-auto mt-2" style={{ maxHeight: "60vh" }}>
-            <Table
-              rowKey="id"
-              columns={scenarioTableColumns}
-              dataSource={filteredData} pagination={{
-                pageSize: 10,
-                showQuickJumper: true,
-                showTotal: (total) => `Total ${total} exercises`,
-              }}
-              scroll={{
-                y: 400,
-                x: "max-content",
-              }}
-              sticky
-              bordered
+              <div className="overflow-auto mt-2" style={{ maxHeight: "60vh" }}>
+                <Table
+                  rowKey="id"
+                  columns={scenarioTableColumns}
+                  dataSource={filteredData}
+                  loading={loading}
+                  pagination={{
+                    pageSize: 10,
+                    showQuickJumper: true,
+                    showTotal: (total) => `Total ${total} scenarios`,
+                  }}
+                  scroll={{
+                    y: 400,
+                    x: "max-content",
+                  }}
+                  sticky
+                  bordered
 
-            />
-          </div>
+                />
+              </div>
+            </>
+          )}
         </Card>
       </div>
 

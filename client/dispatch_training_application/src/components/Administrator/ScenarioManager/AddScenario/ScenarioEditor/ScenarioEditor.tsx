@@ -1,227 +1,236 @@
-import { Space, Button, Typography, Radio, Modal} from "antd";
-import { ArrowLeftOutlined,  CheckCircleOutlined, SaveOutlined } from "@ant-design/icons";
+import { Space, Button, Typography, Radio, Modal } from "antd";
+import { ArrowLeftOutlined, CheckCircleOutlined, SaveOutlined } from "@ant-design/icons";
 import SceneEditor from "./SceneEditor";
-import 'antd/dist/reset.css'; // AntD v5
-
-import { useState, useRef } from "react";
-import type { Scenario } from "../../../../../types/index.types";
-import { useLocation } from "react-router-dom";
 import SceneOverview from "./SceneOverview";
-import { api } from "../../../../../utils/api";
-import { useContext } from "react";
+
+import { useState, useRef, useContext } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import { AuthContext } from "../../../../../contexts/AuthProvider";
-import {  toast } from 'react-hot-toast';
+import { api } from "../../../../../utils/api";
+import { toast } from "react-hot-toast";
+
 import { useScenarioManager } from "../../../../../hooks/useScenarioManager";
 import { useAutosaveScenario } from "../../../../../hooks/useAutoSaveScenario";
-import { useNavigate } from "react-router-dom";
 
-const { Text} = Typography;
+import type { Scenario } from "../../../../../types/index.types";
+
+const { Text } = Typography;
+
 export default function ScenarioEditor() {
   const { Title } = Typography;
   const location = useLocation();
-  const {scenarioId} = location.state || {};
-  const { scenarioDetails } = location.state || {};
+  const navigate = useNavigate();
 
-  const { scenario, setScenario, status} = useScenarioManager({ scenarioId, scenarioDetails });
-
-  const [__, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
-
-  const [isPublishing, setIsPublishing] = useState(false);
-
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { scenarioId, scenarioDetails } = location.state || {};
+  const { scenario, setScenario } = useScenarioManager({
+    scenarioId,
+    scenarioDetails,
+  });
 
   const { user } = useContext(AuthContext);
+
+  // Autosave control
+  const [autosaveEnabled, setAutosaveEnabled] = useState(true);
+  const [__, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
+
+  // UI state
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"draft" | "published">("draft");
 
-  // Audio playback ref
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [playing, setPlaying] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
 
-    const navigate = useNavigate();
-
-
+  // STOP AUDIO PLAYBACK
   const stopAudio = () => {
-  if (audioRef.current) {
-    audioRef.current.pause();
-    audioRef.current = null;
-    setPlaying(false);
-  }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setPlaying(false);
+    }
+  };
+
+  // AUTOSAVE HOOK — now accepts autosaveEnabled flag
+  const { autosaving } = useAutosaveScenario(
+    scenario ?? null,
+    setLastSavedScenario,
+    autosaveEnabled,
+    10000 // 10 seconds
+  );
+
+  /**
+   * SAVE SCENARIO
+   * Full-proof, autosave-proof, clean.
+   */
+  async function saveScenario() {
+    setAutosaveEnabled(false); // ⛔ STOP AUTOSAVE
+    setIsPublishing(true);
+
+    try {
+      const updated: Scenario = {
+  ...(scenario as Scenario),
+  status: saveStatus,
 };
 
+      setScenario(updated);
 
-
-
-
-  const [saveStatus, setSaveStatus] = useState<'draft' | 'published'>('published');
-
-
-const {autosaving} = useAutosaveScenario(scenario ?? null, setLastSavedScenario, status );
-
-
-
-  async function saveScenario() {
-    setIsPublishing(true);
-    try {
+      // SAVE MAIN SCENARIO
       const response = await api.post("/scenarios", {
-        scenario,
+        scenario: updated,
         authorId: user?.id,
-        status: saveStatus, // ✅ explicit
       });
 
-      if(saveStatus === 'published') {
-        // generate TTS for each scene
-      const audioResponse = await api.post(`/scenarios/${scenario?.id}/generate-audio`, {
-        scenes: scenario?.scenes,
-        speakers: scenario?.speakers
-      });
-      if (audioResponse.status === 200) {
-        console.log("Audio generated successfully!");
-      } else {
-        console.log(`Audio generation failed. Status: ${audioResponse.status}`);
-      }
-      setIsPublishing(false);
+      if (saveStatus === "published") {
+        // PUBLISH: Generate audio
+        const audioResponse = await api.post(
+          `/scenarios/${updated.id}/generate-audio`,
+          {
+            scenes: updated.scenes,
+            speakers: updated.speakers,
+          }
+        );
+
+        if (audioResponse.status !== 200) {
+          console.error("Audio generation failed.");
+        }
       }
 
-
-      if ((response.status  === 200) || (response.status  === 201)) {
+      if (response.status === 200 || response.status === 201) {
         toast.success("Scenario saved successfully!");
-        setIsPublishing(false);
-        window.history.back();
+        navigate("/scenario-manager", { replace: true });
       } else {
-        toast.error(`Failed to save scenario. Status: ${response.status}`);
+        toast.error("Failed to save scenario.");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error saving scenario:", err);
-      toast.error("An error occurred while saving the scenario. Check console.");
+      toast.error("An error occurred while saving.");
+    } finally {
+      setIsPublishing(false);
+      setAutosaveEnabled(true); // ✅ RE-ENABLE AUTOSAVE AFTER COMPLETION
     }
   }
 
-
-
-
-
-
-
   return (
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column", padding: 10 }}>
+      {/* HEADER */}
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          borderBottom: "1px solid var(--color-border)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 1rem",
+          height: "9vh",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
+        }}
+      >
+        <Space align="center" size="middle">
+          <Button
+            type="primary"
+            icon={<ArrowLeftOutlined />}
+            size="large"
+            onClick={() => navigate("/scenario-manager")}
+          />
 
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', padding: 10 }}>
+          <div>
+            <Title level={4} style={{ margin: 0 }}>
+              {scenario?.name || "Untitled Scenario"}
+            </Title>
+            <Text type="secondary">Editing scenario</Text>
+          </div>
+        </Space>
 
-          <div
-  style={{
-    position: "sticky",
-    top: 0,
-    zIndex: 1000,
-    borderBottom: "1px solid var(--color-border)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "0 1rem",
-    height: "9vh",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
-  }}
->
-  {/* Left: Back + Title */}
-  <Space align="center" size="middle">
-    <Button
-      type="primary"
-      icon={<ArrowLeftOutlined />}
-      size="large"
-      onClick={() => navigate("/scenario-manager")}
-      
-    />
-    <div>
-      <Title level={4} style={{ margin: 0, color: "#1F1F1F" }}>
-        {scenario?.name || "Untitled Exercise"}
-      </Title>
-      <Text type="secondary" style={{ fontSize: 14 }}>
-        Editing scenario
-      </Text>
-    </div>
-  </Space>
+        <Button
+          type="primary"
+          icon={<SaveOutlined />}
+          size="large"
+          onClick={() => setIsSaveModalOpen(true)}
+          className="regular-btn"
+        >
+          Save
+        </Button>
+      </div>
 
-
-
-    <Button
-      type="primary"
-      icon={<SaveOutlined />}
-      size="large"
-      onClick={() => setIsSaveModalOpen(true)}
-      className="regular-btn"
-    >
-      Save
-    </Button>
-</div>
-
-        {/* Main Content Area */}
-<div className="flex flex-col md:flex-row h-[87vh] overflow-hidden gap-4" style={{ padding: 16 }}>
-        <div className="w-full md:w-1/2 h-full ">
-          <SceneEditor scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex}
-           playing={playing} setPlaying={setPlaying} audioRef={audioRef} />
-
-</div>
-
-
-
-   
-                  <div className="w-full md:w-1/2 h-full ">
-
-          <SceneOverview scenario={scenario} setScenario={setScenario} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} stopAudio={stopAudio} />
+      {/* EDITOR */}
+      <div className="flex flex-col md:flex-row h-[87vh] overflow-hidden gap-4" style={{ padding: 16 }}>
+        <div className="w-full md:w-1/2 h-full">
+          <SceneEditor
+            scenario={scenario}
+            setScenario={setScenario}
+            currentIndex={currentIndex}
+            setCurrentIndex={setCurrentIndex}
+            playing={playing}
+            setPlaying={setPlaying}
+            audioRef={audioRef}
+          />
         </div>
-        
+
+        <div className="w-full md:w-1/2 h-full">
+          <SceneOverview
+            scenario={scenario}
+            setScenario={setScenario}
+            currentIndex={currentIndex}
+            setCurrentIndex={setCurrentIndex}
+            stopAudio={stopAudio}
+          />
         </div>
-         <div
-      className="flex items-center text-xs font-normal text-[#595959] bg-white"
-      style={{
-        padding: "8px 16px",
-        height: "4vh",
-        gap: 6,
-      }}
-    >
-      <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 14 }} />
-      <span>{autosaving ? "Autosaving..." : "All changes saved"}</span>
+      </div>
+
+      {/* AUTOSAVE FOOTER */}
+      <div
+        className="flex items-center text-xs font-normal text-[#595959] bg-white"
+        style={{ padding: "8px 16px", height: "4vh", gap: 6 }}
+      >
+        <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 14 }} />
+        <span>{autosaving ? "Autosaving..." : "All changes saved"}</span>
+      </div>
+
+      {/* SAVE MODAL */}
+      <Modal
+        open={isSaveModalOpen}
+        title="Save Scenario"
+        onCancel={() => setIsSaveModalOpen(false)}
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => setIsSaveModalOpen(false)}
+            disabled={isPublishing}
+            className="border-btn"
+          >
+            Cancel
+          </Button>,
+          <Button
+            key="save"
+            type="primary"
+            loading={isPublishing}
+            onClick={saveScenario}
+            className="regular-btn"
+          >
+            {isPublishing
+              ? saveStatus === "published"
+                ? "Publishing..."
+                : "Saving..."
+              : saveStatus === "published"
+                ? "Publish Scenario"
+                : "Save as Draft"}
+          </Button>,
+        ]}
+      >
+        <p>Would you like to save this scenario as:</p>
+        <Radio.Group
+          value={saveStatus}
+          onChange={(e) => setSaveStatus(e.target.value)}
+          disabled={isPublishing}
+        >
+          <Radio value="draft">Draft</Radio>
+          <Radio value="published">Published</Radio>
+        </Radio.Group>
+      </Modal>
     </div>
-
-  
-<Modal
-  open={isSaveModalOpen}
-  title="Save Scenario"
-  onCancel={() => setIsSaveModalOpen(false)}
-  footer={[
-    <Button
-      key="cancel"
-      onClick={() => setIsSaveModalOpen(false)}
-      disabled={isPublishing}
-      className="border-btn" // Calvin theme (outlined)
-    >
-      Cancel
-    </Button>,
-    <Button
-  key="save"
-  type="primary"
-  loading={isPublishing}
-  onClick={saveScenario}
-  className="regular-btn"
->
-  {isPublishing
-    ? (saveStatus === 'published' ? 'Publishing Scenario...' : 'Saving Draft...')
-    : (saveStatus === 'published' ? 'Publish Scenario' : 'Save as Draft')}
-</Button>,
-
-  ]}
->
-  <p>Would you like to save this scenario as:</p>
-  <Radio.Group
-    value={saveStatus}
-    onChange={(e) => setSaveStatus(e.target.value)}
-    disabled={isPublishing}
-  >
-    <Radio value="draft">Draft</Radio>
-    <Radio value="published">Published</Radio>
-  </Radio.Group>
-</Modal>
-
-
-    </div>
-
-  )
+  );
 }

@@ -14,14 +14,12 @@ const fs = require('fs');
 
 router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
   try {
-    const { role } = req.user; // role comes from auth middleware
+    const { role } = req.user;
 
-    // Base query (shared by all roles)
     let query = `
       SELECT 
         s.id,
         s.author_id,
-        s.status,
         s.scenario_data,
         s.pdf_filename,
         s.updated_at,
@@ -30,20 +28,21 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
       FROM scenarios s
       JOIN users u ON u.id = s.author_id
     `;
+
     const params = [];
 
     if (role === "admin") {
-      // 🔹 Admin sees all scenarios (draft + published)
+      // Admin sees all scenarios (published + drafts)
       query += ` ORDER BY s.created_at DESC;`;
     } else {
-      // 🔹 Trainees and Dispatchers see only published scenarios
-      // 🔹 And only those with audience = 'All' or matching their role
+      // Role → "Trainees" or "Dispatchers"
       const normalizedRole =
-        role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()+'s'; // 'Trainee' / 'Dispatcher'
+        role.charAt(0).toUpperCase() + role.slice(1).toLowerCase() + "s";
+
       params.push(normalizedRole);
 
       query += `
-        WHERE s.status = 'published'
+        WHERE LOWER(s.scenario_data->>'status') = 'published'
         AND (
           LOWER(s.scenario_data->>'audience') = LOWER($1)
           OR LOWER(s.scenario_data->>'audience') = 'all'
@@ -55,6 +54,7 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
     const result = await pool.query(query, params);
 
     res.status(200).json({ scenarios: result.rows });
+
   } catch (err) {
     console.error("❌ Error fetching scenarios:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -65,9 +65,10 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
 
 
 
+
 router.post("/", auth(["admin"]), async (req, res) => {
   const { scenario, authorId, status } = req.body;
-  console.log(status);
+  console.log(scenario.status)
 
   if (!scenario || !authorId) {
     return res.status(400).json({ error: "Missing scenario or authorId" });
@@ -81,15 +82,14 @@ router.post("/", auth(["admin"]), async (req, res) => {
 
     await pool.query(
       `
-      INSERT INTO scenarios (id, author_id, scenario_data, status)
-      VALUES ($1, $2, $3::jsonb, $4)
+      INSERT INTO scenarios (id, author_id, scenario_data)
+      VALUES ($1, $2, $3::jsonb)
       ON CONFLICT (id)
       DO UPDATE SET
         scenario_data = EXCLUDED.scenario_data,
-        status = EXCLUDED.status,
         updated_at = NOW();
       `,
-      [scenario.id, authorId, JSON.stringify(scenario), status ]
+      [scenario.id, authorId, JSON.stringify(scenario) ]
     );
 
     res.status(200).json({ message: "Scenario saved successfully" });

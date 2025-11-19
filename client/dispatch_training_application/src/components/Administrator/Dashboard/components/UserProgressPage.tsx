@@ -148,7 +148,7 @@ export default function UserProgressPage() {
         const audience = sc?.scenario_data?.audience || "All";
         return (
           ["All", toTitleCase(user.role) + "s"].includes(audience) &&
-          sc.status === "published"
+          sc.scenario_data.status === "published"
         );
       });
 

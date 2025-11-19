@@ -5,17 +5,17 @@ import {
   Progress,
   Input,
   Typography,
-  Row,
-  Col,
   Space,
+  Divider,
 } from "antd";
 
 import {
   PlayCircleOutlined,
   CheckCircleTwoTone,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
-import type {  Scene } from "../../types/index.types";
+import type { Scene } from "../../types/index.types";
 import SceneCard from "./SceneCard";
 import { AuthContext } from "../../contexts/AuthProvider";
 import dayjs from "dayjs";
@@ -38,15 +38,10 @@ export default function ScenarioWalkthrough() {
     console.log("Scenario Data:", scenarioData);
   }, [scenarioData]);
 
-
-
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(
     new Set()
   );
   const [completed, setCompleted] = useState(false);
-  const [pdfOpen, setPdfOpen] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [notes, setNotes] = useState("");
   const [__, setScenarioTime] = useState<ScenarioTime | null>(null);
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -72,11 +67,11 @@ export default function ScenarioWalkthrough() {
       }
     } else {
       setCompleted(true);
-      try{
+      try {
         await api.post("/submissions/scenario_walkthrough", {
           scenarioId: scenarioData.id,
-        })
-      }catch(err){
+        });
+      } catch (err) {
         console.error("Failed to submit scenario completion", err);
       }
 
@@ -125,143 +120,239 @@ export default function ScenarioWalkthrough() {
     }
   };
 
-
-
   return (
-    <div 
+    <div
       style={{
-        minHeight: "100vh",
-        backgroundColor: "#fff",
+        height: "100vh",
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
+        overflow: "hidden",
+        backgroundColor: "#f5f5f5",
       }}
     >
-      <div 
-        className="mx-auto w-full" 
-        style={{ 
-          maxWidth: "1400px",
-          padding: "0 1rem",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column"
+      {/* Fixed Header */}
+      <div
+        style={{
+          flexShrink: 0,
+          backgroundColor: "#f5f5f5",
+          paddingTop: "1rem",
+          zIndex: 10,
         }}
       >
-        {/* Header */}
-        <div style={{ paddingTop: "1.5rem", paddingBottom: "1rem" }}>
+        <div
+          style={{
+            maxWidth: "1600px",
+            margin: "0 auto",
+            padding: "0 clamp(1rem, 3vw, 2rem)",
+          }}
+        >
           <div
-            className="py-4 px-4 sm:py-6 sm:px-6 text-center rounded-lg"
             style={{
-              backgroundColor: "#8C2131",
-              color: "white",
+              background: "linear-gradient(135deg, #8C2131 0%, #6B1724 100%)",
+              borderRadius: "12px 12px 0 0",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              padding: "1.5rem clamp(1rem, 3vw, 2rem)",
             }}
           >
-            <Title
-              level={2}
-              className="!mb-2 sm:!mb-3 font-bold tracking-tight"
-              style={{
-                color: "white",
-                fontFamily: "Urbanist, Inter, sans-serif",
-                fontSize: "clamp(1.25rem, 4vw, 2rem)",
-                margin: 0
-              }}
-            >
-              {scenarioData.name}
-            </Title>
+            {/* Title Section */}
+            <div style={{ marginBottom: "1rem" }}>
+              <Title
+                level={2}
+                style={{
+                  color: "white",
+                  margin: 0,
+                  marginBottom: "0.5rem",
+                  fontFamily: "Urbanist, Inter, sans-serif",
+                  fontSize: "clamp(1.5rem, 4vw, 2.25rem)",
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {scenarioData.name}
+              </Title>
 
-            <Paragraph
-              className="mx-auto max-w-2xl leading-relaxed"
-              style={{
-                color: "#F3F3F3",
-                fontFamily: "Inter, sans-serif",
-                fontSize: "clamp(0.875rem, 2vw, 1rem)",
-                marginBottom: 0,
-                padding: "0 0.5rem"
-              }}
-            >
-              {scenarioData.description}
-            </Paragraph>
-          </div>
-        </div>
+              <Paragraph
+                style={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: "clamp(0.875rem, 2vw, 1rem)",
+                  marginBottom: 0,
+                  maxWidth: "900px",
+                  lineHeight: 1.6,
+                }}
+              >
+                {scenarioData.description}
+              </Paragraph>
+            </div>
 
-        {/* Progress */}
-        <div style={{ paddingBottom: "1rem" }}>
-          <div className="mb-2 flex items-center justify-between text-sm">
-            <Text strong style={{ fontSize: "clamp(0.75rem, 2vw, 0.875rem)" }}>
-              Progress
-            </Text>
-            <Text type="secondary" style={{ fontSize: "clamp(0.75rem, 2vw, 0.875rem)" }}>
-              {answeredQuestions.size}/{scenarioData.scenes.length}
-            </Text>
-          </div>
-          <Progress 
-            percent={progress} 
-            showInfo={false} 
-            strokeColor="#52c41a"
-            strokeWidth={8}
-          />
-        </div>
-
-        {/* Main Content */}
-        <div style={{ flex: 1, paddingBottom: "1rem", minHeight: 0 }}>
-          <Row gutter={[16, 16]} style={{ height: "100%" }}>
-            {/* Question Section */}
-            <Col xs={24} lg={15} style={{ display: "flex", flexDirection: "column" }}>
-              {!started ? (
-                <Card 
-                  className="p-4 sm:p-6 md:p-8" 
-                  style={{ 
-                    height: "100%",
-                    minHeight: "400px",
-                    display: "flex",
-                    flexDirection: "column"
+            {/* Progress Section */}
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <Text
+                  strong
+                  style={{
+                    color: "white",
+                    fontSize: "clamp(0.75rem, 2vw, 0.875rem)",
                   }}
                 >
-                  <div className="flex flex-col items-center justify-center text-center" style={{ flex: 1 }}>
-                    <div className="mb-4 sm:mb-6 rounded-full bg-green-100 p-4 sm:p-6">
-                      <PlayCircleOutlined 
-                        style={{ fontSize: "clamp(2rem, 8vw, 3rem)" }} 
-                      />
-                    </div>
-                    <Title 
-                      level={3}
-                      style={{ fontSize: "clamp(1.125rem, 3vw, 1.5rem)" }}
-                    >
-                      Ready to Begin?
-                    </Title>
-                    <Paragraph 
-                      className="mb-6 sm:mb-8 max-w-md text-gray-600 leading-relaxed"
-                      style={{ fontSize: "clamp(0.875rem, 2vw, 1rem)" }}
-                    >
-                      You'll be presented with {scenarioData.scenes.length} real-world scenes. 
-                      Choose the best response for each situation.
-                    </Paragraph>
-                    <Button 
-                      type="primary" 
-                      size="large" 
-                      onClick={handleStart}
-                      style={{ 
-                        height: "auto",
-                        padding: "0.75rem 2rem",
-                        fontSize: "clamp(0.875rem, 2vw, 1rem)"
-                      }}
-                    >
-                      Start Walkthrough
-                    </Button>
-                  </div>
-                </Card>
-              ) : (
+                  Progress
+                </Text>
+                <Text
+                  style={{
+                    color: "rgba(255, 255, 255, 0.9)",
+                    fontSize: "clamp(0.75rem, 2vw, 0.875rem)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {answeredQuestions.size} / {scenarioData.scenes.length} completed
+                </Text>
+              </div>
+              <Progress
+                percent={progress}
+                showInfo={false}
+                strokeColor="#B4975A"
+                trailColor="rgba(255, 255, 255, 0.3)"
+                strokeWidth={10}
+                style={{
+                  maxWidth: "600px",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div
+        style={{
+          flex: 1,
+          overflow: "hidden",
+          display: "flex",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1600px",
+            margin: "0 auto",
+            width: "100%",
+            display: "flex",
+            gap: "1rem",
+            padding: "0 clamp(1rem, 3vw, 2rem) 1rem",
+            overflow: "hidden",
+          }}
+        >
+          {/* Questions Section - Scrollable */}
+          <div
+            style={{
+              flex: "1 1 65%",
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {!started ? (
+              <Card
+                style={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  border: "none",
+                }}
+                bodyStyle={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "clamp(2rem, 5vw, 4rem)",
+                }}
+              >
                 <div
-                  id="questions-container"
-                  className="pr-2"
-                  style={{ 
-                    height: "100%",
-                    overflowY: "auto",
-                    overflowX: "hidden"
+                  style={{
+                    textAlign: "center",
+                    maxWidth: "500px",
                   }}
                 >
+                  <div
+                    style={{
+                      marginBottom: "2rem",
+                      display: "inline-flex",
+                      padding: "2rem",
+                      borderRadius: "50%",
+                      background: "linear-gradient(135deg, #e6f7ff 0%, #d9f7be 100%)",
+                    }}
+                  >
+                    <PlayCircleOutlined
+                      style={{
+                        fontSize: "clamp(3rem, 8vw, 4rem)",
+                        color: "#52c41a",
+                      }}
+                    />
+                  </div>
+
+                  <Title
+                    level={2}
+                    style={{
+                      fontSize: "clamp(1.5rem, 4vw, 2rem)",
+                      marginBottom: "1rem",
+                      color: "#1f1f1f",
+                    }}
+                  >
+                    Ready to Begin?
+                  </Title>
+
+                  <Paragraph
+                    style={{
+                      fontSize: "clamp(0.875rem, 2vw, 1.125rem)",
+                      color: "#666",
+                      lineHeight: 1.7,
+                      marginBottom: "2rem",
+                    }}
+                  >
+                    You'll navigate through {scenarioData.scenes.length}{" "}
+                    real-world scenarios. Choose the best response for each
+                    situation and take notes as you progress.
+                  </Paragraph>
+
+                  <Button
+                    type="primary"
+                    size="large"
+                    onClick={handleStart}
+                    style={{
+                      height: "auto",
+                      padding: "1rem 3rem",
+                      fontSize: "clamp(1rem, 2vw, 1.125rem)",
+                      fontWeight: 600,
+                      background: "#8C2131",
+                      borderColor: "#8C2131",
+                      boxShadow: "0 4px 12px rgba(140, 33, 49, 0.3)",
+                    }}
+                  >
+                    Start Walkthrough
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  overflowX: "hidden",
+                  paddingRight: "0.5rem",
+                }}
+              >
+                <div style={{ paddingBottom: "2rem" }}>
                   {scenarioData.scenes.map((scene: Scene, index: number) => {
                     const isUnlocked =
-                      answeredQuestions.has(index) || index === answeredQuestions.size;
+                      answeredQuestions.has(index) ||
+                      index === answeredQuestions.size;
 
                     return (
                       <div
@@ -269,11 +360,12 @@ export default function ScenarioWalkthrough() {
                         ref={(el) => {
                           questionRefs.current[index] = el;
                         }}
-                        className={`transition-all mb-4`}
                         style={{
-                          opacity: isUnlocked ? 1 : 0.3,
+                          marginBottom: "1.5rem",
+                          transition: "all 0.3s ease",
+                          opacity: isUnlocked ? 1 : 0.4,
                           pointerEvents: isUnlocked ? "auto" : "none",
-                          filter: isUnlocked ? "none" : "blur(4px)"
+                          filter: isUnlocked ? "none" : "blur(3px)",
                         }}
                       >
                         {isUnlocked ? (
@@ -282,25 +374,26 @@ export default function ScenarioWalkthrough() {
                             scene={scene}
                             index={index}
                             onCorrect={handleCorrect}
-                           
                             audioUrl={`http://localhost:5000/data/scenario_audios/${scenarioData.id}/scene-${index}.mp3?token=${token}`}
                           />
                         ) : (
-                          <Card 
-                            style={{ 
-                              minHeight: "300px",
-                              height: "100%",
+                          <Card
+                            style={{
+                              minHeight: "250px",
                               display: "flex",
                               alignItems: "center",
-                              justifyContent: "center"
+                              justifyContent: "center",
+                              background: "#fafafa",
+                              border: "2px dashed #d9d9d9",
                             }}
-                            className="bg-gray-100 border-dashed"
                           >
-                            <Text 
+                            <Text
                               type="secondary"
-                              style={{ fontSize: "clamp(0.875rem, 2vw, 1rem)" }}
+                              style={{
+                                fontSize: "clamp(0.875rem, 2vw, 1rem)",
+                              }}
                             >
-                              Locked — finish the previous scene first
+                              🔒 Complete the previous scene to unlock
                             </Text>
                           </Card>
                         )}
@@ -308,170 +401,237 @@ export default function ScenarioWalkthrough() {
                     );
                   })}
 
-                  {/* Completion card */}
+                  {/* Completion Card */}
                   {completed && (
-                    <div ref={completionRef} className="mb-4">
-                      <Card className="p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center text-center">
-                        <div className="mb-4 sm:mb-6 rounded-full bg-green-100 p-4 sm:p-6">
-                          <CheckCircleTwoTone 
-                            twoToneColor="#52c41a" 
-                            style={{ fontSize: "clamp(2rem, 8vw, 3rem)" }}
-                          />
+                    <div ref={completionRef}>
+                      <Card
+                        style={{
+                          boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+                          border: "2px solid #52c41a",
+                        }}
+                        bodyStyle={{
+                          padding: "clamp(2rem, 5vw, 3rem)",
+                        }}
+                      >
+                        <div style={{ textAlign: "center" }}>
+                          <div
+                            style={{
+                              marginBottom: "2rem",
+                              display: "inline-flex",
+                              padding: "2rem",
+                              borderRadius: "50%",
+                              background: "#f6ffed",
+                            }}
+                          >
+                            <CheckCircleTwoTone
+                              twoToneColor="#52c41a"
+                              style={{
+                                fontSize: "clamp(3rem, 8vw, 4rem)",
+                              }}
+                            />
+                          </div>
+
+                          <Title
+                            level={2}
+                            style={{
+                              fontSize: "clamp(1.5rem, 4vw, 2rem)",
+                              marginBottom: "1rem",
+                              color: "#1f1f1f",
+                            }}
+                          >
+                            🎉 Walkthrough Complete!
+                          </Title>
+
+                          <Paragraph
+                            style={{
+                              fontSize: "clamp(0.875rem, 2vw, 1.125rem)",
+                              color: "#666",
+                              lineHeight: 1.7,
+                              marginBottom: "2rem",
+                              maxWidth: "500px",
+                              marginLeft: "auto",
+                              marginRight: "auto",
+                            }}
+                          >
+                            Excellent work! You've successfully navigated all
+                            scenarios. Review your dispatch notes or restart to
+                            reinforce your learning.
+                          </Paragraph>
+
+                          <Space size="middle" wrap>
+                            <Button
+                              type="primary"
+                              size="large"
+                              onClick={() => window.history.back()}
+                              style={{
+                                height: "auto",
+                                padding: "0.75rem 2rem",
+                                fontSize: "clamp(0.875rem, 2vw, 1rem)",
+                                background: "#8C2131",
+                                borderColor: "#8C2131",
+                              }}
+                            >
+                              End Walkthrough
+                            </Button>
+                            <Button
+                              size="large"
+                              onClick={() => window.location.reload()}
+                              style={{
+                                height: "auto",
+                                padding: "0.75rem 2rem",
+                                fontSize: "clamp(0.875rem, 2vw, 1rem)",
+                              }}
+                            >
+                              Restart
+                            </Button>
+                          </Space>
                         </div>
-                        <Title 
-                          level={3}
-                          style={{ fontSize: "clamp(1.125rem, 3vw, 1.5rem)" }}
-                        >
-                          Walkthrough Complete!
-                        </Title>
-                        <Paragraph 
-                          className="mb-4 sm:mb-6 max-w-md text-gray-600 leading-relaxed"
-                          style={{ fontSize: "clamp(0.875rem, 2vw, 1rem)" }}
-                        >
-                          Great job! You've completed all the scenarios. Review your notes,
-                          or try again to reinforce your learning.
-                        </Paragraph>
-                        <Space 
-                          direction="horizontal" 
-                          wrap
-                          style={{ justifyContent: "center" }}
-                        >
-                          <Button
-                            type="primary"
-                            size="large"
-                            onClick={() => window.history.back()}
-                            style={{ 
-                              height: "auto",
-                              padding: "0.75rem 1.5rem",
-                              fontSize: "clamp(0.875rem, 2vw, 1rem)"
-                            }}
-                          >
-                            End Walkthrough
-                          </Button>
-                          <Button
-                            type="default"
-                            size="large"
-                            onClick={() => window.location.reload()}
-                            style={{ 
-                              height: "auto",
-                              padding: "0.75rem 1.5rem",
-                              fontSize: "clamp(0.875rem, 2vw, 1rem)"
-                            }}
-                          >
-                            Restart
-                          </Button>
-                        </Space>
                       </Card>
                     </div>
                   )}
                 </div>
-              )}
-            </Col>
+              </div>
+            )}
+          </div>
 
-            {/* Notes Section */}
-            <Col 
-              xs={24} 
-              lg={9} 
-              style={{ 
-                display: "flex", 
+          {/* Notes Section - Fixed Position on Desktop, Below on Mobile */}
+          <div
+            style={{
+              flex: "0 0 35%",
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}
+            className="notes-section"
+          >
+            <Card
+              title={
+                <Space>
+                  <span style={{ fontSize: "1.25rem" }}>📓</span>
+                  <span
+                    style={{
+                      fontSize: "clamp(1rem, 2vw, 1.125rem)",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Dispatch Notes
+                  </span>
+                </Space>
+              }
+              style={{
+                height: "100%",
+                display: "flex",
                 flexDirection: "column",
-                height: "100%"
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                border: "1px solid #e8e8e8",
+              }}
+              bodyStyle={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                padding: "1rem",
+                overflow: "hidden",
               }}
             >
-              <Card
-                title={
-                  <span 
-                    className="font-bold"
-                    style={{ fontSize: "clamp(0.875rem, 2vw, 1.125rem)" }}
-                  >
-                    📓 Dispatch Notes
-                  </span>
-                }
-                className="shadow-md border border-gray-200"
-                style={{ 
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                  minHeight: "400px"
-                }}
-                bodyStyle={{ 
-                  display: "flex", 
-                  flexDirection: "column", 
+              {/* Notes Textarea */}
+              <div
+                style={{
                   flex: 1,
-                  padding: "clamp(0.75rem, 2vw, 1.5rem)"
+                  marginBottom: "1rem",
+                  border: "1px solid #d9d9d9",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  background: "#fafafa",
                 }}
               >
-                {/* Log area */}
-                <div
-                  className="rounded-md border border-gray-300 bg-gray-100"
-                  style={{ flex: 1, minHeight: "200px", marginBottom: "1rem" }}
-                >
-                  <TextArea
-                    ref={textAreaRef}
-                    placeholder="[Dispatcher] Begin logging scenario notes..."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#333",
-                      fontFamily: "monospace",
-                      boxShadow: "none",
-                      height: "100%",
-                      fontSize: "clamp(0.75rem, 1.5vw, 0.875rem)",
-                      resize: "none"
-                    }}
-                  />
-                </div>
+                <TextArea
+                  ref={textAreaRef}
+                  placeholder="[Dispatcher] Begin logging scenario notes here...&#10;&#10;Use the timestamp button to add time markers."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#262626",
+                    fontFamily: "'Courier New', monospace",
+                    fontSize: "clamp(0.75rem, 1.5vw, 0.875rem)",
+                    lineHeight: 1.6,
+                    resize: "none",
+                    height: "100%",
+                    padding: "1rem",
+                  }}
+                />
+              </div>
 
-                {/* Controls */}
-                <div 
-                  style={{ 
-                    display: "flex", 
-                    flexDirection: "column",
-                    gap: "0.5rem"
+              <Divider style={{ margin: "0.5rem 0" }} />
+
+              {/* Controls */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                }}
+              >
+                <Button
+                  type="primary"
+                  icon={<ClockCircleOutlined />}
+                  onClick={handleAddTimestamp}
+                  block
+                  style={{
+                    height: "auto",
+                    padding: "0.625rem 1rem",
+                    fontSize: "clamp(0.875rem, 1.5vw, 0.9375rem)",
+                    fontWeight: 500,
+                    background: "#8C2131",
+                    borderColor: "#8C2131",
                   }}
                 >
-                  <div 
-                    style={{ 
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      gap: "0.5rem"
-                    }}
-                  >
-                    <Button
-                      type="primary"
-                      size="middle"
-                      icon={<i className="far fa-clock" />}
-                      onClick={handleAddTimestamp}
-                      style={{ 
-                        fontSize: "clamp(0.75rem, 1.5vw, 0.875rem)",
-                        height: "auto",
-                        padding: "0.5rem 1rem"
-                      }}
-                    >
-                      Insert Timestamp
-                    </Button>
+                  Insert Timestamp
+                </Button>
 
-                    <Text 
-                      type="secondary" 
-                      style={{ 
-                        fontSize: "clamp(0.625rem, 1.5vw, 0.75rem)"
-                      }}
-                    >
-                      (Shift+Enter for newline)
-                    </Text>
-                  </div>
-                </div>
-              </Card>
-            </Col>
-          </Row>
+                <Text
+                  type="secondary"
+                  style={{
+                    fontSize: "clamp(0.75rem, 1.5vw, 0.8125rem)",
+                    textAlign: "center",
+                  }}
+                >
+                  💡 Tip: Press Shift+Enter for a new line
+                </Text>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
 
-   
+      <style>{`
+        @media (max-width: 1024px) {
+          .notes-section {
+            display: none !important;
+          }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: #8C2131;
+          border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: #6B1724;
+        }
+      `}</style>
     </div>
   );
 }

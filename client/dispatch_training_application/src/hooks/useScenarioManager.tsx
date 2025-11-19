@@ -11,7 +11,6 @@ type UseScenarioManagerProps = {
 export function useScenarioManager({ scenarioId, scenarioDetails }: UseScenarioManagerProps) {
   const navigate = useNavigate();
     const [scenario, setScenario] = useState<Scenario | undefined>(undefined);
-    const [status, setStatus] = useState<'draft' | 'published'>("draft");
 
 
     useEffect(() => {
@@ -33,7 +32,6 @@ export function useScenarioManager({ scenarioId, scenarioDetails }: UseScenarioM
                     status: data.scenario_data.status,
                 };
 
-                setStatus(data.status);
                 
                 setScenario(loaded);
             } catch (err) {
@@ -47,5 +45,5 @@ export function useScenarioManager({ scenarioId, scenarioDetails }: UseScenarioM
         init();
     }, [scenarioId, scenarioDetails, navigate]);
 
-    return { scenario, setScenario, status };
+    return { scenario, setScenario };
 }

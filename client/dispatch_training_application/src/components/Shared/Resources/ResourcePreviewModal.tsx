@@ -104,8 +104,6 @@ export default function ResourcePreviewModal({
   const isVideo = resourceType === "video";
   const isAudio = resourceType === "audio";
   const isPdf = type === "application/pdf";
-  const isPreviewable = isImage || isVideo || isAudio || isPdf;
-
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setPageNumber(1);
@@ -168,8 +166,8 @@ export default function ResourcePreviewModal({
         body: {
           backgroundColor: "#fafafa",
           borderRadius: 8,
-          padding: "16px 20px",
-          height: "85vh",
+          padding: 0,
+          height: "90vh",
           display: "flex",
           flexDirection: "column",
         },
@@ -181,8 +179,10 @@ export default function ResourcePreviewModal({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
-          marginBottom: 12,
+          padding: "16px 20px",
           flexShrink: 0,
+          background: "#fff",
+          borderBottom: "1px solid #f0f0f0",
         }}
       >
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -237,9 +237,7 @@ export default function ResourcePreviewModal({
         </div>
       </div>
 
-      <Divider style={{ margin: "8px 0 12px 0", flexShrink: 0 }} />
-
-      {/* Content Area - Scrollable */}
+      {/* Content Area - Full Coverage */}
       <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {/* IMAGE PREVIEW */}
         {isImage && (
@@ -247,17 +245,11 @@ export default function ResourcePreviewModal({
             display: "flex", 
             alignItems: "center", 
             justifyContent: "center",
-            height: "100%",
           }}>
             <Image
               src={url}
               alt={name}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                objectFit: "contain",
-                borderRadius: 8,
-              }}
+        
             />
           </div>
         )}
@@ -269,15 +261,19 @@ export default function ResourcePreviewModal({
             alignItems: "center", 
             justifyContent: "center",
             height: "100%",
+            width: "100%",
+            background: "#000",
+            padding: "20px",
           }}>
             <video
               ref={videoRef}
               controls
               style={{
+                width: "100%",
+                height: "100%",
                 maxWidth: "100%",
                 maxHeight: "100%",
                 objectFit: "contain",
-                borderRadius: 8,
               }}
             >
               <source src={url} type={type} />
@@ -287,25 +283,51 @@ export default function ResourcePreviewModal({
         )}
 
         {/* AUDIO PREVIEW */}
+        
+        {/* AUDIO PREVIEW */}
         {isAudio && (
           <div
             style={{
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               height: "100%",
               padding: "2rem",
+              background: "linear-gradient(135deg, #8C2131 0%, #B4975A 100%)",
             }}
           >
-            <audio
-              ref={audioRef}
-              controls
-              controlsList="nodownload"
-              style={{ width: "100%", maxWidth: 600 }}
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: 16,
+                padding: "2rem",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                width: "100%",
+                maxWidth: 600,
+              }}
             >
-              <source src={url} type={type} />
-              Your browser does not support the audio element.
-            </audio>
+              <Text
+                strong
+                style={{
+                  display: "block",
+                  marginBottom: "1rem",
+                  fontSize: 18,
+                  textAlign: "center",
+                }}
+              >
+                🎵 Audio Player
+              </Text>
+              <audio
+                ref={audioRef}
+                controls
+                controlsList="nodownload"
+                style={{ width: "100%" }}
+              >
+                <source src={url} type={type} />
+                Your browser does not support the audio element.
+              </audio>
+            </div>
           </div>
         )}
 
@@ -315,15 +337,14 @@ export default function ResourcePreviewModal({
             display: "flex", 
             flexDirection: "column", 
             height: "100%",
-            gap: 12,
+            gap: 0,
           }}>
             {/* PDF Controls - Fixed */}
             <div
               style={{
                 background: "#fff",
                 padding: "10px 16px",
-                borderRadius: 8,
-                border: "1px solid #e8e8e8",
+                borderBottom: "1px solid #e8e8e8",
                 flexShrink: 0,
               }}
             >
@@ -433,19 +454,17 @@ export default function ResourcePreviewModal({
               </div>
             </div>
 
-            {/* PDF Viewer - Scrollable with fixed height */}
+            {/* PDF Viewer - Full Coverage */}
             <div
               ref={pdfContainerRef}
               style={{
                 flex: 1,
                 overflow: "auto",
-                background: "#fff",
-                borderRadius: 8,
-                border: "1px solid #e8e8e8",
+                background: "#525659",
                 display: "flex",
                 alignItems: "flex-start",
                 justifyContent: "center",
-                padding: 20,
+                padding: "20px",
               }}
             >
               <Document
@@ -453,7 +472,7 @@ export default function ResourcePreviewModal({
                 onLoadSuccess={onDocumentLoadSuccess}
                 onLoadError={onDocumentLoadError}
                 loading={
-                  <div style={{ padding: "3rem", textAlign: "center" }}>
+                  <div style={{ padding: "3rem", textAlign: "center", background: "#fff", borderRadius: 8 }}>
                     <Skeleton active paragraph={{ rows: 8 }} />
                     <Text
                       type="secondary"
@@ -467,7 +486,7 @@ export default function ResourcePreviewModal({
                 <div
                   style={{
                     display: "inline-block",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
                     background: "#fff",
                   }}
                 >
@@ -478,7 +497,7 @@ export default function ResourcePreviewModal({
                     renderAnnotationLayer={true}
                     renderTextLayer={true}
                     loading={
-                      <div style={{ padding: "3rem", textAlign: "center" }}>
+                      <div style={{ padding: "3rem", textAlign: "center", background: "#fff" }}>
                         <Skeleton active paragraph={{ rows: 6 }} />
                       </div>
                     }

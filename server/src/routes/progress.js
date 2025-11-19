@@ -51,9 +51,10 @@ async function getTotalNumberOfScenarios(role) {
     const { rows } = await pool.query(
       `
       SELECT COUNT(*) AS total
-      FROM scenarios
-      WHERE scenario_data->>'audience' IN ($1, 'All')
-      AND status = 'published'
+FROM scenarios
+WHERE scenario_data->>'audience' IN ($1, 'All')
+AND scenario_data->>'status' = 'published';
+
       `,
       [role]
     );
