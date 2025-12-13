@@ -46,9 +46,10 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
     return [];
   };
 
-  const getStatus = (q: Question): { status: Status; correctChosen: number; totalCorrect: number } => {
+  const getStatus = (
+    q: Question
+  ): { status: Status; correctChosen: number; totalCorrect: number } => {
     if (q.answerType === "text-area") {
-      // you said you don't want tags for text-area; treat as "not answered/correct" elsewhere if needed
       return { status: "not_answered", correctChosen: 0, totalCorrect: 0 };
     }
 
@@ -61,18 +62,10 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
 
     const correctSet = new Set(correctList);
     const correctChosen = userList.filter((u) => correctSet.has(u)).length;
-
     const fullyCorrect = sameSet(userList, correctList);
 
-    if (fullyCorrect) {
-      return { status: "correct", correctChosen, totalCorrect: correctList.length };
-    }
-
-    if (correctChosen > 0) {
-      // got at least one right, but not all (or included wrong picks)
-      return { status: "partial", correctChosen, totalCorrect: correctList.length };
-    }
-
+    if (fullyCorrect) return { status: "correct", correctChosen, totalCorrect: correctList.length };
+    if (correctChosen > 0) return { status: "partial", correctChosen, totalCorrect: correctList.length };
     return { status: "incorrect", correctChosen: 0, totalCorrect: correctList.length };
   };
 
@@ -131,7 +124,7 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
           }}
           icon={<MinusCircleOutlined />}
         >
-          Partially Correct ({correctChosen}/{totalCorrect})
+          Partial ({correctChosen}/{totalCorrect})
         </Tag>
       );
     }
@@ -151,15 +144,46 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
     );
   };
 
-  // ---------- UI ----------
+  const listItemStyle = (kind: "neutral" | "good" | "bad") => {
+    const base: React.CSSProperties = {
+      borderRadius: 10,
+      padding: isMobile ? "6px 10px" : "8px 14px",
+      fontSize: isMobile ? 14 : 15,
+      marginTop: 6,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 12,
+    };
+
+    if (kind === "good") {
+      return {
+        ...base,
+        background: "#F6FFF8",
+        color: "#146B2E",
+        border: "1px solid #A2D683",
+      };
+    }
+
+    if (kind === "bad") {
+      return {
+        ...base,
+        background: "#FDF7F8",
+        color: "#8C2131",
+        border: "1px solid #F2C2C2",
+      };
+    }
+
+    return {
+      ...base,
+      background: "#F5F5F5",
+      color: "#595959",
+      border: "1px solid #D9D9D9",
+    };
+  };
+
   return (
-    <div
-      style={{
-        maxWidth: 800,
-        margin: "0 auto",
-        padding: isMobile ? "0px" : "1rem",
-      }}
-    >
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: isMobile ? 0 : "1rem" }}>
       {/* Header */}
       <Card
         style={{
@@ -170,17 +194,11 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
           marginBottom: 32,
           boxShadow: "var(--shadow)",
         }}
-        bodyStyle={{
-          padding: isMobile ? "20px 16px" : "32px 24px",
-        }}
+        bodyStyle={{ padding: isMobile ? "20px 16px" : "32px 24px" }}
       >
         <Title
           level={isMobile ? 4 : 3}
-          style={{
-            color: "white",
-            marginBottom: 4,
-            fontFamily: "Urbanist, sans-serif",
-          }}
+          style={{ color: "white", marginBottom: 4, fontFamily: "Urbanist, sans-serif" }}
         >
           {name} Results
         </Title>
@@ -194,6 +212,15 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
 
           const correctSet = new Set(correctList);
           const missed = correctList.filter((c) => !userList.includes(c));
+
+          const isMultiAnswer = correctList.length > 1; // ✅ "only show missed this when there are multiple"
+
+          const isFullyCorrect = sameSet(userList, correctList);
+          const shouldShowCorrectSection =
+            // show correct section if:
+            // - multi-answer (always helps) OR
+            // - single-answer but they were wrong OR not answered
+            isMultiAnswer || !isFullyCorrect;
 
           return (
             <Card
@@ -235,10 +262,8 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
               </Title>
 
               {/* Your Answers */}
-              <div style={{ marginBottom: 10 }}>
-                <Text strong>
-                  Your Answer{userList.length > 1 ? "s" : ""}:
-                </Text>
+              <div style={{ marginBottom: shouldShowCorrectSection ? 10 : 0 }}>
+                <Text strong>Your Answer{userList.length > 1 ? "s" : ""}:</Text>
 
                 <List
                   size="small"
@@ -248,25 +273,7 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
                     const isCorrectPick = !isNoAnswer && correctSet.has(ans);
 
                     return (
-                      <List.Item
-                        style={{
-                          background: isNoAnswer ? "#F5F5F5" : isCorrectPick ? "#F6FFF8" : "#FDF7F8",
-                          borderRadius: 10,
-                          padding: isMobile ? "6px 10px" : "8px 14px",
-                          color: isNoAnswer ? "#595959" : isCorrectPick ? "#146B2E" : "#8C2131",
-                          fontSize: isMobile ? 14 : 15,
-                          marginTop: 6,
-                          border: isNoAnswer
-                            ? "1px solid #D9D9D9"
-                            : isCorrectPick
-                            ? "1px solid #A2D683"
-                            : "1px solid #F2C2C2",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: 12,
-                        }}
-                      >
+                      <List.Item style={isNoAnswer ? listItemStyle("neutral") : listItemStyle(isCorrectPick ? "good" : "bad")}>
                         <span>{ans}</span>
                         {!isNoAnswer && (
                           <Tag
@@ -283,46 +290,35 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
               </div>
 
               {/* Correct Answers */}
-              <div>
-                <Text strong>
-                  Correct Answer{correctList.length > 1 ? "s" : ""}:
-                </Text>
+              {shouldShowCorrectSection && (
+                <div>
+                  <Text strong>
+                    Correct Answer{correctList.length > 1 ? "s" : ""}:
+                  </Text>
 
-                <List
-                  size="small"
-                  dataSource={correctList.length > 0 ? correctList : ["No correct answer set"]}
-                  renderItem={(ans) => {
-                    const isMissing = missed.includes(ans);
-                    const noCorrect = ans === "No correct answer set";
+                  <List
+                    size="small"
+                    dataSource={correctList.length > 0 ? correctList : ["No correct answer set"]}
+                    renderItem={(ans) => {
+                      const noCorrect = ans === "No correct answer set";
+                      const isMissing = !noCorrect && missed.includes(ans);
 
-                    return (
-                      <List.Item
-                        style={{
-                          background: noCorrect ? "#F5F5F5" : "#F6FFF8",
-                          borderRadius: 10,
-                          padding: isMobile ? "6px 10px" : "8px 14px",
-                          color: noCorrect ? "#595959" : "#146B2E",
-                          fontSize: isMobile ? 14 : 15,
-                          marginTop: 6,
-                          border: noCorrect ? "1px solid #D9D9D9" : "1px solid #A2D683",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: 12,
-                        }}
-                      >
-                        <span>{ans}</span>
+                      return (
+                        <List.Item style={noCorrect ? listItemStyle("neutral") : listItemStyle("good")}>
+                          <span>{ans}</span>
 
-                        {!noCorrect && isMissing && (
-                          <Tag color="orange" style={{ borderRadius: 999, fontWeight: 600 }}>
-                            You missed this
-                          </Tag>
-                        )}
-                      </List.Item>
-                    );
-                  }}
-                />
-              </div>
+                          {/* ✅ Only show "You missed this" when there are multiple correct answers */}
+                          {isMultiAnswer && isMissing && (
+                            <Tag color="orange" style={{ borderRadius: 999, fontWeight: 600 }}>
+                              You missed this
+                            </Tag>
+                          )}
+                        </List.Item>
+                      );
+                    }}
+                  />
+                </div>
+              )}
             </Card>
           );
         })}
