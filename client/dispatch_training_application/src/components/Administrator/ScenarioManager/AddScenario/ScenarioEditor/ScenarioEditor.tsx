@@ -32,7 +32,7 @@ export default function ScenarioEditor() {
 
   // Autosave control
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
-  const [__, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
+  const [, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
 
   // UI state
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);

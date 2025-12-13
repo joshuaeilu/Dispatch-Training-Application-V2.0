@@ -25,6 +25,13 @@ import type { Exercise } from "../../../types/index.types";
 import KnowledgeCheckResults from "./components/KnowledgeCheckResults";
 
 const { Title, Text } = Typography;
+type Submission = {
+  id: string;
+  exerciseId: string;
+  userId: string;
+  answers: Record<string, unknown>;
+  createdAt: string;
+};
 
 export default function UserViewKnowledgeChecks() {
   const [form] = Form.useForm();
@@ -32,7 +39,7 @@ export default function UserViewKnowledgeChecks() {
   const { user } = useContext(AuthContext);
   const { preferences } = useContext(UniversalContext);
   const [showResultModal, setShowResultModal] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [loadingSubmission, setLoadingSubmission] = useState(false);
   const [loadingExercises, setLoadingExercises] = useState(true);

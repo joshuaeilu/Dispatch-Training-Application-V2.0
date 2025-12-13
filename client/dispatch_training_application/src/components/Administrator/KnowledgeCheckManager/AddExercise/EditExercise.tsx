@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import type { RadioChangeEvent } from "antd";
 import {
   Button,
   Typography,
@@ -37,7 +38,7 @@ export default function EditExercisePage() {
   } = useExerciseManager({ exerciseId });
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [__, setLastSavedExercise] = useState<Exercise | null>(
+  const [, setLastSavedExercise] = useState<Exercise | null>(
     exercise
   );
   const [saveModalOpen, setSaveModalOpen] = useState(false);
@@ -52,11 +53,15 @@ export default function EditExercisePage() {
     navigate("/knowledge-checks", { replace: true });
   };
 
-  const handleStatusChange = (e: any) => {
-    if (exercise) {
-      setExercise({ ...exercise, status: e.target.value });
-    }
-  };
+  const handleStatusChange = (e: RadioChangeEvent) => {
+  if (!exercise) return;
+
+  setExercise({
+    ...exercise,
+    status: e.target.value as Exercise["status"],
+  });
+};
+
 
   if (loading || !exercise) {
     return <Skeleton active paragraph={{ rows: 25 }} className="py-4" />;

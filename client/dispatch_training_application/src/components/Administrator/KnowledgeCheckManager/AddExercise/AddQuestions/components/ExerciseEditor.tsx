@@ -8,7 +8,7 @@ import { v4 as uuid } from "uuid";
 import { useEffect, useState } from "react";
 interface ExerciseEditorProps {
   exercise: Exercise;
-  setExercise: (exercise: Exercise) => void;
+  setExercise:  React.Dispatch<React.SetStateAction<Exercise | null>>;
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
 }

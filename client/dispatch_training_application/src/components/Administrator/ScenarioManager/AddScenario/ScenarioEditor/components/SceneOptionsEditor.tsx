@@ -39,15 +39,21 @@ export default function SceneOptionsEditor({
     }
   };
 
-  const updateOption = (index: number, value: string) => {
-    const updated = [...options];
-    updated[index] = value.trim();
-    onChange(updated);
+const updateOption = (index: number, value: string) => {
+  const next = value.trim();
+  if (!next) return;
 
-    if (correctOption === options[index]) {
-      onCorrectChange(value.trim());
-    }
-  };
+  const updated = [...options];
+  const old = updated[index];     // ✅ old text before change
+  updated[index] = next;
+
+  onChange(updated);
+
+  if (correctOption === old) {    // ✅ stable comparison
+    onCorrectChange(next);
+  }
+};
+
 
   const deleteOption = (index: number) => {
     const removed = options[index];

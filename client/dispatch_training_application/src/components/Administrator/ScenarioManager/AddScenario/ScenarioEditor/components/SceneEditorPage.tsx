@@ -53,14 +53,17 @@ export default function SceneEditorPage({
     };
 
 
-    setScenario && setScenario({
-      ...scenario!,
-      scenes: [
-        ...scenario!.scenes.slice(0, currentIndex + 1),
-        newScene,
-        ...scenario!.scenes.slice(currentIndex + 1),
-      ],
-    });
+    if (setScenario) {
+  setScenario({
+    ...scenario!,
+    scenes: [
+      ...scenario!.scenes.slice(0, currentIndex + 1),
+      newScene,
+      ...scenario!.scenes.slice(currentIndex + 1),
+    ],
+  });
+}
+
 
     setCurrentIndex(currentIndex + 1); // stay on new scene
 
@@ -186,7 +189,15 @@ export default function SceneEditorPage({
                 return;
               }
               else {
-                setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, speaker: value } : s) });
+if (!scenario) return;
+
+setScenario({
+  ...scenario,
+  scenes: scenario.scenes.map((s, idx) =>
+    idx === currentIndex ? { ...s, speaker: value } : s
+  ),
+});
+
               }
             }}
           >
@@ -208,7 +219,8 @@ export default function SceneEditorPage({
             placeholder="Describe the scene..."
             value={scene?.sceneDescription}
             onChange={(e) => {
-              setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, sceneDescription: e.target.value } : s) });
+              if (!scenario) return;
+              setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, sceneDescription: e.target.value } : s) });
             }}
           />
         </Form.Item>
@@ -239,15 +251,33 @@ export default function SceneEditorPage({
         {/* Scene Options */}
         <Text>Scene Options</Text>
         <SceneOptionsEditor
-          options={scene?.options || []}
-          correctOption={scene?.correctOption || null}
-          onChange={(updatedOptions) =>
-            setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, options: updatedOptions } : s) })
-          }
-          onCorrectChange={(correctOption) =>
-            setScenario && setScenario({ ...scenario!, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, correctOption } : s) })
-          }
-        />
+  key={scene?.id} // keep this from earlier fix
+  options={scene?.options || []}
+  correctOption={scene?.correctOption || null}
+  onChange={(updatedOptions) =>
+    setScenario?.((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        scenes: prev.scenes.map((s, idx) =>
+          idx === currentIndex ? { ...s, options: updatedOptions } : s
+        ),
+      };
+    })
+  }
+  onCorrectChange={(correctOption) =>
+    setScenario?.((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        scenes: prev.scenes.map((s, idx) =>
+          idx === currentIndex ? { ...s, correctOption } : s
+        ),
+      };
+    })
+  }
+/>
+
         {/* Footer Buttons */}
         <div
           style={{
@@ -295,8 +325,9 @@ export default function SceneEditorPage({
         onClose={() => setShowAudioEditor(false)}
         speakers={scenario?.speakers || []}
         setSpeakers={(newSpeakers) => {
+          if (!scenario) return;
 
-          setScenario && setScenario({ ...scenario!, speakers: newSpeakers, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, speaker: newSpeakers[newSpeakers.length - 1]?.name || "" } : s) });
+          setScenario({ ...scenario!, speakers: newSpeakers, scenes: scenario!.scenes.map((s, idx) => idx === currentIndex ? { ...s, speaker: newSpeakers[newSpeakers.length - 1]?.name || "" } : s) });
 
         }}
 

@@ -178,7 +178,7 @@ export interface AddQuestionsSectionsProps {
   selectedIndex: number;
   setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
   exercise: Exercise;
-  setExercise: (exercise: Exercise) => void;
+  setExercise: React.Dispatch<React.SetStateAction<Exercise | null>>;
 }
 
 export interface ResourcePayload {

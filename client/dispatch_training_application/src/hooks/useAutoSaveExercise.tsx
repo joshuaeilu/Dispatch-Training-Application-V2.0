@@ -5,17 +5,17 @@ import type { Exercise } from "../types/index.types";
 
 export function useAutosaveExercise(
   exercise: Exercise | null,
-  setLastSavedExercise: (e: Exercise) => void
+  setLastSavedExercise: React.Dispatch<React.SetStateAction<Exercise | null>>
 ) {
   const [autosaving, setAutosaving] = useState(false);
-  const lastExerciseRef = useRef<Exercise | null>(null);
+  const lastSavedSnapshotRef = useRef<string | null>(null);
 
-  const saveToServer = async (exercise: Exercise) => {
+  const saveToServer = async (exercise: Exercise, snapshot: string) => {
     try {
       setAutosaving(true);
       await api.put(`/exercises/${exercise.id}`, exercise);
       setLastSavedExercise(exercise);
-      lastExerciseRef.current = exercise;
+      lastSavedSnapshotRef.current = snapshot; // ✅ snapshot, not object
     } catch (err) {
       console.error("❌ Autosave failed:", err);
     } finally {
@@ -24,29 +24,27 @@ export function useAutosaveExercise(
   };
 
   const debouncedSave = useRef(
-    debounce((exercise: Exercise) => {
-      saveToServer(exercise);
-    }, 3000) // 3 seconds of inactivity
+    debounce((exercise: Exercise, snapshot: string) => {
+      saveToServer(exercise, snapshot);
+    }, 3000)
   ).current;
 
   useEffect(() => {
-    if (!exercise?.name) return;
-    
-    const prev = lastExerciseRef.current;
+    if (!exercise?.id) return;
 
-    const hasChanged =
-      JSON.stringify(exercise) !== JSON.stringify(prev);
+    const snapshot = JSON.stringify(exercise);
 
-    if (hasChanged) {
-      debouncedSave(exercise);
+    if (snapshot !== lastSavedSnapshotRef.current) {
+      debouncedSave(exercise, snapshot);
     }
   }, [exercise]);
 
   const manualSave = async () => {
-    if (exercise?.id) {
-      await saveToServer(exercise);
-    }
+    if (!exercise?.id) return;
+    const snapshot = JSON.stringify(exercise);
+    await saveToServer(exercise, snapshot);
   };
 
   return { autosaving, manualSave };
 }
+
