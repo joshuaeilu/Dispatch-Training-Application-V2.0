@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 const app = express();
 app.use(cors());
@@ -49,7 +50,16 @@ const audioDescriptionRoutes = require('./src/routes/audio');
 app.use('/api/tts', audioDescriptionRoutes);
 app.use('/data/scenario_audios', auth(['admin', 'trainee', 'dispatcher']), express.static('src/scenario_audios'));
 
+  const clientBuildPath = path.join(__dirname, "../client/dispatch_training_application/dist");
+  app.use(express.static(clientBuildPath));
+
+  // Serve index.html for all non-API routes
+  app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(clientBuildPath, "index.html"));
+  });
+
 
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

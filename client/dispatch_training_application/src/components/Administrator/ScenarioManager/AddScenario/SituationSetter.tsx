@@ -120,7 +120,7 @@ const scenarioTypes = useMemo(() => {
     if (!speaker?.voice) return messageApi.warning("No voice selected for this speaker");
     if (!token) return messageApi.error("Missing token to access audio files");
 
-    const audio = new Audio(`http://localhost:5000/data/audio/${speaker.voice}.mp3?token=${token}`);
+    const audio = new Audio(`/data/audio/${speaker.voice}.mp3?token=${token}`);
     if (audioRef.current) audioRef.current.pause();
     audioRef.current = audio;
     audio.play();
@@ -279,7 +279,7 @@ const finishSituationSetup = async () => {
 
 
           <Form layout="vertical" form={form} requiredMark={false}
-            onValuesChange={(changedValues, allValues) => {
+            onValuesChange={(__, allValues) => {
               const { time, day, season } = allValues;
 
               if (time && day && season) {

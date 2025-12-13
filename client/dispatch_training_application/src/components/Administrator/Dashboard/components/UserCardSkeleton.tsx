@@ -1,4 +1,4 @@
-import { Card, Skeleton, Space, Avatar } from "antd";
+import { Card, Skeleton, Space } from "antd";
 
 export default function UserCardSkeleton() {
   return (

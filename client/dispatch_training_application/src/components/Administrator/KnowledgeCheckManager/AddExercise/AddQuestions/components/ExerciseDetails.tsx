@@ -23,7 +23,7 @@ export default function ExerciseDetails({ exercise, setExercise }: ExerciseDetai
     { value: "Custom", label: "Custom" },
   ];
 
-    async function handleCustomTypeSave(source: "exercise" | "question") {
+    async function handleCustomTypeSave() {
       const newType = customType.trim();
       if (!newType) return toast.error("Please enter a valid type");
   
@@ -101,13 +101,13 @@ export default function ExerciseDetails({ exercise, setExercise }: ExerciseDetai
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  handleCustomTypeSave("exercise");
+                  handleCustomTypeSave();
                 }
               }}
             />
             <Button
               type="primary"
-              onClick={() => handleCustomTypeSave("exercise")}
+              onClick={() => handleCustomTypeSave()}
               size="middle"
               style={{
                 backgroundColor: "#8C2131",

@@ -32,7 +32,7 @@ export default function AudioEditorModal({
 
   const handlePlay = (speaker: Speaker) => {
     if (!speaker.voice) return message.warning("No voice selected");
-    const audio = new Audio(`http://localhost:5000/data/audio/${speaker.voice}.mp3?token=${token}`);
+    const audio = new Audio(`/data/audio/${speaker.voice}.mp3?token=${token}`);
     if (audioRef.current) audioRef.current.pause();
     audioRef.current = audio;
     audio.play();

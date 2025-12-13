@@ -374,7 +374,7 @@ export default function ScenarioWalkthrough() {
                             scene={scene}
                             index={index}
                             onCorrect={handleCorrect}
-                            audioUrl={`http://localhost:5000/data/scenario_audios/${scenarioData.id}/scene-${index}.mp3?token=${token}`}
+                            audioUrl={`/data/scenario_audios/${scenarioData.id}/scene-${index}.mp3?token=${token}`}
                           />
                         ) : (
                           <Card

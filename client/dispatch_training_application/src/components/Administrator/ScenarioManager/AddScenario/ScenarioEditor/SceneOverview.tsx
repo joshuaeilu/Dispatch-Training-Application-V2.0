@@ -1,4 +1,4 @@
-import { Card, Typography, Radio, Space, Tag, Popconfirm, Dropdown, Menu, Button } from "antd";
+import { Card, Typography, Radio, Space,  Popconfirm, Dropdown, Menu, Button } from "antd";
 import type { Scenario } from "../../../../../types/index.types";
 import { DeleteOutlined, MoreOutlined, UserOutlined } from "@ant-design/icons";
 import {

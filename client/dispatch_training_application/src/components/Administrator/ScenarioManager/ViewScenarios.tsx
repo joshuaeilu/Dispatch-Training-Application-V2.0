@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { api } from "../../../utils/api";
 import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
-import type { Scenario, ScenarioTableType } from "../../../types/index.types";
+import type {  ScenarioTableType } from "../../../types/index.types";
 import ViewScenarioModal from "./components/ViewScenarioModal";
 
 export default function ViewScenarios() {

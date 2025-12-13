@@ -212,7 +212,7 @@ export default function UserResourcesPage() {
                       description: resource.description,
                       type: resource.mime_type,
                       url:
-                        "http://localhost:5000/data" +
+                        "/data" +
                         resource.url +
                         "?token=" +
                         token,
@@ -226,7 +226,7 @@ export default function UserResourcesPage() {
                       <img
                         alt={resource.name}
                         src={
-                          "http://localhost:5000/data" +
+                          "/data" +
                           resource.url +
                           "?token=" +
                           token
@@ -271,7 +271,7 @@ export default function UserResourcesPage() {
                     description: resource.description,
                     type: resource.mime_type,
                     url:
-                      "http://localhost:5000/data" +
+                      "/data" +
                       resource.url +
                       "?token=" +
                       token,
@@ -288,7 +288,7 @@ export default function UserResourcesPage() {
                       <img
                         alt={resource.name}
                         src={
-                          "http://localhost:5000/data" +
+                          "/data" +
                           resource.url +
                           "?token=" +
                           token

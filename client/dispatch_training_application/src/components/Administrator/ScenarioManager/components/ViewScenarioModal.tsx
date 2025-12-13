@@ -1,5 +1,5 @@
-import { Modal, Card, Typography, Radio, Space, Tag, Divider } from "antd";
-import type { Scenario, ScenarioTableType } from "../../../../types/index.types";
+import { Modal, Card, Typography, Radio } from "antd";
+import type {  ScenarioTableType } from "../../../../types/index.types";
 import { UserOutlined, CheckCircleFilled, InfoCircleOutlined } from "@ant-design/icons";
 
 const { Text, Paragraph } = Typography;

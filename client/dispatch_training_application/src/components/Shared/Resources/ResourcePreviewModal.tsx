@@ -1,4 +1,4 @@
-import { Modal, Typography, Divider, Button, Skeleton, Slider, Space } from "antd";
+import { Modal, Typography, Button, Skeleton, Slider, Space } from "antd";
 import { useEffect, useRef, useState } from "react";
 import {
   CloseOutlined,

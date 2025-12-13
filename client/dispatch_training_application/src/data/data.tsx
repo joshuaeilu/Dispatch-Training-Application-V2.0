@@ -112,5 +112,5 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
 
 
 
-export const RESOURCE_URL = "http://localhost:5000/data";
-export const PROFILE_PIC_URL = "http://localhost:5000/data";
+export const RESOURCE_URL = "/data";
+export const PROFILE_PIC_URL = "/data";
