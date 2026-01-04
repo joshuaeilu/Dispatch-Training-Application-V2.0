@@ -1,5 +1,8 @@
 # Dispatch Training Application
 
+## Vision Statement
+For Calvin University Campus Safety Dispatch department that needs a more effective comprehensive training, The Dispatch Training Application is a web based service that provides dispatch simulations, resources and exercises that improve new incoming dispatcher training. Unlike Priority Care and Washtenaw Metro Dispatch Training Programs that provide class room based lessons and courses, this product goes beyond the traditional learning by providing an interactive and easier form of learning.
+
 ## Overview
 
 The **Dispatch Training Application** is a web-based training platform designed for the **Calvin University Campus Safety Dispatch Department**. Its purpose is to provide a more effective, comprehensive, and modern approach to training new dispatchers through interactive learning experiences.
@@ -34,8 +37,8 @@ The goal of this project is to improve dispatcher readiness, decision-making, an
 By Joshua Eilu and Moses Kuria
 
 ## Models
-[Domain Model](www.domain.com)
+[Domain Model](https://github.com/joshuaeilu/Dispatch-Training-Application-V2.0/blob/main/project/domain_model_diagram.png)
 
 ## Links
-[Client]()
-[Service]()
+-[Client](https://github.com/joshuaeilu/Dispatch-Training-Application-V2.0/tree/main/client)
+-[Service](https://github.com/joshuaeilu/Dispatch-Training-Application-V2.0/tree/main/server)
