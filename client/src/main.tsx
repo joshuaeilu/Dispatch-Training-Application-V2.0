@@ -4,6 +4,7 @@ import App from './App.tsx'
 import { ConfigProvider } from 'antd'
 import './App.css'
 import { AuthProvider } from './contexts/AuthProvider.tsx'
+import { ToastProvider } from './contexts/ToastContext.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ConfigProvider
@@ -11,7 +12,7 @@ createRoot(document.getElementById('root')!).render(
     token: {
       colorPrimary: "#8C2131",   // Calvin maroon
       colorLink: "#8C2131",
-      colorBgBase: "#f9f9f9",
+      colorBgBase: "#F8F6F4",
       fontFamily: "Inter, sans-serif",
       borderRadius: 8,
     },
@@ -31,9 +32,11 @@ itemHoverColor: "rgb(130,28,49)"
     },
   }}
 >
+  <ToastProvider>
       <AuthProvider>
       <App />
     </AuthProvider>
+    </ToastProvider>
     </ConfigProvider>
   </StrictMode>,
 )

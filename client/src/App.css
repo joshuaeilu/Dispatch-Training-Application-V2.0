@@ -16,6 +16,8 @@ body{
   @apply border-2 border-[#8C2131] bg-white shadow-md scale-[1.01] transition-all duration-200 ease-in-out rounded-lg;
 }
 
+
+
 /* Disable text caret globally unless it's an input or textarea */
 /* *:not(input):not(textarea) {
   caret-color: transparent;
@@ -30,3 +32,56 @@ body{
   font-weight: 500;
   text-transform: capitalize;
 }
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-slide-in {
+  animation: toast-slide-in 0.4s ease-out both;
+}
+
+
+
+/* Calvin University Brand Color Tokens */
+@theme {
+  /* Primary Color – Maroon (core brand) */
+  --color-brand-maroon: #891B2F;
+  --color-brand-maroon-light: #A54952;
+  --color-brand-maroon-dark: #6E1421;
+
+  
+
+  /* Supporting neutrals */
+  --color-brand-black: #231F20;
+  --color-brand-white: #FFFFFF;
+  --color-brand-gray-100: #F7F7F7;
+  --color-brand-gray-200: #E1E1E1;
+  --color-brand-gray-300: #CFCFCF;
+  --color-brand-gray-400: #B1B1B1;
+  --color-brand-gray-500: #9E9E9E;
+  --color-brand-gray-600: #7E7E7E;
+  --color-brand-gray-700: #626262;
+  --color-brand-gray-800: #4E4E4E;
+  --color-brand-gray-900: #333333;
+}
+/* Remove autofill shading in Chrome/Edge */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+ -webkit-box-shadow: 0 0 0px 1000px var(--color-brand-gray-100) inset !important;
+box-shadow: 0 0 0px 1000px var(--color-brand-gray-100) inset !important;
+background-color: var(--color-brand-gray-100) !important;
+
+}
+
+
