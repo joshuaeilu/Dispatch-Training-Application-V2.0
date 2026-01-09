@@ -24,6 +24,7 @@ import {
   UploadOutlined,
   LockOutlined,
   UserOutlined,
+  ArrowRightOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-hot-toast";
 import { api } from "../../../../utils/api";
@@ -33,13 +34,14 @@ import { PROFILE_PIC_URL } from "../../../../data/data";
 import { AuthContext } from "../../../../contexts/AuthProvider";
 import { getUsers } from "../../../../contexts/UniversalHelpers";
 import type { GetUser } from "../../../../types/index.types";
+import { PageBreadcrumbs } from "../../../Shared/Breadcrumbs";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 export default function ManageUsers() {
   const { token } = useContext(AuthContext);
-  const { users: globalUsers, refreshUsers } = getUsers();
+  const { users: globalUsers } = getUsers();
 
   const [allUsers, setAllUsers] = useState<GetUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<GetUser[]>([]);
@@ -136,7 +138,6 @@ export default function ManageUsers() {
 
       toast.success("User updated successfully");
       setIsModalOpen(false);
-      refreshUsers();
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || "Failed to update user.";
       toast.error(errorMsg);
@@ -172,12 +173,13 @@ export default function ManageUsers() {
 
       toast.success("User deleted successfully");
       setIsDeleteModalOpen(false);
-      refreshUsers();
+      setAllUsers(allUsers.filter((u) => u.id !== selectedUser?.id));
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || "Failed to delete user.";
       toast.error(errorMsg);
     } finally {
       setDeleteLoading(false);
+     
     }
   };
 
@@ -207,9 +209,10 @@ export default function ManageUsers() {
       <PageHeader
         title="User Management"
         subtitle="Manage users, roles, and permissions"
-        showBackButton
-        onBack={() => window.history.back()}
+        
       />
+      <PageBreadcrumbs items={[{name: 'Users', current: true}]}/>
+      <h1>{token}</h1>
 
 <div style={{ margin: "0 1rem"}}>
         {/* Search + Filters */}
@@ -244,48 +247,68 @@ export default function ManageUsers() {
           style={{ marginTop: "4rem" }}
         />
       ) : (
-        <Row gutter={[16, 16]}>
-          {filteredUsers.map((user) => (
-            <Col key={user.id} xs={24} sm={12} md={8} lg={6}>
-              <Card
-                hoverable
-                className="shadow-lg rounded-xl relative transition-all duration-200 hover:shadow-2xl"
-                bodyStyle={{
-                  padding: "2rem 1rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  textAlign: "center",
-                }}
-              >
-                <div className="absolute top-3 right-3">
-                  <Dropdown overlay={actionMenu(user)} trigger={["click"]}>
-                    <Button
-                      type="text"
-                      icon={<MoreOutlined style={{ fontSize: 22 }} />}
-                      style={{
-                        borderRadius: 6,
-                        padding: "4px 10px",
-                      }}
-                    />
-                  </Dropdown>
-                </div>
+      <Row gutter={[24, 24]}>
+  {filteredUsers.map((user) => (
+  <Col key={user.id} xs={24} sm={12}>
+  <div className="group relative cursor-pointer overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-200 ease-out hover:-translate-y-1.5 hover:shadow-xl">
+    <div className="px-6 py-6 sm:p-7">
+      <div className="flex items-start justify-between gap-6">
+        
+        {/* Left: Avatar + Text */}
+        <div className="flex items-start gap-5">
+          {/* Avatar */}
+          <Avatar
+            src={
+              user.avatar
+                ? `${PROFILE_PIC_URL}${user.avatar}?token=${token}`
+                : undefined
+            }
+            icon={!user.avatar ? <UserOutlined /> : undefined}
+            size={60}
+            className="shrink-0"
+            style={{ color: "#8C2131" }}
+          />
 
-                <Avatar
-                  src={
-                    user.avatar
-                      ? `${PROFILE_PIC_URL}${user.avatar}?token=${token}`
-                      : <UserOutlined style={{ fontSize: 48, color: "#8C2131" }} />
-                  }
-                  size={96}
-                  className="border mb-3"
-                />
-                <Title level={4}>{toTitleCase(user.name)}</Title>
-                <div>{getRoleTag(user.role)}</div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+          {/* Text */}
+          <div className="min-w-0 pt-0.5">
+            <Title
+              level={4}
+              style={{ margin: 0, fontWeight: 600 }}
+              className="truncate"
+            >
+              {toTitleCase(user.name)}
+            </Title>
+
+            <div className="mt-2">
+              {getRoleTag(user.role)}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-start pt-1">
+          <Dropdown overlay={actionMenu(user)} trigger={['click']}>
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 group-hover:translate-x-0.5"
+              style={{ backgroundColor: "rgba(140, 33, 49, 0.08)" }}
+            >
+              <MoreOutlined
+                className="text-sm"
+                style={{ color: "#8C2131" }}
+              />
+            </div>
+          </Dropdown>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</Col>
+
+  ))}
+</Row>
+
+
       )}
 </div>
 

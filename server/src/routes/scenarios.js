@@ -21,12 +21,12 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
         s.id,
         s.author_id,
         s.scenario_data,
-        s.pdf_filename,
         s.updated_at,
         u.username AS author_name,
         u.avatar AS author_avatar
       FROM scenarios s
       JOIN users u ON u.id = s.author_id
+      WHERE s.in_trash = FALSE
     `;
 
     const params = [];

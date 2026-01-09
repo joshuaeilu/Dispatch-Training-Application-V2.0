@@ -7,10 +7,11 @@ import { api } from "../../../utils/api";
 import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchOutlined, SnippetsOutlined } from "@ant-design/icons";
 import type {  ScenarioTableType } from "../../../types/index.types";
 import ViewScenarioModal from "./components/ViewScenarioModal";
-
+import { getUser } from "../../../contexts/AuthProvider";
 export default function ViewScenarios() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const user = getUser();
   const [selectedScenarioType, setSelectedScenarioType] = useState<string | null>("All Types");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -243,17 +244,31 @@ export default function ViewScenarios() {
               cancelText="Cancel"
               onConfirm={async () => {
 
-                try {
-                  const response = await api.delete(`/scenarios/${record.id}`, {
-                    data: { authorId: record.authorId }, // optional: verify ownership
-                  });
-                  if (response.status === 200) {
-                    setScenarioFiles(prev => prev.filter(s => s.id !== record.id));
-                    toast.success("Scenario deleted successfully.");
-                  }
+                // try {
+                //   const response = await api.delete(`/scenarios/${record.id}`, {
+                //     data: { authorId: record.authorId }, // optional: verify ownership
+                //   });
+                //   if (response.status === 200) {
+                //     setScenarioFiles(prev => prev.filter(s => s.id !== record.id));
+                //     toast.success("Scenario deleted successfully.");
+                //   }
+                // } catch (error) {
+                //   console.error("Error deleting scenario:", error);
+                //   toast.error("Failed to delete scenario");
+                // }
+
+
+                try{
+                  await api.post('/trash', { trash_item_id: record.id, who_deleted: user?.id, item_type: 'scenario' });
+                  // alert(record.id + " -----" + record.created_by.id);
+                  // await api.post('/trash', { trash_item_id: record.id, who_deleted: record.created_by.id, item_type: 'scenario' });
+                  toast.success("Scenario moved to trash");
+                  setScenarioFiles((prev) =>
+                    prev.filter((file) => file.id !== record.id)
+                  );
                 } catch (error) {
-                  console.error("Error deleting scenario:", error);
-                  toast.error("Failed to delete scenario");
+                  console.error("Error moving scenario to trash:", error);
+                  toast.error("Failed to move scenario to trash");
                 }
               }}
             >
@@ -269,7 +284,7 @@ export default function ViewScenarios() {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Fixed Page Header */}
       <div style={{ flex: '0 0 auto' }}>
-        <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios" showButton buttonText="Add Scenario" onButtonPress={() => navigate("/scenario-manager/add-scenario")} />
+        <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios"  />
       </div>
       <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
         {/* Filters */}

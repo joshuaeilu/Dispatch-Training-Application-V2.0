@@ -15,6 +15,9 @@ import { api } from '../../../../utils/api';
 import type { UploadFile, UploadProps, GetProp } from 'antd';
 import { toast } from 'react-hot-toast';
 import { getUsers } from '../../../../contexts/UniversalHelpers';
+import { Page } from 'react-pdf';
+import { PageHeader } from '../../../Shared/PageHeader';
+import { PageBreadcrumbs } from '../../../Shared/Breadcrumbs';
 const { Title } = Typography;
 const roles = ['dispatcher', 'trainee', 'admin'];
 
@@ -107,28 +110,10 @@ const handleFinish = async (values: any) => {
   );
 
   return (
-    <div style={{ height: '100vh', overflow: 'hidden' }}>
-      <div
-        style={{
-          height: '100%',
-          overflowY: 'auto',
-          padding: '1.5rem',
-          maxWidth: 700,
-          margin: '0 auto',
-        }}
-      >
+    <div>
+      <PageHeader title="Create New User" subtitle='Add a new User to the Training System'  />
+      <PageBreadcrumbs items={[{name: 'Create User', current: true}]} />
 
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
-          <Button
-            onClick={() => navigate(-1)}
-            type="primary"
-            icon={<ArrowLeftOutlined />}
-            style={{ marginRight: '1rem' }}
-          />
-          <Title level={3} style={{ margin: 0 }}>
-            Create New User
-          </Title>
-        </div>
 
         <Form
           form={form}
@@ -205,7 +190,6 @@ const handleFinish = async (values: any) => {
             </Button>
           </Form.Item>
         </Form>
-      </div>
     </div>
   );
 }

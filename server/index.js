@@ -44,6 +44,10 @@ app.use('/api/scenarios', scenariosRoutes);
 const progressRoutes = require('./src/routes/progress');
 app.use('/api/progress', progressRoutes);
 
+// Trash Routes
+const trashRoutes = require('./src/routes/trash');
+app.use('/api/trash', trashRoutes);
+
 // Audio Routes
 app.use('/data/audio', auth(['admin']), express.static('voice_samples'));
 const audioDescriptionRoutes = require('./src/routes/audio');

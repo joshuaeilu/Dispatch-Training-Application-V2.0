@@ -88,6 +88,7 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
         ) AS created_by
       FROM exercises e
       JOIN users u ON u.id = e.created_by
+      WHERE e.in_trash = FALSE
     `;
 
     const values = [];

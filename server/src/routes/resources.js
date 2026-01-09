@@ -73,6 +73,7 @@ router.get('/', auth(['admin', 'trainee', 'dispatcher']), async (req, res) => {
   ) AS created_by
 FROM resources
 LEFT JOIN users ON users.id = resources.created_by
+WHERE resources.in_trash = FALSE
 ORDER BY resources.created_at DESC;
 `);
     return res.status(200).json(result.rows);

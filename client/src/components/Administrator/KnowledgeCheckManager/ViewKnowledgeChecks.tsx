@@ -9,11 +9,12 @@ import ViewExerciseModal from "./AddExercise/ViewQuestions/components/ViewExerci
 import { PageHeader } from "../../Shared/PageHeader";
 import {  exerciseDifficultyOptions, exerciseStatusOptions } from "../../../data/data";
 import { toTitleCase } from "../../../utils/tools";
-
+import { getUser } from "../../../contexts/AuthProvider";
 
 export default function KnowledgeCheckViewExercises() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const user = getUser();
   const [exerciseFiles, setExerciseFiles] = useState<ExerciseTableType[]>([]);
   const [selectedExerciseType, setSelectedExerciseType] = useState<string>("All Types");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | undefined>(undefined);
@@ -265,15 +266,28 @@ export default function KnowledgeCheckViewExercises() {
               okButtonProps={{ danger: true }}
               cancelText="Cancel"
               onConfirm={async () => {
-                try {
-                  await api.delete(`/exercises/${record.id}`);
-                  messageApi.success("Exercise deleted");
+                // try {
+                //   await api.delete(`/exercises/${record.id}`);
+                //   messageApi.success("Exercise deleted");
+                //   setExerciseFiles((prev) =>
+                //     prev.filter((file) => file.id !== record.id)
+                //   );
+                // } catch (error) {
+                //   messageApi.error("Failed to delete exercise");
+                // }
+
+                try{
+                  await api.post('/trash', { trash_item_id: record.id, who_deleted: user?.id, item_type: 'exercise' });
+                  messageApi.success("Exercise moved to trash");
                   setExerciseFiles((prev) =>
                     prev.filter((file) => file.id !== record.id)
                   );
-                } catch (error) {
-                  messageApi.error("Failed to delete exercise");
+                }catch(error){
+                  messageApi.error("Failed to move exercise to trash");
                 }
+
+
+
               }}
             >
               <Button type="text" variant="filled" color="red" icon={<DeleteOutlined />} >Delete</Button>
@@ -298,9 +312,7 @@ const allExerciseTypes = [
       <PageHeader
         title="View Exercises"
         subtitle="Filter, search and manage exercises"
-        showButton
-        buttonText="Add Exercise"
-        onButtonPress={() => navigate("/knowledge-checks/edit-exercise")}
+       
       />
     </div>
 

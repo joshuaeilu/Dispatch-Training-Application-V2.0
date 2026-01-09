@@ -11,7 +11,7 @@ import { api } from "../../../../utils/api";
 import ResourcePreviewModal from "../../../Shared/Resources/ResourcePreviewModal";
 import {  RESOURCE_CATEGORIES } from "../../../../data/data";
 import { RESOURCE_URL } from "../../../../data/data";
-
+import { getUser } from "../../../../contexts/AuthProvider";
 const { Title } = Typography;
 
 export default function ResourceSection({ resources, fetchResources }: { resources: ResourceTableType[]; fetchResources: () => void }) {
@@ -20,7 +20,7 @@ export default function ResourceSection({ resources, fetchResources }: { resourc
         label: "All Resources",
         icon: <FileTextOutlined  style={{ fontSize: 18 }} />,
     });
-    const { isMobile } = useContext(AuthContext);
+    const user = getUser();
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewResource, setPreviewResource] = useState({
         id: "",
@@ -210,19 +210,34 @@ const columns: TableColumnType<ResourceTableType>[] = [
 
 
     async function handleResourceDelete(resourceId: string) {
+        // try {
+        //     await api.delete(`/resources/${resourceId}`);
+        //     messageApi.open({
+        //         type: 'success',
+        //         content: 'Resource deleted successfully',
+        //     });
+        //     fetchResources(); // Refresh the resource list
+        // } catch (error) {
+        //     messageApi.open({
+        //         type: 'error',
+        //         content: error instanceof Error ? error.message : 'Failed to delete resource',
+        //     });
+        // }
+
         try {
-            await api.delete(`/resources/${resourceId}`);
-            messageApi.open({
-                type: 'success',
-                content: 'Resource deleted successfully',
-            });
-            fetchResources(); // Refresh the resource list
-        } catch (error) {
-            messageApi.open({
-                type: 'error',
-                content: error instanceof Error ? error.message : 'Failed to delete resource',
-            });
+          await api.post('/trash', { trash_item_id: resourceId, who_deleted: user?.id , item_type: 'resource'});
+          messageApi.open({
+              type: 'success',
+              content: 'Resource moved to trash successfully',
+          });
+          fetchResources(); // Refresh the resource list
+      } catch (error) {
+          messageApi.open({
+              type: 'error',
+              content: error instanceof Error ? error.message : 'Failed to move resource to trash',
+          });
         }
+       
     }
 
 
@@ -279,7 +294,7 @@ const columns: TableColumnType<ResourceTableType>[] = [
     const { token } = useContext(AuthContext);
 
     return (
-        <div style={{ padding: isMobile ? "0 1rem": "0 1.5rem", overflow: "auto" }}> 
+        <div > 
             <Card>
 
  <Title
