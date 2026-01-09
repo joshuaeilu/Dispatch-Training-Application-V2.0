@@ -286,6 +286,11 @@ export default function ViewScenarios() {
       <div style={{ flex: '0 0 auto' }}>
         <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios"  />
       </div>
+      <Button>
+        <Typography.Title level={4} style={{ margin: 0, paddingLeft: "1.5rem" }} onClick={() => navigate('/scenario-manager/add-scenario')}>
+          Create Scenario
+        </Typography.Title>
+      </Button>
       <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
         {/* Filters */}
         <Card className="shadow-soft mb-4" style={{ margin: "0 1.5rem" }}>

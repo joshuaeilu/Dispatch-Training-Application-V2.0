@@ -120,7 +120,7 @@ const scenarioTypes = useMemo(() => {
     if (!speaker?.voice) return messageApi.warning("No voice selected for this speaker");
     if (!token) return messageApi.error("Missing token to access audio files");
 
-    const audio = new Audio(`/data/audio/${speaker.voice}.mp3?token=${token}`);
+    const audio = new Audio(`http://localhost:5000/data/audio/${speaker.voice}.mp3?token=${token}`);
     if (audioRef.current) audioRef.current.pause();
     audioRef.current = audio;
     audio.play();
@@ -174,9 +174,6 @@ const finishSituationSetup = async () => {
   try {
     const time: Dayjs | null = form.getFieldValue("time");
 
-    // ✅ Fetch default MOP PDF filename
-    const mopRes = await api.get("/mop/default");
-    const pdfFilename = mopRes.data?.filename || null;
 
     const scenarioDetails = {
       id: uuidv4(),
@@ -203,7 +200,6 @@ const finishSituationSetup = async () => {
         },
       ],
       status: "draft",
-      pdfFilename: pdfFilename, // ✅ attach it here
     };
 
     navigate("/scenario-manager/edit-scenario", {

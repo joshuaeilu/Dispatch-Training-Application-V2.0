@@ -42,7 +42,7 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
       params.push(normalizedRole);
 
       query += `
-        WHERE LOWER(s.scenario_data->>'status') = 'published'
+        AND LOWER(s.scenario_data->>'status') = 'published'
         AND (
           LOWER(s.scenario_data->>'audience') = LOWER($1)
           OR LOWER(s.scenario_data->>'audience') = 'all'

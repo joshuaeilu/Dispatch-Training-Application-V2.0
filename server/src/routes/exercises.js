@@ -88,7 +88,7 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
         ) AS created_by
       FROM exercises e
       JOIN users u ON u.id = e.created_by
-      WHERE e.in_trash = FALSE
+      WHERE e.in_trash = false
     `;
 
     const values = [];
@@ -100,7 +100,7 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
     } else if (user.role === "trainee") {
       // Trainees see only published + audience matches
       query += `
-        WHERE e.status = 'published'
+        AND e.status = 'published'
         AND e.audience IN ($1, $2)
         ORDER BY e.created_at DESC;
       `;
@@ -108,7 +108,7 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
     } else if (user.role === "dispatcher") {
       // Dispatchers see only published + audience matches
       query += `
-        WHERE e.status = 'published'
+        AND e.status = 'published'
         AND e.audience IN ($1, $2)
         ORDER BY e.created_at DESC;
       `;
