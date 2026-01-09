@@ -14,7 +14,6 @@ import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../../utils/api";
-import { checkIsMobile } from "../../../contexts/AuthProvider";
 import { AuthContext } from "../../../contexts/AuthProvider";
 import { UniversalContext } from "../../../contexts/UniversalHelpers";
 import UserPageHeader from "../../Shared/UserPageHeader";
@@ -183,7 +182,6 @@ export default function UserViewKnowledgeChecks() {
             padding: "1rem 1.5rem",
             background: "#fff",
             borderBottom: "1px solid #f0f0f0",
-            position: checkIsMobile() ? "relative" : "sticky",
             top: 0,
             zIndex: 2,
           }}
@@ -223,7 +221,7 @@ export default function UserViewKnowledgeChecks() {
                 </Form.Item>
               </Col>
 
-              {!checkIsMobile() && (
+              {/* {!checkIsMobile() && (
                 <Col xs={24} md={4}>
                   <Button
                     size="large"
@@ -239,7 +237,7 @@ export default function UserViewKnowledgeChecks() {
                     Reset
                   </Button>
                 </Col>
-              )}
+              )} */}
             </Row>
           </Form>
 

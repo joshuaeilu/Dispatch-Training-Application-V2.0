@@ -24,17 +24,16 @@ export default function DashboardSection({
     const navigate = useNavigate();
     return (
         <>
-            <div className=" px-6 py-5 sm:px-6">
+            <div >
                 <h3 className="text-xl font-semibold text-brand-maroon">{title}</h3>
                 <p className="mt-1 text-sm text-gray-500">
                     {subtitle}
                 </p>
             </div>
 
-            <div className="px-6">
                 <Row gutter={[24, 24]}>
                     {cardsData.map((card, index) => (
-                        <Col key={index} xs={24} sm={12} md={8} >
+                        <Col key={index} xs={24} sm={12}  >
                             <div className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl" onClick={() => navigate(card.route)}>
                                 <div className="px-4 py-5 sm:p-6">
                                     <div className="flex items-start justify-between gap-4">
@@ -101,7 +100,6 @@ export default function DashboardSection({
                         </Col>
                     ))}
                 </Row>
-            </div>
         </>
     );
 }

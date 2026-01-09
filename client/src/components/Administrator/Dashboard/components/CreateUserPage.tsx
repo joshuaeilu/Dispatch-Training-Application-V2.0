@@ -14,7 +14,7 @@ import { AuthContext } from '../../../../contexts/AuthProvider';
 import { api } from '../../../../utils/api';
 import type { UploadFile, UploadProps, GetProp } from 'antd';
 import { toast } from 'react-hot-toast';
-
+import { getUsers } from '../../../../contexts/UniversalHelpers';
 const { Title } = Typography;
 const roles = ['dispatcher', 'trainee', 'admin'];
 
@@ -32,6 +32,7 @@ export default function CreateUserPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setUsers, users } = getUsers();
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -73,9 +74,17 @@ const handleFinish = async (values: any) => {
   }
 
   try {
-    await api.post('/auth/signup', formData, {
+    const res = await api.post('/auth/signup', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+
+    setUsers([...users, {
+      id: res.data.id,
+      name: res.data.username,
+      role: res.data.role,
+      avatar: res.data.avatar,
+    }]);
+    
 
     toast.success('User created successfully!');
     form.resetFields();

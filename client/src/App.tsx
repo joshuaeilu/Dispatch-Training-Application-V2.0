@@ -13,14 +13,14 @@ import AdminDashboard from './components/Administrator/Dashboard/AdminDashboard'
 import CreateUserPage from './components/Administrator/Dashboard/components/CreateUserPage'
 import ManageUsers from './components/Administrator/Dashboard/components/ManageUsers'
 import ResourceManager from './components/Administrator/ResourceManager/ResourceManager'
-import DispatchersSection from './components/Administrator/Dashboard/Dispatchers/DispatchersSection'
-import TraineesSection from './components/Administrator/Dashboard/Trainees/TraineesSection'
 import UserViewKnowledgeChecks from './components/User/KnowledgeChecks/UserViewKnowledgeChecks'
 import ViewKnowledgeCheck from './components/User/KnowledgeChecks/ViewKnowledgeCheck'
 import UserResourcesPage from './components/Shared/Resources/UserResourcesPage'
 import { getUser } from './contexts/AuthProvider'
 import SettingsPage from './components/Administrator/Dashboard/components/SettingsPage'
 import UserProgressPage from './components/Administrator/Dashboard/components/UserProgressPage'
+import UsersPage from './components/Administrator/Dashboard/components/UsersPage'
+
 function App() {
 
   const user = getUser();
@@ -42,8 +42,8 @@ function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="create-user" element={<CreateUserPage />} />
             <Route path="manage-users" element={<ManageUsers />} />
-            <Route path="dispatchers" element={<DispatchersSection />} />
-            <Route path="trainees" element={<TraineesSection />} />
+            <Route path="dispatchers" element={<UsersPage role="dispatcher" />} />
+            <Route path="trainees" element={<UsersPage role="trainee" />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="user-progress" element={<UserProgressPage />} />
             

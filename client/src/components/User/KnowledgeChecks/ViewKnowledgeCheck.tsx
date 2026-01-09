@@ -7,7 +7,6 @@ import KnowledgeCheckHeader from "./components/KnowledgeCheckHeader";
 import QuestionSection from "./components/QuestionSection";
 import QuestionNavigation from "./components/QuestionNavigation";
 import KnowledgeCheckResults from "./components/KnowledgeCheckResults";
-import { checkIsMobile } from "../../../contexts/AuthProvider";
 import { useLocation } from "react-router-dom";
 import { api } from "../../../utils/api";
 
@@ -86,7 +85,6 @@ export default function KnowledgeCheckPage() {
         display: "flex",
         flexDirection: "column",
         backgroundColor: "#f5f7fa",
-        padding: checkIsMobile() ? "0.75rem" : "1.5rem",
       }}
     >
       <div
@@ -124,9 +122,7 @@ export default function KnowledgeCheckPage() {
                 style={{
                   backgroundColor: "#ffffff",
                   borderRadius: 12,
-                  padding: checkIsMobile() ? "1.25rem" : "2rem",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                  minHeight: checkIsMobile() ? "auto" : 350,
                   display: "flex",
                   flexDirection: "column",
                 }}
@@ -169,7 +165,6 @@ export default function KnowledgeCheckPage() {
                 style={{
                   backgroundColor: "#ffffff",
                   borderRadius: 12,
-                  padding: checkIsMobile() ? "1.25rem" : "2rem",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
                 }}
               >
@@ -183,7 +178,6 @@ export default function KnowledgeCheckPage() {
               <div
                 style={{
                   textAlign: "center",
-                  padding: checkIsMobile() ? "0.75rem 0" : "1rem 0",
                 }}
               >
                 <Button
@@ -191,9 +185,7 @@ export default function KnowledgeCheckPage() {
                   type="primary"
                   className="regular-btn"
                   style={{
-                    fontSize: checkIsMobile() ? 15 : 16,
                     borderRadius: 10,
-                    height: checkIsMobile() ? 42 : 46,
                     padding: "0 2.5rem",
                     fontWeight: 500,
                     boxShadow: "0 4px 12px rgba(24, 144, 255, 0.25)",

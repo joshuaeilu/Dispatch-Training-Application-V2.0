@@ -31,5 +31,17 @@ const singularize = (word: string) => {
   return word; // unchanged if already singular
 };
 
+function matchCase(orig: string, out: string) {
+  if (!orig) return out;
+  return orig[0] === orig[0].toUpperCase()
+    ? out.charAt(0).toUpperCase() + out.slice(1)
+    : out;
+}
 
-export { formatFileSize, formatDateOnly, toTitleCase, singularize };
+
+function addS(word: string): string {
+  return word + 's';
+}
+
+
+export { formatFileSize, formatDateOnly, toTitleCase, singularize,  addS };

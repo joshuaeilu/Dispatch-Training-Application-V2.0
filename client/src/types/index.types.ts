@@ -1,5 +1,30 @@
 import { Dayjs } from "dayjs";
 
+
+
+// PageHeader Component Props
+export interface PageHeaderProps {
+  title: string;
+  subtitle?: string;
+}
+
+// AdminWelcomeSection Props
+export interface AdminWelcomeSectionProps {
+  avatarUrl?: string;
+  name?: string;
+  role?: string;
+  stats: { label: string; value: number }[];
+}
+
+// Universal Helpers Context Types
+export interface UniversalHelpersCtx {
+  preferences: AdminPreferences | null;
+  setPreferences: React.Dispatch<React.SetStateAction<AdminPreferences | null>>;
+  users: GetUser[];
+  setUsers: React.Dispatch<React.SetStateAction<GetUser[]>>;
+}
+
+
 // Authentication Types
 export type Role = 'admin' | 'dispatcher' | 'trainee';
 export type User = { id: string; username: string; role: Role, avatar: string } | null;
@@ -8,7 +33,6 @@ export type Ctx = {
   token: string | null;
   setAuth: (token: string, user: NonNullable<User>) => void;
   logout: () => void;
-  isMobile: boolean;
 };
 
 export type Speaker = {

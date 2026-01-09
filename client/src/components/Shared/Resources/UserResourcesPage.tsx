@@ -25,7 +25,7 @@ import {
 import type { ResourceTableType } from "../../../types/index.types";
 import UserPageHeader from "../UserPageHeader";
 import { api } from "../../../utils/api";
-import { getToken, checkIsMobile } from "../../../contexts/AuthProvider";
+import { getToken} from "../../../contexts/AuthProvider";
 import ResourcePreviewModal from "./ResourcePreviewModal";
 import { singularize } from "../../../utils/tools";
 
@@ -60,7 +60,6 @@ const ResourcePlaceholder: React.FC<{ type: string }> = ({ type }) => {
   return (
     <div
       style={{
-        height: checkIsMobile() ? 120 : 160,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -83,7 +82,6 @@ export default function UserResourcesPage() {
   const [loading, setLoading] = useState(true);
 
   const token = getToken();
-  const isMobile = checkIsMobile();
 
   useEffect(() => {
     async function fetchResources() {
@@ -113,9 +111,7 @@ export default function UserResourcesPage() {
   }, [resources, selectedCategory, searchQuery]);
 
   return (
-    <div className="bg-white" style={isMobile
-    ? { height: "auto", overflowY: "visible" } // phone: scroll entire page
-    : { height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="bg-white" >
       <UserPageHeader
         title="Campus Safety Resources"
         subtitle="Your guide to staying safe and informed on the Calvin University campus"
@@ -128,8 +124,6 @@ export default function UserResourcesPage() {
           background: "#fff",
           padding:" 1.5rem",
           borderBottom: "1px solid #f0f0f0",
-          position: isMobile ? "relative" : "sticky",
-          top: isMobile ? "auto" : 0,
         }}
       >
           <Row gutter={[16, 16]} align="middle" justify="space-between">
@@ -187,7 +181,6 @@ export default function UserResourcesPage() {
       <div
         style={{
           flex: 1,
-          overflowY: isMobile ? "visible" : "auto",
           padding: "1.5rem",
         }}
       >
@@ -232,7 +225,6 @@ export default function UserResourcesPage() {
                           token
                         }
                         style={{
-                          height: checkIsMobile() ? 120 : 160,
                           objectFit: "cover",
                           borderRadius: "8px 8px 0 0",
                         }}

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 body{
     margin: 0;
     padding: 0;
@@ -53,10 +54,11 @@ body{
 @theme {
   /* Primary Color – Maroon (core brand) */
   --color-brand-maroon: #891B2F;
-  --color-brand-maroon-light: #A54952;
+  --color-brand-maroon-light: #A32E41;
   --color-brand-maroon-dark: #6E1421;
+  --color-brand-maroon-very-light: #F8EDEE;
+  --color-brand-maroon-tint: #F1D8DC;
 
-  
 
   /* Supporting neutrals */
   --color-brand-black: #231F20;

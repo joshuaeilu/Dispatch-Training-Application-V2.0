@@ -1,6 +1,7 @@
 import { ApartmentOutlined, AppstoreFilled, AudioOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, UserOutlined,} from "@ant-design/icons";
 import type {  ResourceCategory, ResourceKey, Role, MenuItem } from '../types/index.types';
 
+
 import React from "react";
   export const exerciseDifficultyOptions = [
     { label: "Easy", value: "easy" },
@@ -12,7 +13,7 @@ import React from "react";
     { label: "Published", value: "published" },
   ];
 
-
+export const DATA_URL = "http://localhost:5000/data";
 
 export const RESOURCE_CATEGORIES: ResourceCategory[] = [
     {

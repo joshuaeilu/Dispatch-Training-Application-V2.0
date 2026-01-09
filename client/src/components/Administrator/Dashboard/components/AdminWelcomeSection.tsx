@@ -1,26 +1,20 @@
-import { ShieldCheckIcon } from '@heroicons/react/20/solid'
-const user = {
-  name: 'Rebecca Nicholas',
-  role: 'Administrator',
-  imageUrl:
-    'https://images.unsplash.com/photo-1550525811-e5869dd03032?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-}
+import { ShieldCheckIcon } from '@heroicons/react/20/solid';
+import { toTitleCase } from '../../../../utils/tools';
+import type { AdminWelcomeSectionProps } from '../../../../types/index.types';
+import { getToken } from '../../../../contexts/AuthProvider';
+import { DATA_URL } from '../../../../data/data';
 
-const stats = [
-  { label: 'Dispatchers', value: 24 },
-  { label: 'Trainees', value: 68 },
-  { label: 'Administrators', value: 3 },
-]
 
-export default function AdminSnapshotSection() {
+export default function AdminWelcomeSection({ avatarUrl, name, role, stats }: AdminWelcomeSectionProps) {
+  const token = getToken();
   return (
-    <section className="mx-6 flex items-center flex-wrap justify-between rounded-xl border border-gray-200 bg-white px-8 py-7">
+    <section className="m-6  flex items-center flex-wrap justify-between rounded-xl border border-gray-200 bg-white px-8 py-7">
       {/* LEFT: Admin context */}
       <div className="flex items-center gap-5 ">
         <img
-          src={user.imageUrl}
-          alt=""
-          className="h-14 w-14 rounded-full object-cover"
+          src={DATA_URL + avatarUrl + '?token=' + token}
+          alt="Administrator Avatar"
+          className="h-16 w-16 rounded-full object-cover"
         />
 
         <div className="flex flex-col">
@@ -29,13 +23,13 @@ export default function AdminSnapshotSection() {
           </span>
 
           <span className="mt-0.5 text-xl font-semibold text-gray-900">
-            {user.name}
+            {toTitleCase(name || 'Admin')}
           </span>
 
           <span className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-gray-600">
-  <ShieldCheckIcon  className="h-4 w-4 text-brand-maroon-light" />
-  Administrator
-</span>
+            <ShieldCheckIcon className="h-4 w-4 text-brand-maroon-light" />
+            {toTitleCase(role || 'Admin')}
+          </span>
         </div>
       </div>
 

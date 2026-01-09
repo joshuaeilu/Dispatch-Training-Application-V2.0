@@ -17,7 +17,7 @@ import { api } from "../../../utils/api";
 import type { Scenario } from "../../../types/index.types";
 import { useNavigate } from "react-router-dom";
 import UserPageHeader from "../../Shared/UserPageHeader";
-import { AuthContext, checkIsMobile } from "../../../contexts/AuthProvider";
+import { AuthContext} from "../../../contexts/AuthProvider";
 const { Title, Text } = Typography;
 
 export default function UserViewScenarios() {
@@ -134,7 +134,6 @@ export default function UserViewScenarios() {
           padding: "1rem 1.5rem",
           background: "#fff",
           borderBottom: "1px solid #f0f0f0",
-          position: checkIsMobile() ? "relative" : "sticky",
           top: 0,
           zIndex: 2,
         }}
@@ -174,7 +173,7 @@ export default function UserViewScenarios() {
               </Form.Item>
             </Col>
 
-            {!checkIsMobile() && (
+            {/* {!checkIsMobile() && (
               <Col xs={24} md={4}>
                 <Button
                   size="large"
@@ -190,7 +189,7 @@ export default function UserViewScenarios() {
                   Reset
                 </Button>
               </Col>
-            )}
+            )} */}
           </Row>
         </Form>
 

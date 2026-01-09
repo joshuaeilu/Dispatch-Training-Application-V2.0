@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')!).render(
     token: {
       colorPrimary: "#8C2131",   // Calvin maroon
       colorLink: "#8C2131",
-      colorBgBase: "#F8F6F4",
+      colorBgBase: "#f9f9f9",
       fontFamily: "Inter, sans-serif",
       borderRadius: 8,
     },

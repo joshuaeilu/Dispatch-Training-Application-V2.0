@@ -13,7 +13,7 @@ function parseJwt(token: string) {
 
 
 export const AuthContext = createContext<Ctx>({
-  user: null, token: null, setAuth: () => {}, logout: () => {}, isMobile: false
+  user: null, token: null, setAuth: () => {}, logout: () => {}
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -79,10 +79,7 @@ export function getToken(){
   return token;
 }
 
-export function checkIsMobile(){
-  const { isMobile } = React.useContext(AuthContext);
-  return isMobile;
-}
+
 
 export function getUser(){
   const { user } = React.useContext(AuthContext);
