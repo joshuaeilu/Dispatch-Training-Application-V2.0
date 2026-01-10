@@ -42,6 +42,12 @@ function matchCase(orig: string, out: string) {
 function addS(word: string): string {
   return word + 's';
 }
+function removeS(word: string): string {
+  if (word.endsWith('s')) {
+    return word.slice(0, -1);
+  }
+  return word;
+}
 
 
-export { formatFileSize, formatDateOnly, toTitleCase, singularize,  addS };
+export { formatFileSize, formatDateOnly, toTitleCase, singularize,  addS, removeS, matchCase };

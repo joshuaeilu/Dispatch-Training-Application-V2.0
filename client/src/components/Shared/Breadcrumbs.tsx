@@ -9,7 +9,7 @@ type Breadcrumb = {
 export function PageBreadcrumbs({ items }: { items: Breadcrumb[] }) {
   return (
     <div className="mx-6 mb-6">
-      <div className="border-b border-gray-200 bg-white">
+      <div className="border-b border-t border-gray-200 bg-white">
         <div className="px-4 py-3 sm:px-6 lg:px-8">
           <nav aria-label="Breadcrumb" className="flex">
             {/* Mobile back */}

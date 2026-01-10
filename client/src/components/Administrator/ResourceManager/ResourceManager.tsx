@@ -1,11 +1,12 @@
 
-import ResourceSection from "./components/ResourceSection";
 import { useEffect, useState } from "react";
 import AddResourceModal from "./components/AddResourceModal";
 import { type ResourcePayload, type ResourceTableType } from "../../../types/index.types";
 import { api } from "../../../utils/api"
 import { message } from "antd";
 import { PageHeader } from "../../Shared/PageHeader";
+import { TableViewer } from "../../Shared/TableViewer";
+import { resourceColumns, resourceFilterOptions } from "../../../data/data";
 export default function Resources() {
 const [resourceModalOpen, setResourceModalOpen] = useState(false);
 
@@ -55,17 +56,28 @@ const [resourceFiles, setResourceFiles] = useState<ResourceTableType[]>([]);
     const [messageApi, contextHolder] = message.useMessage();
 
 
-    return (
-         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-         {/* Fixed Page Header */}
-    <div style={{ flex: '0 0 auto' }}>
-            <PageHeader title="Resource Management" subtitle="Manage dispatch resources, documents and materials" />
-</div>
-<div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
-      <ResourceSection resources={resourceFiles} fetchResources={fetchResources} />
-</div>  
 
-      <AddResourceModal
+    return (
+         <div >
+         {/* Fixed Page Header */}
+            <PageHeader title="Resource Management" subtitle="Manage dispatch resources, documents and materials" />
+
+            <TableViewer tableType="Resource" columnDefinitions={resourceColumns} columnData={resourceFiles} filterOptions={resourceFilterOptions} />
+
+
+
+
+
+
+
+
+
+
+{/* <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
+      <ResourceSection resources={resourceFiles} fetchResources={fetchResources} />
+</div>   */}
+
+      {/* <AddResourceModal
         open={resourceModalOpen}
         onCancel={() => setResourceModalOpen(false)}
         onSubmit={async (values) => {
@@ -73,7 +85,12 @@ const [resourceFiles, setResourceFiles] = useState<ResourceTableType[]>([]);
           setResourceModalOpen(false);
           fetchResources();
         }}
-      />
+      /> */}
+
+
+
+
+
       {contextHolder}
     </div>
 

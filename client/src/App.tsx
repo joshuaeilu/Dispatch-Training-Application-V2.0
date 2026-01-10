@@ -20,6 +20,7 @@ import { getUser } from './contexts/AuthProvider'
 import SettingsPage from './components/Administrator/Dashboard/components/SettingsPage'
 import UserProgressPage from './components/Administrator/Dashboard/components/UserProgressPage'
 import UsersPage from './components/Administrator/Dashboard/components/UsersPage'
+import { TableViewer } from './components/Shared/TableViewer'
 
 function App() {
 
@@ -54,6 +55,8 @@ function App() {
             <Route path="add-scenario" element={<SituationSetter />} />
             <Route path="edit-scenario" element={<ScenarioEditor />} />
           </Route>
+
+          <Route path="/table" element={<TableViewer />} />
 
         
 

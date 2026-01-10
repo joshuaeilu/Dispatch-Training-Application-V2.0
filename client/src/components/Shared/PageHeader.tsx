@@ -7,7 +7,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
 
   return (
- <header className="mx-6 mt-6 border-b border-gray-200 bg-white">
+ <header className="mx-6 mt-6  bg-white">
   <div className="py-6 px-4 sm:px-6 lg:px-8">
     <h1 className="text-3xl font-bold tracking-tight text-brand-maroon">
       {title}

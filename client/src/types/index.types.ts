@@ -24,6 +24,28 @@ export interface UniversalHelpersCtx {
   setUsers: React.Dispatch<React.SetStateAction<GetUser[]>>;
 }
 
+// Table Viewer Component Types
+export interface TableViewerProps<T> {
+  tableType: string
+  columnDefinitions: TableColumnDef<T>[]
+  columnData: T[]
+  filterOptions?: Record<string, string[]>
+}
+export interface TableColumnDef<T> {
+  key?: keyof T & string
+  header: string
+  render: (row: T) => React.ReactNode
+  align?: string
+  searchable?: boolean
+  filterable?: boolean
+}
+
+export type AdminTableProps<T> = {
+  columns: TableColumnDef<T>[]
+  data: T[]
+}
+
+
 
 // Authentication Types
 export type Role = 'admin' | 'dispatcher' | 'trainee';
@@ -167,10 +189,9 @@ export interface ExerciseTableType{
 
 
 export type ResourceKey =
-  | "all"
   | "documents"
   | "videos"
-  | "audio"
+  | "audios"
   | "images";
 
 export interface ResourceCategory {

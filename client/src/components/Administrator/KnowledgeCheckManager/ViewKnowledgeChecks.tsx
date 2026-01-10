@@ -10,6 +10,7 @@ import { PageHeader } from "../../Shared/PageHeader";
 import {  exerciseDifficultyOptions, exerciseStatusOptions } from "../../../data/data";
 import { toTitleCase } from "../../../utils/tools";
 import { getUser } from "../../../contexts/AuthProvider";
+import { TableViewer } from "../../Shared/TableViewer";
 
 export default function KnowledgeCheckViewExercises() {
   const navigate = useNavigate();
@@ -306,135 +307,132 @@ const allExerciseTypes = [
 
 
   return (
-   <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-         {/* Fixed Page Header */}
-    <div style={{ flex: '0 0 auto' }}>
+    <>
       <PageHeader
         title="View Exercises"
-        subtitle="Filter, search and manage exercises"
-       
+        subtitle="Filter, search and manage exercises"   
       />
-    </div>
+       <TableViewer tableType="Knowledge Checks" columnDefinitions={resourceColumns} columnData={resourceFiles} filterOptions={resourceFilterOptions} />
+</>
+//         {/* Scrollable Content */}
+//     <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
 
-        {/* Scrollable Content */}
-    <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
+//       {/* Filters */}
+//       <Card className="shadow-soft mb-4" style={{ margin: "0 1.5rem"}}>
+//         <Form
+//           form={form}
+//           layout="vertical"
+//         >
+//           <Row gutter={[16, 12]}>
+//             <Col xs={24} sm={12} md={4}>
+//               <Form.Item label="Type" name="type">
+// <Select
+//   defaultValue={selectedExerciseType}
+//   options={allExerciseTypes.map(type => ({ label: type, value: type }))}
+//   onChange={(value) => setSelectedExerciseType(value)}
+// />
+//               </Form.Item>
+//             </Col>
 
-      {/* Filters */}
-      <Card className="shadow-soft mb-4" style={{ margin: "0 1.5rem"}}>
-        <Form
-          form={form}
-          layout="vertical"
-        >
-          <Row gutter={[16, 12]}>
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item label="Type" name="type">
-<Select
-  defaultValue={selectedExerciseType}
-  options={allExerciseTypes.map(type => ({ label: type, value: type }))}
-  onChange={(value) => setSelectedExerciseType(value)}
-/>
-              </Form.Item>
-            </Col>
+//             <Col xs={24} sm={12} md={4}>
+//               <Form.Item label="Difficulty" name="difficulty">
+//                 <Select placeholder="Select difficulty" options={exerciseDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
+//               </Form.Item>
+//             </Col>
 
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item label="Difficulty" name="difficulty">
-                <Select placeholder="Select difficulty" options={exerciseDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item label="Status" name="status">
-                <Select placeholder="Select status" options={exerciseStatusOptions} onChange={(value) => setSelectedStatus(value)} />
-              </Form.Item>
-            </Col>
-
-
-            <Col xs={24} md={10} >
-              <Form.Item label="Search by name" name="q">
-                <Input prefix={<SearchOutlined />} placeholder="Type to search…" allowClear onChange={(e) => setSearchQuery(e.target.value)}
-                  onPressEnter={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
-                />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} md={2} >
-              <Space className="w-full justify-center" style={{ alignItems: "center", justifyContent: "center", alignContent: "center", height: "100%", width: "100%" }}>
-                <Button
-                  className="border-btn"
-                  size="middle"
-                  icon={<ReloadOutlined />}
-                  onClick={handleResetFilteredFields}
-                >
-                  Reset
-                </Button>
-
-              </Space>
-            </Col>
-          </Row>
-        </Form>
-      </Card>
-<Card
-  style={{ margin: "1.5rem", overflowX: "auto" }}
-  bodyStyle={{ padding: 16 }}
->
-  <div style={{ marginBottom: 12 }}>
-    <Space align="center" size="small">
-      <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
-      <Typography.Title
-        level={4}
-        style={{
-          margin: 0,
-          fontWeight: 600,
-          fontSize: "20px",
-          color: "var(--color-heading, #1f1f1f)",
-        }}
-      >
-        {selectedExerciseType === "All Types"
-          ? "All Exercises"
-          : selectedExerciseType}
-      </Typography.Title>
-    </Space>
-    <Typography.Text
-      type="secondary"
-      style={{
-        display: "block",
-        marginTop: 4,
-        fontSize: "14px",
-        color: "var(--color-text-secondary, #888)",
-      }}
-    >
-      {filteredData.length}{" "}
-      {filteredData.length === 1 ? "exercise" : "exercises"} found
-    </Typography.Text>
-  </div>
-
-  <Table
-    rowKey="id"
-    columns={exerciseTableColumns}
-    dataSource={filteredData}
-    pagination={{
-      pageSize: 10,
-      showQuickJumper: true,
-      showTotal: (total) => `Total ${total} exercises`,
-    }}
-    scroll={{
-      y: 400,
-      x: "max-content",
-    }}
-    sticky
-    bordered
-  />
-</Card>
-</div>
+//             <Col xs={24} sm={12} md={4}>
+//               <Form.Item label="Status" name="status">
+//                 <Select placeholder="Select status" options={exerciseStatusOptions} onChange={(value) => setSelectedStatus(value)} />
+//               </Form.Item>
+//             </Col>
 
 
-      {/* View Exercise Modal */}
-      {selectedExercise && (
-        <ViewExerciseModal exercise={selectedExercise} setViewExerciseModal={setViewExerciseModal} viewExerciseModal={viewExerciseModal} />
-      )}
+//             <Col xs={24} md={10} >
+//               <Form.Item label="Search by name" name="q">
+//                 <Input prefix={<SearchOutlined />} placeholder="Type to search…" allowClear onChange={(e) => setSearchQuery(e.target.value)}
+//                   onPressEnter={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
+//                 />
+//               </Form.Item>
+//             </Col>
+
+//             <Col xs={24} md={2} >
+//               <Space className="w-full justify-center" style={{ alignItems: "center", justifyContent: "center", alignContent: "center", height: "100%", width: "100%" }}>
+//                 <Button
+//                   className="border-btn"
+//                   size="middle"
+//                   icon={<ReloadOutlined />}
+//                   onClick={handleResetFilteredFields}
+//                 >
+//                   Reset
+//                 </Button>
+
+//               </Space>
+//             </Col>
+//           </Row>
+//         </Form>
+//       </Card>
+// <Card
+//   style={{ margin: "1.5rem", overflowX: "auto" }}
+//   bodyStyle={{ padding: 16 }}
+// >
+//   <div style={{ marginBottom: 12 }}>
+//     <Space align="center" size="small">
+//       <FileTextOutlined style={{ fontSize: 26, color: "#8C2131" }} />
+//       <Typography.Title
+//         level={4}
+//         style={{
+//           margin: 0,
+//           fontWeight: 600,
+//           fontSize: "20px",
+//           color: "var(--color-heading, #1f1f1f)",
+//         }}
+//       >
+//         {selectedExerciseType === "All Types"
+//           ? "All Exercises"
+//           : selectedExerciseType}
+//       </Typography.Title>
+//     </Space>
+//     <Typography.Text
+//       type="secondary"
+//       style={{
+//         display: "block",
+//         marginTop: 4,
+//         fontSize: "14px",
+//         color: "var(--color-text-secondary, #888)",
+//       }}
+//     >
+//       {filteredData.length}{" "}
+//       {filteredData.length === 1 ? "exercise" : "exercises"} found
+//     </Typography.Text>
+//   </div>
+
+//   <Table
+//     rowKey="id"
+//     columns={exerciseTableColumns}
+//     dataSource={filteredData}
+//     pagination={{
+//       pageSize: 10,
+//       showQuickJumper: true,
+//       showTotal: (total) => `Total ${total} exercises`,
+//     }}
+//     scroll={{
+//       y: 400,
+//       x: "max-content",
+//     }}
+//     sticky
+//     bordered
+//   />
+// </Card>
+// </div>
 
 
-      {contextHolder}
-    </div>
+//       {/* View Exercise Modal */}
+//       {selectedExercise && (
+//         <ViewExerciseModal exercise={selectedExercise} setViewExerciseModal={setViewExerciseModal} viewExerciseModal={viewExerciseModal} />
+//       )}
+
+
+//       {contextHolder}
+//     </div>
   );
 }

@@ -8,7 +8,7 @@ import { DATA_URL } from '../../../../data/data';
 export default function AdminWelcomeSection({ avatarUrl, name, role, stats }: AdminWelcomeSectionProps) {
   const token = getToken();
   return (
-    <section className="m-6  flex items-center flex-wrap justify-between rounded-xl border border-gray-200 bg-white px-8 py-7">
+    <section className="m-6  flex items-center flex-wrap justify-between rounded-xl  bg-white px-8 py-7">
       {/* LEFT: Admin context */}
       <div className="flex items-center gap-5 ">
         <img

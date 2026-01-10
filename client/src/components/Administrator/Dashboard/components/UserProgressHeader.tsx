@@ -2,7 +2,6 @@ import { ShieldCheckIcon } from "@heroicons/react/20/solid";
 import { toTitleCase } from "../../../../utils/tools";
 import { getToken } from "../../../../contexts/AuthProvider";
 import { DATA_URL } from "../../../../data/data";
-import { Skeleton } from "antd";
 
 type UserProgressHeaderCardProps = {
   avatarUrl?: string;
@@ -31,7 +30,7 @@ export default function UserProgressHeaderCard({
       : null;
 
   return (
-    <section className="mx-6 mt-6 border-b border-gray-200 bg-white px-6 py-6 sm:px-8">
+    <section className="mx-6 mt-6  bg-white px-6 py-6 sm:px-8">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         {/* LEFT: Identity */}
         {(avatarUrl || name || role) && (
