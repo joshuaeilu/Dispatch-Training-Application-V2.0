@@ -56,7 +56,6 @@ function App() {
             <Route path="edit-scenario" element={<ScenarioEditor />} />
           </Route>
 
-          <Route path="/table" element={<TableViewer />} />
 
         
 

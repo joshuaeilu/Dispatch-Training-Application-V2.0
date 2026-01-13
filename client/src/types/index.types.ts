@@ -30,6 +30,7 @@ export interface TableViewerProps<T> {
   columnDefinitions: TableColumnDef<T>[]
   columnData: T[]
   filterOptions?: Record<string, string[]>
+  onButtonPress?: () => void
 }
 export interface TableColumnDef<T> {
   key?: keyof T & string
@@ -116,10 +117,11 @@ export type ScenarioTableType = {
   authorId: string;
   name: string;
   type: string;
-  difficulty: string;
-  questionsCount: number;
-  status: string;
-  audience: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  questionCount: number;
+  status: "draft" | "published";
+  audience: "All" | "Dispatchers" | "Trainees";
+  visibility: boolean;
   scenes: Scene[];
   created_by: {
     name: string;
@@ -189,10 +191,10 @@ export interface ExerciseTableType{
 
 
 export type ResourceKey =
-  | "documents"
-  | "videos"
-  | "audios"
-  | "images";
+  | "document"
+  | "video"
+  | "audio"
+  | "image";
 
 export interface ResourceCategory {
   key: ResourceKey;

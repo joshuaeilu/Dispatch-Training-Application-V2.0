@@ -1,11 +1,12 @@
-import type { MouseEventHandler, ComponentType, SVGProps } from "react";
+import type { ComponentType, SVGProps } from "react";
+import { Popconfirm } from "antd";
 
 type ActionButtonColor = "blue" | "red" | "green" | "gray";
 
 interface TableActionButtonProps {
   title: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
-  onPress: MouseEventHandler<HTMLButtonElement>;
+  onPress: () => void; // ✅ fixed
   color?: ActionButtonColor;
 }
 
@@ -22,10 +23,12 @@ export function TableActionButton({
   onPress,
   color = "blue",
 }: TableActionButtonProps) {
-  return (
+  const isDestructive = color === "red";
+
+  const button = (
     <button
       type="button"
-      onClick={onPress}
+      onClick={isDestructive ? undefined : onPress}
       className={`
         inline-flex items-center gap-1.5
         rounded-md
@@ -42,4 +45,21 @@ export function TableActionButton({
       {title}
     </button>
   );
+
+  if (isDestructive) {
+    return (
+      <Popconfirm
+        title="Move this item to Trash?"
+        description="This item will be moved to Trash and can be restored later."
+        okText="Move to Trash"
+        cancelText="Cancel"
+        okButtonProps={{ danger: true }}
+        onConfirm={onPress} // ✅ now perfectly compatible
+      >
+        {button}
+      </Popconfirm>
+    );
+  }
+
+  return button;
 }

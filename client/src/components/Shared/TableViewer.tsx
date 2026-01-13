@@ -11,7 +11,9 @@ import {
 } from '@heroicons/react/20/solid'
 import { AdminTable } from '../Administrator/Dashboard/components/AdminTable'
 import { addS, toTitleCase } from '../../utils/tools'
-import type { TableColumnDef, TableViewerProps } from '../../types/index.types'
+import { Dialog, DialogPanel } from "@headlessui/react"
+
+import type { TableViewerProps } from '../../types/index.types'
 
 
 
@@ -20,12 +22,15 @@ export function TableViewer<T>({
   columnDefinitions,
   columnData,
   filterOptions = {},
+  onButtonPress,
 }: TableViewerProps<T>) {
-  const ITEMS_PER_PAGE = 10
+  const ITEMS_PER_PAGE = 5
 
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<Record<string, string[]>>({})
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+
 
   /* Reset pagination when inputs change */
   useEffect(() => {
@@ -91,83 +96,155 @@ export function TableViewer<T>({
           </p>
         </div>
 
-        <button className="inline-flex items-center gap-1 rounded-md bg-brand-maroon-light px-3 py-2 text-sm font-semibold text-white hover:bg-brand-maroon-hover">
+        <button className="inline-flex items-center gap-1 rounded-md bg-brand-maroon-light px-3 py-2 text-sm font-semibold text-white hover:bg-brand-maroon-hover" onClick={onButtonPress}>
           <PlusCircleIcon className="size-5" />
           Add {tableType}
         </button>
       </div>
 
       {/* Search + Filters */}
-      <div className="mt-4 flex items-center justify-between gap-4">
-        <div className="relative w-full sm:max-w-xs">
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Type to search..."
-            className="block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-brand-maroon-light"
-          />
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-        </div>
+<div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  {/* Search */}
+  <div className="relative flex-1 max-w-md">
+    <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+    <input
+      type="search"
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      placeholder="Type to search..."
+      className="w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-brand-maroon-light"
+    />
+  </div>
 
-        <div className="lg:flex items-center gap-4">
-          {Object.entries(filterOptions).map(([columnKey, options]) => {
-            const count = filters[columnKey]?.length ?? 0
+  {/* Desktop Filters */}
+  <div className="hidden sm:flex items-center gap-4">
+    {Object.entries(filterOptions).map(([key, options]) => {
+      const count = filters[key]?.length ?? 0
 
-            return (
-              <Menu key={columnKey} as="div" className="relative">
-                <MenuButton className="flex items-center gap-1 text-base text-gray-600 hover:text-gray-900">
-                  {toTitleCase(columnKey)}
-                  {count > 0 && (
-                    <span className="ml-1 rounded bg-brand-maroon-very-light px-1.5 text-xs text-brand-maroon">
-                      {count}
-                    </span>
-                  )}
-                  <ChevronDownIcon className="size-4" />
-                </MenuButton>
+      return (
+        <Menu key={key} as="div" className="relative">
+          <MenuButton className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+            {toTitleCase(key)}
+            {count > 0 && (
+              <span className="rounded bg-brand-maroon-very-light px-1.5 text-xs text-brand-maroon">
+                {count}
+              </span>
+            )}
+            <ChevronDownIcon className="size-4" />
+          </MenuButton>
 
-                <MenuItems className="absolute right-0 z-10 mt-2 w-44 rounded-md bg-white shadow ring-1 ring-black/5">
+          <MenuItems className="absolute right-0 z-10 mt-2 w-44 rounded-md bg-white shadow ring-1 ring-black/5">
+            {options.map((option) => (
+              <MenuItem key={option}>
+                {({ active }) => (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      toggleFilter(key, option)
+                    }}
+                    className={`flex w-full items-center gap-2 px-4 py-2 text-sm ${
+                      active ? "bg-gray-50" : ""
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      readOnly
+                      checked={filters[key]?.includes(option) ?? false}
+                      className="rounded border-gray-300"
+                    />
+                    {toTitleCase(option)}
+                  </button>
+                )}
+              </MenuItem>
+            ))}
+          </MenuItems>
+        </Menu>
+      )
+    })}
+  </div>
+
+  {/* Mobile Filters Button */}
+  <button
+    type="button"
+    onClick={() => setMobileFiltersOpen(true)}
+    className="sm:hidden inline-flex items-center justify-center rounded-md border border-gray-300 hover:bg-gray-50 px-3 py-2 text-sm text-gray-700"
+  >
+    Filters
+  </button>
+</div>
+
+{/* Mobile Filters Drawer (Dialog) */}
+<Dialog
+  open={mobileFiltersOpen}
+  onClose={setMobileFiltersOpen}
+  className="relative z-50 sm:hidden"
+>
+  {/* Backdrop */}
+  <div className="fixed inset-0 bg-black/30" />
+
+  {/* Slide-over */}
+  <div className="fixed inset-0 flex justify-end">
+    <DialogPanel className="h-full w-full max-w-sm bg-white shadow-xl">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-4">
+        <h2 className="text-base font-semibold text-gray-900">Filters</h2>
+        <button
+          type="button"
+          onClick={() => setMobileFiltersOpen(false)}
+          className="rounded-md p-2 text-gray-500 hover:bg-gray-50"
+        >
+          <XMarkIcon className="size-5" />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 py-4">
+        <div className="space-y-3">
+          {Object.entries(filterOptions).map(([key, options]) => (
+            <details key={key} className="group rounded-md border hover:shadow-sm border-gray-200">
+              <summary className="flex cursor-pointer items-center justify-between px-3 py-3 text-sm font-medium text-gray-900">
+                {toTitleCase(key)}
+                <ChevronDownIcon className="size-4 text-gray-500 transition group-open:rotate-180" />
+              </summary>
+
+              <div className="border-t border-gray-200 px-3 py-3">
+                <div className="space-y-2">
                   {options.map((option) => (
-                    <MenuItem key={option}>
-                      {({ active }) => (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            toggleFilter(columnKey, option)
-                          }}
-                          className={`flex w-full items-center gap-2 px-4 py-2 text-sm ${
-                            active ? 'bg-gray-50' : ''
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            readOnly
-                            checked={filters[columnKey]?.includes(option) ?? false}
-                            className="rounded border-gray-300"
-                          />
-                          {toTitleCase(option)}
-                        </button>
-                      )}
-                    </MenuItem>
+                    <label key={option} className="flex items-center gap-2 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={filters[key]?.includes(option) ?? false}
+                        onChange={() => toggleFilter(key, option)}
+                        className="rounded border-gray-300"
+                      />
+                      {toTitleCase(option)}
+                    </label>
                   ))}
-                </MenuItems>
-              </Menu>
-            )
-          })}
+                </div>
+              </div>
+            </details>
+          ))}
         </div>
       </div>
+    </DialogPanel>
+  </div>
+</Dialog>
+
+
+
 
       {/* Active Filters */}
       {Object.keys(filters).length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3">
           <span className="text-base text-brand-maroon-light">Filters</span>
+          <span className="text-gray-400">|</span>
           {Object.entries(filters).flatMap(([key, values]) =>
             values.map((value) => (
               <span
                 key={`${key}-${value}`}
-                className="flex items-center gap-1 rounded-full bg-brand-maroon-very-light px-3 py-1 text-sm text-brand-maroon-light"
+                className="flex items-center gap-1 rounded-full bg-brand-maroon-very-light px-3 py-1 text-xs text-brand-maroon-light"
               >
                 {toTitleCase(value)}
                 <button onClick={() => toggleFilter(key, value)}>
@@ -183,37 +260,54 @@ export function TableViewer<T>({
       <AdminTable columns={columnDefinitions} data={paginatedData} />
 
       {/* Pagination */}
+      
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between border-t border-gray-200 px-4 py-3">
-          <p className="text-sm text-gray-700">
-            Showing {(page - 1) * ITEMS_PER_PAGE + 1} to{' '}
-            {Math.min(page * ITEMS_PER_PAGE, totalItems)} of {totalItems}
-          </p>
+  <div className="mt-6 flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+    {/* Range info */}
+    <p className="text-sm text-gray-600">
+      Showing{" "}
+      <span className="font-medium text-gray-900">
+        {(page - 1) * ITEMS_PER_PAGE + 1}
+      </span>{" "}
+      to{" "}
+      <span className="font-medium text-gray-900">
+        {Math.min(page * ITEMS_PER_PAGE, totalItems)}
+      </span>{" "}
+      of{" "}
+      <span className="font-medium text-gray-900">{totalItems}</span>
+    </p>
 
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">
-              Page {page} of {totalPages}
-            </span>
+    {/* Controls */}
+    <div className="flex items-center gap-3">
+      <span className="text-sm text-gray-500">
+        Page <span className="font-medium text-gray-900">{page}</span> of{" "}
+        <span className="font-medium text-gray-900">{totalPages}</span>
+      </span>
 
-            <div className="flex">
-              <button
-                onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                disabled={page === 1}
-                className="rounded-l-md border px-2 py-2 text-gray-400 hover:bg-gray-50 disabled:opacity-50"
-              >
-                <ChevronLeftIcon className="size-5" />
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-                disabled={page === totalPages}
-                className="rounded-r-md border px-2 py-2 text-gray-400 hover:bg-gray-50 disabled:opacity-50"
-              >
-                <ChevronRightIcon className="size-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="flex overflow-hidden rounded-md border border-gray-300">
+        <button
+          onClick={() => setPage((p) => Math.max(p - 1, 1))}
+          disabled={page === 1}
+          className="px-2 py-1 text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+        >
+          <ChevronLeftIcon className="size-5" />
+        </button>
+
+        {/* Center divider */}
+        <div className="w-px bg-gray-300" />
+
+        <button
+          onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+          disabled={page === totalPages}
+          className="px-2 py-1 text-brand-maroon hover:bg-brand-maroon-very-light disabled:opacity-40"
+        >
+          <ChevronRightIcon className="size-5" />
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   )
 }

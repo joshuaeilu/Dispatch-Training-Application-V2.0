@@ -123,16 +123,16 @@ export default function ViewResourcesPage({
                     type={file.type}
                     title={file.name}
                     description={file.description}
-                    onClick={() =>
-                      handleResourcePreview(
-                        file.id,
-                        file.name,
-                        file.description,
-                        file.type,
-                        file.mime_type,
-                        file.url
-                      )
-                    }
+                    // onClick={() =>
+                    //   handleResourcePreview(
+                    //     file.id,
+                    //     file.name,
+                    //     file.description,
+                    //     file.type,
+                    //     file.mime_type,
+                    //     file.url
+                    //   )
+                    // }
                   />
                 </div>
               </div>

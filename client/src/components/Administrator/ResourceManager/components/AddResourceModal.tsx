@@ -16,6 +16,8 @@ import {
 } from "@ant-design/icons";
 import type { ResourcePayload } from "../../../../types/index.types";
 import { v4 as uuidv4 } from "uuid";
+import { remove } from "lodash";
+import { removeS } from "../../../../utils/tools";
 
 const RESOURCE_OPTIONS = [
   { value: "documents", label: "Documents", icon: <FileTextOutlined /> },
@@ -35,14 +37,12 @@ type AddResourceModalProps = {
   open: boolean;
   onCancel: () => void;
   onSubmit: (values: ResourcePayload) => void;
-  defaultType?: string;
 };
 
 export default function AddResourceModal({
   open,
   onCancel,
   onSubmit,
-  defaultType = "images",
 }: AddResourceModalProps) {
   const [form] = Form.useForm<AddResourceValues>();
 
@@ -52,21 +52,28 @@ export default function AddResourceModal({
     try {
       const values = await form.validateFields();
       const file = values.file[0]?.originFileObj;
+
       const resourcePayload: ResourcePayload = {
         id: uuidv4(),
         name: values.name,
-        type: values.type,
+        type: removeS(values.type),
         description: values.description,
         size: file.size,
         mime_type: file.type,
-        file: values.file[0]?.originFileObj,
-        visibility: true // Default visibility to false
+        file,
+        visibility: true,
       };
+
       onSubmit(resourcePayload);
       form.resetFields();
     } catch {
-      /* validation errors shown by Form */
+      /* validation handled by Form */
     }
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    onCancel();
   };
 
   return (
@@ -74,53 +81,41 @@ export default function AddResourceModal({
       open={open}
       centered
       closeIcon={null}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
-  title={
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      padding: "8px 0",
-    }}
-  >
-    <div style={{ fontSize: 24, color: "#8C2131" }}>
-      <FileTextOutlined />
-    </div>
-    <div>
-      <Typography.Title
-        level={4}
-        style={{
-          margin: 0,
-          fontWeight: 600,
-          color: "#1f1f1f",
-        }}
-      >
-        Add New Resource
-      </Typography.Title>
-      <Typography.Text type="secondary">
-        Upload a new resource to the dispatch system.
-      </Typography.Text>
-    </div>
-  </div>
-}
-
+      onCancel={handleCancel}
       maskClosable={false}
       destroyOnClose
       footer={
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
-          <Button className="border-btn"  onClick={() => { form.resetFields(); onCancel(); }}>
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="rounded-md border border-gray-300 bg-white px-3 cursor-pointer py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 active:translate-y-px"
+          >
             Cancel
-          </Button>
-          <Button
-            className="regular-btn"
+          </button>
+
+          <button
+            type="button"
             onClick={handleOk}
+            className="rounded-md bg-brand-maroon-light cursor-pointer px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-maroon active:translate-y-px"
           >
             Add Resource
-          </Button>
+          </button>
+        </div>
+      }
+      title={
+        <div className="flex items-center gap-3 py-2">
+          <div className="text-2xl text-[#8C2131]">
+            <FileTextOutlined />
+          </div>
+          <div>
+            <Typography.Title level={4} style={{ margin: 0 }}>
+              Add New Resource
+            </Typography.Title>
+            <Typography.Text type="secondary">
+              Upload a new resource to the dispatch system.
+            </Typography.Text>
+          </div>
         </div>
       }
       styles={{
@@ -129,11 +124,7 @@ export default function AddResourceModal({
         body: { paddingTop: 12 },
       }}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{ type: defaultType }}
-      >
+      <Form form={form} layout="vertical">
         <Form.Item
           label="Resource Name"
           name="name"
@@ -146,6 +137,7 @@ export default function AddResourceModal({
           label="Resource Type"
           name="type"
           rules={[{ required: true, message: "Choose a resource type" }]}
+          help="Select the type of resource you are uploading."
         >
           <Select
             placeholder="Select type"
@@ -153,13 +145,7 @@ export default function AddResourceModal({
             options={RESOURCE_OPTIONS.map((o) => ({
               value: o.value,
               label: (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
+                <span className="inline-flex items-center gap-2">
                   {o.icon}
                   <span>{o.label}</span>
                 </span>
@@ -182,7 +168,11 @@ export default function AddResourceModal({
           getValueFromEvent={normFile}
           rules={[{ required: true, message: "Please choose a file" }]}
         >
-          <Upload beforeUpload={() => false} maxCount={1} listType="text">
+          <Upload
+            beforeUpload={() => false}
+            maxCount={1}
+            listType="text"
+          >
             <Button icon={<UploadOutlined />}>Choose File</Button>
           </Upload>
         </Form.Item>

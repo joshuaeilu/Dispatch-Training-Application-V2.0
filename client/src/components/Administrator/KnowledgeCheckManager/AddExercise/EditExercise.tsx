@@ -105,6 +105,7 @@ export default function EditExercisePage() {
      {
       setupOpen ? (<Skeleton active paragraph={{ rows: 20 }} className="m-4 overflow-hidden" />) : (<> {/* Sticky Header */}
    <div
+   className="mx-3 mt-3"
   style={{
     position: "sticky",
     top: 0,
@@ -112,6 +113,7 @@ export default function EditExercisePage() {
     borderBottom: "1px solid var(--color-border)",
     display: "flex",
     alignItems: "center",
+    backgroundColor: "#FFFFFF",
     justifyContent: "space-between",
     padding: "0 1rem",
     height: "9vh",
@@ -152,7 +154,7 @@ export default function EditExercisePage() {
 
 
       {/* Main Layout */}
-<div className="flex flex-col md:flex-row h-[87vh] overflow-hidden gap-4" style={{ padding: 16 }}>
+<div className="flex flex-col md:flex-row h-[85vh] overflow-hidden gap-4" style={{ padding: 16 }}>
         <div className="w-full md:w-1/2 h-full ">
           <AddQuestionsSections
             selectedIndex={selectedIndex}

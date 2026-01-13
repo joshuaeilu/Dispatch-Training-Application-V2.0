@@ -100,15 +100,7 @@ export default function LoginPage() {
         </form>
         
 
-        <p className="mt-10 text-center text-sm text-gray-500">
-          Don't have an account?{" "}
-          <a
-            href="#"
-            className="font-semibold text-brand-maroon hover:text-brand-maroon-light"
-          >
-            See Access Instructions
-          </a>
-        </p>
+        
       </div>
     </div>
   );

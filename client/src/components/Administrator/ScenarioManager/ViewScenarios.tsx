@@ -8,6 +8,9 @@ import { DeleteOutlined, EditOutlined, FileTextOutlined, ReloadOutlined, SearchO
 import type {  ScenarioTableType } from "../../../types/index.types";
 import ViewScenarioModal from "./components/ViewScenarioModal";
 import { getUser } from "../../../contexts/AuthProvider";
+import { TableViewer } from "../../Shared/TableViewer";
+import { scenarioTableColumns } from "../../../data/data";
+import { scenarioFilterOptions } from "../../../data/data";
 export default function ViewScenarios() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -21,6 +24,8 @@ export default function ViewScenarios() {
   const [selectedScenario, setSelectedScenario] = useState<ScenarioTableType | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
+  
+
   const handleResetFilteredFields = () => {
     form.resetFields();
     setSelectedScenarioType("All Types");
@@ -28,6 +33,8 @@ export default function ViewScenarios() {
     setSelectedStatus(null);
     setSearchQuery("");
   };
+
+  
 
   // Get all scenarios from the database
   useEffect(() => {
@@ -41,7 +48,7 @@ export default function ViewScenarios() {
           name: scenario.scenario_data?.name || "Untitled",
           type: scenario.scenario_data?.type || "Unknown",
           difficulty: scenario.scenario_data?.difficulty || "N/A",
-          questionsCount: scenario.scenario_data?.scenes?.length || 0,
+          questionCount: scenario.scenario_data?.scenes?.length || 0,
           status: scenario.scenario_data?.status || "draft",
           audience: scenario.scenario_data?.audience || "N/A",
           scenes: scenario.scenario_data?.scenes || [],
@@ -87,7 +94,7 @@ export default function ViewScenarios() {
     name: file.name,
     type: file.type,
     difficulty: file.difficulty,
-    questionsCount: file.questionsCount,
+    questionCount: file.questionCount,
     status: file.status,
     audience: file.audience,
     scenes: file.scenes,
@@ -119,7 +126,7 @@ export default function ViewScenarios() {
     return matchesType && matchesDifficulty && matchesStatus;
   });
 
-  const scenarioTableColumns: TableColumnType<ScenarioTableType>[] = [
+  const scenarioTableColumnsd: TableColumnType<ScenarioTableType>[] = [
     {
       title: "Name",
       dataIndex: "name",
@@ -167,8 +174,8 @@ export default function ViewScenarios() {
           className="table-tag"
 
         >
-          {record.questionsCount}{" "}
-          {record.questionsCount === 1 ? "question" : "questions"}
+          {record.questionCount}{" "}
+          {record.questionCount === 1 ? "question" : "questions"}
 
         </Tag>
       ),
@@ -281,94 +288,16 @@ export default function ViewScenarios() {
   ];
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div>
       {/* Fixed Page Header */}
-      <div style={{ flex: '0 0 auto' }}>
         <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios"  />
-      </div>
-      <Button>
-        <Typography.Title level={4} style={{ margin: 0, paddingLeft: "1.5rem" }} onClick={() => navigate('/scenario-manager/add-scenario')}>
-          Create Scenario
-        </Typography.Title>
-      </Button>
-      <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingBottom: 24 }}>
-        {/* Filters */}
-        <Card className="shadow-soft mb-4" style={{ margin: "0 1.5rem" }}>
-          {loading ? (
-            <Row gutter={[16, 12]}>
-              <Col xs={24} sm={12} md={4}>
-                <Skeleton.Input active block style={{ height: 32, marginBottom: 8 }} />
-              </Col>
-              <Col xs={24} sm={12} md={4}>
-                <Skeleton.Input active block style={{ height: 32, marginBottom: 8 }} />
-              </Col>
-              <Col xs={24} sm={12} md={4}>
-                <Skeleton.Input active block style={{ height: 32, marginBottom: 8 }} />
-              </Col>
-              <Col xs={24} md={10}>
-                <Skeleton.Input active block style={{ height: 32, marginBottom: 8 }} />
-              </Col>
-              <Col xs={24} md={2}>
-                <Skeleton.Button active block style={{ height: 32 }} />
-              </Col>
-            </Row>
-          ) : (
-            <Form
-              form={form}
-              layout="vertical"
-            >
-              <Row gutter={[16, 12]}>
-                <Col xs={24} sm={12} md={4}>
-                  <Form.Item label="Type" name="type">
-                    <Select
-                      defaultValue={selectedScenarioType}
-                      options={scenarioTypes.map(type => ({ label: type, value: type }))}
-                      onChange={(value) => setSelectedScenarioType(value)}
-                    />
-                  </Form.Item>
-                </Col>
 
-                <Col xs={24} sm={12} md={4}>
-                  <Form.Item label="Difficulty" name="difficulty">
-                    <Select placeholder="Select difficulty" options={scenarioDifficultyOptions} onChange={(value) => setSelectedDifficulty(value)} />
-                  </Form.Item>
-                </Col>
-
-                <Col xs={24} sm={12} md={4}>
-                  <Form.Item label="Status" name="status">
-                    <Select placeholder="Select status" options={scenarioStatusOptions} onChange={(value) => setSelectedStatus(value)} />
-                  </Form.Item>
-                </Col>
+        <TableViewer tableType="Scenario" columnDefinitions={scenarioTableColumns} columnData={scenarioData} filterOptions={scenarioFilterOptions} />
+   
+     
 
 
-                <Col xs={24} md={10} >
-                  <Form.Item label="Search by name" name="q">
-                    <Input prefix={<SearchOutlined />} placeholder="Type to search…" allowClear onChange={(e) => setSearchQuery(e.target.value)}
-                      onPressEnter={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
-                    />
-                  </Form.Item>
-                </Col>
-
-                <Col xs={24} md={2} >
-                  <Space className="w-full justify-center" style={{ alignItems: "center", justifyContent: "center", alignContent: "center", height: "100%", width: "100%" }}>
-                    <Button
-                      className="border-btn"
-                      size="middle"
-                      icon={<ReloadOutlined />}
-                      onClick={handleResetFilteredFields}
-                    >
-                      Reset
-                    </Button>
-
-                  </Space>
-                </Col>
-              </Row>
-            </Form>
-          )}
-        </Card>
-
-
-        <Card
+        {/* <Card
           style={{ margin: "1.5rem", overflowX: "auto" }}
           bodyStyle={{ padding: 16 }}
         >
@@ -440,14 +369,13 @@ export default function ViewScenarios() {
               </div>
             </>
           )}
-        </Card>
-      </div>
+        </Card> */}
 
-      <ViewScenarioModal
+      {/* <ViewScenarioModal
         open={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
         scenario={selectedScenario}
-      />
+      /> */}
 
     </div>
   )
