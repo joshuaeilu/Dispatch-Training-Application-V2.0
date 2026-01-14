@@ -22,6 +22,7 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
         s.author_id,
         s.scenario_data,
         s.updated_at,
+        s.visibility,
         u.username AS author_name,
         u.avatar AS author_avatar
       FROM scenarios s
@@ -66,36 +67,77 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
 
 
 
-router.post("/", auth(["admin"]), async (req, res) => {
-  const { scenario, authorId, status } = req.body;
-  console.log(scenario.status)
+// router.post("/", auth(["admin"]), async (req, res) => {
+//   const { scenario, authorId, status } = req.body;
+//   console.log(scenario.status)
 
-  if (!scenario || !authorId) {
-    return res.status(400).json({ error: "Missing scenario or authorId" });
-  }
+//   if (!scenario || !authorId) {
+//     return res.status(400).json({ error: "Missing scenario or authorId" });
+//   }
 
+//   try {
+//     // Ensure we have an ID
+//     if (!scenario.id) {
+//       return res.status(400).json({ error: "Scenario missing ID" });
+//     }
+
+//     await pool.query(
+//       `
+//       INSERT INTO scenarios (id, author_id, scenario_data)
+//       VALUES ($1, $2, $3::jsonb)
+//       ON CONFLICT (id)
+//       DO UPDATE SET
+//         scenario_data = EXCLUDED.scenario_data,
+//         updated_at = NOW();
+//       `,
+//       [scenario.id, authorId, JSON.stringify(scenario) ]
+//     );
+
+//     res.status(200).json({ message: "Scenario saved successfully" });
+//   } catch (error) {
+//     console.error("❌ Error saving scenario:", error);
+//     res.status(500).json({ error: "Failed to save scenario" });
+//   }
+// });
+
+
+// 🔹 Create or update scenario (UPSERT)
+router.put("/:id", auth(["admin"]), async (req, res) => {
   try {
-    // Ensure we have an ID
-    if (!scenario.id) {
-      return res.status(400).json({ error: "Scenario missing ID" });
+    const { scenario, authorId } = req.body;
+
+    if (!scenario || !authorId) {
+      return res.status(400).json({ error: "Missing scenario or authorId" });
     }
 
-    await pool.query(
-      `
+
+    console.log("💾 Saving scenario:", scenario.name, scenario.status);
+
+    const query = `
       INSERT INTO scenarios (id, author_id, scenario_data)
       VALUES ($1, $2, $3::jsonb)
       ON CONFLICT (id)
       DO UPDATE SET
         scenario_data = EXCLUDED.scenario_data,
-        updated_at = NOW();
-      `,
-      [scenario.id, authorId, JSON.stringify(scenario) ]
-    );
+        updated_at = NOW()
+      RETURNING *;
+    `;
 
-    res.status(200).json({ message: "Scenario saved successfully" });
+    const values = [
+      scenario.id,
+      authorId,
+      JSON.stringify(scenario),
+    ];
+
+    const { rows } = await pool.query(query, values);
+
+    res.status(200).json({
+      message: "Scenario saved successfully",
+      scenario: rows[0],
+    });
   } catch (error) {
-    console.error("❌ Error saving scenario:", error);
-    res.status(500).json({ error: "Failed to save scenario" });
+    console.error("❌ Failed to create/update scenario:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -122,6 +164,32 @@ router.get("/:id", auth(['admin']), async (req, res) => {
   } catch (err) {
     console.error("❌ Error fetching scenario:", err);
     return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+// 🔹 Update visibility only
+router.patch("/:id", auth(["admin"]), async (req, res) => {
+  const { id } = req.params;
+  const { visibility } = req.body;
+
+  try {
+    const result = await pool.query(
+      "UPDATE scenarios SET visibility = $1 WHERE id = $2 RETURNING *",
+      [visibility, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Scenario not found" });
+    }
+
+    res.status(200).json({
+      message: "Visibility updated",
+      scenario: result.rows[0],
+    });
+  } catch (error) {
+    console.error("❌ Failed to update scenario visibility:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

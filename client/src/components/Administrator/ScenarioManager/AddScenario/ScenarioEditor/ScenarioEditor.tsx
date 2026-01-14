@@ -30,8 +30,6 @@ export default function ScenarioEditor() {
 
   const { user } = useContext(AuthContext);
 
-  // Autosave control
-  const [autosaveEnabled, setAutosaveEnabled] = useState(true);
   const [, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
 
   // UI state
@@ -53,11 +51,9 @@ export default function ScenarioEditor() {
   };
 
   // AUTOSAVE HOOK — now accepts autosaveEnabled flag
-  const { autosaving } = useAutosaveScenario(
-    scenario ?? null,
+  const { autosaving, manualSave } = useAutosaveScenario(
+    scenario as Scenario,
     setLastSavedScenario,
-    autosaveEnabled,
-    10000 // 10 seconds
   );
 
   /**
@@ -65,7 +61,6 @@ export default function ScenarioEditor() {
    * Full-proof, autosave-proof, clean.
    */
   async function saveScenario() {
-    setAutosaveEnabled(false); // ⛔ STOP AUTOSAVE
     setIsPublishing(true);
 
     try {
@@ -77,10 +72,7 @@ export default function ScenarioEditor() {
       setScenario(updated);
 
       // SAVE MAIN SCENARIO
-      const response = await api.post("/scenarios", {
-        scenario: updated,
-        authorId: user?.id,
-      });
+      await manualSave();
 
       if (saveStatus === "published") {
         // PUBLISH: Generate audio
@@ -97,18 +89,17 @@ export default function ScenarioEditor() {
         }
       }
 
-      if (response.status === 200 || response.status === 201) {
-        toast.success("Scenario saved successfully!");
-        navigate("/scenario-manager", { replace: true });
-      } else {
-        toast.error("Failed to save scenario.");
-      }
+      toast.success("Scenario saved successfully!");
+      navigate("/scenario-manager", { replace: true });
+        
+
+
+
     } catch (err) {
       console.error("Error saving scenario:", err);
       toast.error("An error occurred while saving.");
     } finally {
       setIsPublishing(false);
-      setAutosaveEnabled(true); // ✅ RE-ENABLE AUTOSAVE AFTER COMPLETION
     }
   }
 
@@ -116,6 +107,7 @@ export default function ScenarioEditor() {
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", padding: 10 }}>
       {/* HEADER */}
       <div
+      className="bg-white"
         style={{
           position: "sticky",
           top: 0,
@@ -187,7 +179,7 @@ export default function ScenarioEditor() {
         style={{ padding: "8px 16px", height: "4vh", gap: 6 }}
       >
         <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 14 }} />
-        <span>{autosaving ? "Autosaving..." : "All changes saved"}</span>
+        <span>{autosaving ? "Autosaving..." : "Changes saved every 3 seconds. "}</span>
       </div>
 
       {/* SAVE MODAL */}

@@ -29,6 +29,8 @@ export function useAutosaveExercise(
     }, 3000)
   ).current;
 
+
+  
   useEffect(() => {
     if (!exercise?.id) return;
 

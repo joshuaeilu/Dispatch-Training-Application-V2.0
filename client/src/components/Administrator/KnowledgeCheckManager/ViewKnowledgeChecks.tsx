@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Form, Select, Input, Button, Table, Tag, Space, Tooltip, Popconfirm, message, type TableColumnType, Switch, Typography } from "antd";
-import { ReloadOutlined, SearchOutlined, EditOutlined, FileTextOutlined, DeleteOutlined, SnippetsOutlined } from "@ant-design/icons";
+import { Switch } from "antd";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../../utils/api";
 import type { Exercise, ExerciseTableType, TableColumnDef } from "../../../types/index.types";
@@ -36,10 +35,6 @@ export default function KnowledgeCheckViewExercises() {
   const toast = useToast();
   const user = getUser();
   const [exerciseFiles, setExerciseFiles] = useState<ExerciseTableType[]>([]);
-  const [selectedExerciseType, setSelectedExerciseType] = useState<string>("All Types");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | undefined>(undefined);
-  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [viewExerciseModal, setViewExerciseModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 

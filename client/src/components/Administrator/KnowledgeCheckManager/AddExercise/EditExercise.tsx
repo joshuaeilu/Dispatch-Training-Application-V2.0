@@ -183,7 +183,7 @@ export default function EditExercisePage() {
       }}
     >
       <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 14 }} />
-      <span>{autosaving ? "Autosaving..." : "All changes saved"}</span>
+      <span>{autosaving ? "Autosaving..." : "Changes saved every 3 seconds. "}</span>
     </div>
       
       

@@ -77,11 +77,7 @@ export const knowledgeCheckFilterOptions = {
   audience: ["All", "Trainees", "Dispatchers"],
 }
 
-export const scenarioFilterOptions = {
-  status: ["draft", "published"],
-  difficulty: ["Easy", "Medium", "Hard"],
-  audience: ["All", "Trainees", "Dispatchers"],
-}
+
 
 
 
@@ -112,135 +108,7 @@ export const TYPE_META = {
 
 
 
-export const scenarioTableColumns: TableColumnDef<ScenarioTableType>[] = [
-{
-  key: 'name',
-  header: 'Name',
-  align: 'text-left',
-  render: (e: ScenarioTableType) => <span className="font-medium text-gray-900">{e.name}</span>,
-  searchable: true,
-  filterable: true,
-}, 
-{
-  key: 'type',
-  header: 'Type',
-  align: 'text-left',
-  render: (e: ScenarioTableType) => <span className="text-gray-600">{toTitleCase(e.type)}</span>,
-  searchable: false,
-  filterable: true,
-}, 
- {
-    key: 'difficulty',
-    header: 'Difficulty',
-    align: 'text-left',
-    render: (e: ScenarioTableType) => <span
-  className={`
-    inline-flex items-center
-    rounded-md
-    px-2.5 py-0.5
-    text-xs font-medium
-    ring-1 ring-inset
-    ${DIFFICULTY_STYLES[e.difficulty]}
-  `}
->
-  {e.difficulty}
-</span>,
-    searchable: false,
-    filterable: true,
-  },
-  { 
-    header: "Count",
-    align: 'text-left',
-    render: (e: ScenarioTableType) => (<span
-        className="
-          inline-flex items-center
-          rounded-md
-          bg-gray-50
-          px-2.5 py-0.5
-          text-xs font-medium
-          text-gray-700
-          ring-1 ring-inset ring-gray-600/20
-        "
-      >
-        {e.questionCount}{" "}
-        {e.questionCount === 1 ? "question" : "questions"}
 
-      </span>),
-      searchable: false,
-      filterable: false
-   },
-    {
-    key: 'status',
-    header: 'Status',
-    align: 'text-left',
-    render: (e: ScenarioTableType) => <span
-  className={`
-    inline-flex items-center
-    rounded-md
-    px-2.5 py-0.5
-    text-xs font-medium
-    ring-1 ring-inset
-    ${STATUS_STYLES[e.status]}
-  `}>{toTitleCase(e.status)}</span>,
-   filterable: false,
-   searchable: false
-  }, 
-  {
-    key: 'audience',
-    header: 'Audience',
-    align: 'text-left',
-    render: (e: ScenarioTableType) => <span
-  className={`
-    inline-flex items-center
-    rounded-md
-    px-2.5 py-0.5
-    text-xs font-medium
-    ring-1 ring-inset
-    ${AUDIENCE_STYLES[e.audience]}
-  `}>{e.audience}</span>,
-    searchable: true,
-    filterable: true,
-  }, 
-  {
-    key: 'visibility',
-    header: 'Visibility',
-    align: 'text-left',
-    render: (e: ScenarioTableType) => <div className="group relative inline-flex w-9 rounded-full bg-gray-200 p-0.5 transition-colors has-checked:bg-brand-maroon-light">
-  <span className="size-4 rounded-full bg-white transition-transform duration-200 ease-out group-has-checked:translate-x-4" />
-  <input type="checkbox" className="absolute inset-0 appearance-none" />
-</div>
-}, 
-{
-  header: 'Actions',
-  align: 'text-center',
-  render: () => (
-    <div className="flex justify-end gap-2">
-
-      <TableActionButton
-        icon={ArrowTopRightOnSquareIcon}
-        title="View"
-        color="green"
-        onPress={() => alert("view")}
-      />
-
-      <TableActionButton 
-        icon={PencilSquareIcon}
-        title="Edit"
-        color="blue"
-        onPress={() => alert("edit")}
-      />
-      <TableActionButton
-        icon={TrashIcon}
-        title="Delete"
-        color="red"
-        onPress={() => alert("delete")}
-      />
-    </div>
-  )
-}
-
-
-];
 
 export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   admin: [

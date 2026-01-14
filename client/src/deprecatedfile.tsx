@@ -22,3 +22,21 @@
                         // } catch (error) {
                         //   messageApi.error("Failed to delete exercise");
                         // }
+
+
+
+      
+                // try {
+                //   const response = await api.delete(`/scenarios/${record.id}`, {
+                //     data: { authorId: record.authorId }, // optional: verify ownership
+                //   });
+                //   if (response.status === 200) {
+                //     setScenarioFiles(prev => prev.filter(s => s.id !== record.id));
+                //     toast.success("Scenario deleted successfully.");
+                //   }
+                // } catch (error) {
+                //   console.error("Error deleting scenario:", error);
+                //   toast.error("Failed to delete scenario");
+                // }
+
+                  

@@ -285,6 +285,8 @@ export default function OptionsEditor({ exercise, setExercise, selectedIndex }: 
                     <Tooltip title="Delete option">
                       <Button
                         type="text"
+                        variant="filled"
+                        color="red"
                         icon={<DeleteOutlined />}
                         onClick={() => removeOption(option.id)}
                       />

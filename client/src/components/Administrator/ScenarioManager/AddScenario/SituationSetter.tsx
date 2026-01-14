@@ -266,7 +266,7 @@ const finishSituationSetup = async () => {
         {showPage === 1 && (<div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between", flexDirection: "column" }}>
 
           <div style={{ marginBottom: 16 }}>
-            <Title level={3} style={{ margin: 0 }}>
+            <Title level={3} style={{ margin: 0}} className="!text-brand-maroon-light">
               Situation Setter
             </Title>
             <Text type="secondary">Set the situation for the scenario.</Text>

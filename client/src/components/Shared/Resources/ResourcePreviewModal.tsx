@@ -1,27 +1,16 @@
-import { Modal, Typography, Button, Skeleton, Slider, Space } from "antd";
+import { Modal, Typography, Button, Skeleton, } from "antd";
 import { useEffect, useRef, useState } from "react";
 import {
   CloseOutlined,
   PlusCircleFilled,
-  LeftOutlined,
-  RightOutlined,
-  ZoomInOutlined,
-  ZoomOutOutlined,
-  FullscreenOutlined,
-  DownloadOutlined,
 } from "@ant-design/icons";
 import { Image } from "antd";
-import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
 const { Title, Text } = Typography;
 
-// Set up PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
+
 
 interface ResourcePreviewModalProps {
   open: boolean;
@@ -44,9 +33,7 @@ export default function ResourcePreviewModal({
   resource,
 }: ResourcePreviewModalProps) {
   const [numPages, setNumPages] = useState<number>(0);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [scale, setScale] = useState<number>(1.0);
-  const [containerWidth, setContainerWidth] = useState<number>(800);
+
 
   // Refs to control media
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -67,25 +54,7 @@ export default function ResourcePreviewModal({
         audioRef.current.currentTime = 0;
       }
 
-      // Reset PDF state when modal closes
-      setPageNumber(1);
-      setNumPages(0);
-      setScale(1.0);
     }
-  }, [open]);
-
-  // Calculate container width for PDF
-  useEffect(() => {
-    const updateWidth = () => {
-      if (pdfContainerRef.current && open) {
-        const width = pdfContainerRef.current.offsetWidth - 40;
-        setContainerWidth(width);
-      }
-    };
-
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
   }, [open]);
 
   // Early return if no resource
@@ -104,42 +73,8 @@ export default function ResourcePreviewModal({
   const isVideo = resourceType === "video";
   const isAudio = resourceType === "audio";
   const isPdf = type === "application/pdf";
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    setPageNumber(1);
-  };
+ 
 
-  const onDocumentLoadError = (error: Error) => {
-    console.error("Error loading PDF:", error);
-  };
-
-  const goToPrevPage = () => {
-    setPageNumber((prev) => Math.max(prev - 1, 1));
-  };
-
-  const goToNextPage = () => {
-    setPageNumber((prev) => Math.min(prev + 1, numPages));
-  };
-
-  const zoomIn = () => {
-    setScale((prev) => Math.min(prev + 0.25, 3.0));
-  };
-
-  const zoomOut = () => {
-    setScale((prev) => Math.max(prev - 0.25, 0.5));
-  };
-
-  const resetZoom = () => {
-    setScale(1.0);
-  };
-
-  const handleFullscreen = () => {
-    if (pdfContainerRef.current) {
-      if (pdfContainerRef.current.requestFullscreen) {
-        pdfContainerRef.current.requestFullscreen();
-      }
-    }
-  };
 
   // Determine modal width based on screen size
   const getModalWidth = () => {
@@ -341,172 +276,16 @@ export default function ResourcePreviewModal({
             height: "100%",
             gap: 0,
           }}>
-            {/* PDF Controls - Fixed */}
-            <div
-              style={{
-                background: "#fff",
-                padding: "10px 16px",
-                borderBottom: "1px solid #e8e8e8",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 12,
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                {/* Page Navigation */}
-                <Space size="small">
-                  <Button
-                    icon={<LeftOutlined />}
-                    onClick={goToPrevPage}
-                    disabled={pageNumber <= 1}
-                    size="middle"
-                  >
-                    Prev
-                  </Button>
-                  <div
-                    style={{
-                      padding: "6px 12px",
-                      background: "#fafafa",
-                      borderRadius: 6,
-                      border: "1px solid #e8e8e8",
-                      minWidth: 100,
-                      textAlign: "center",
-                    }}
-                  >
-                    <Text strong style={{ fontSize: 13 }}>
-                      {pageNumber} / {numPages || "?"}
-                    </Text>
-                  </div>
-                  <Button
-                    icon={<RightOutlined />}
-                    onClick={goToNextPage}
-                    disabled={pageNumber >= numPages}
-                    size="middle"
-                  >
-                    Next
-                  </Button>
-                </Space>
-
-                {/* Zoom Controls */}
-                <Space align="center" size="small">
-                  <Button
-                    icon={<ZoomOutOutlined />}
-                    onClick={zoomOut}
-                    disabled={scale <= 0.5}
-                    size="middle"
-                  />
-                  <Slider
-                    min={50}
-                    max={300}
-                    step={25}
-                    value={scale * 100}
-                    onChange={(value) => setScale(value / 100)}
-                    style={{ width: 120, margin: "0 8px" }}
-                    tooltip={{ formatter: (value) => `${value}%` }}
-                  />
-                  <div
-                    style={{
-                      minWidth: 50,
-                      textAlign: "center",
-                      padding: "4px 8px",
-                      background: "#fafafa",
-                      borderRadius: 6,
-                      border: "1px solid #e8e8e8",
-                    }}
-                  >
-                    <Text strong style={{ fontSize: 12 }}>
-                      {Math.round(scale * 100)}%
-                    </Text>
-                  </div>
-                  <Button
-                    icon={<ZoomInOutlined />}
-                    onClick={zoomIn}
-                    disabled={scale >= 3.0}
-                    size="middle"
-                  />
-                  <Button onClick={resetZoom} size="middle">
-                    Reset
-                  </Button>
-                </Space>
-
-                {/* Additional Controls */}
-                <Space size="small">
-                  <Button
-                    icon={<FullscreenOutlined />}
-                    onClick={handleFullscreen}
-                    size="middle"
-                    title="Fullscreen"
-                  />
-                  <Button
-                    icon={<DownloadOutlined />}
-                    href={url}
-                    target="_blank"
-                    size="middle"
-                    title="Download PDF"
-                  >
-                    Download
-                  </Button>
-                </Space>
-              </div>
-            </div>
-
-            {/* PDF Viewer - Full Coverage */}
-            <div
-              ref={pdfContainerRef}
+            <iframe
+              src={url + "#toolbar=0&navpanes=0&scrollbar=0"}
+              title={name}
               style={{
                 flex: 1,
-                overflow: "auto",
-                background: "#525659",
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "center",
-                padding: "20px",
+                border: "none",
+                width: "100%",
               }}
-            >
-              <Document
-                file={{ url }}
-                onLoadSuccess={onDocumentLoadSuccess}
-                onLoadError={onDocumentLoadError}
-                loading={
-                  <div style={{ padding: "3rem", textAlign: "center", background: "#fff", borderRadius: 8 }}>
-                    <Skeleton active paragraph={{ rows: 8 }} />
-                    <Text
-                      type="secondary"
-                      style={{ display: "block", marginTop: "1rem" }}
-                    >
-                      Loading PDF...
-                    </Text>
-                  </div>
-                }
-              >
-                <div
-                  style={{
-                    display: "inline-block",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                    background: "#fff",
-                  }}
-                >
-                  <Page
-                    pageNumber={pageNumber}
-                    width={containerWidth}
-                    scale={scale}
-                    renderAnnotationLayer={true}
-                    renderTextLayer={true}
-                    loading={
-                      <div style={{ padding: "3rem", textAlign: "center", background: "#fff" }}>
-                        <Skeleton active paragraph={{ rows: 6 }} />
-                      </div>
-                    }
-                  />
-                </div>
-              </Document>
-            </div>
+            />
+          
           </div>
         )}
 
