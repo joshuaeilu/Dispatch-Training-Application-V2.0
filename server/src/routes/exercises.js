@@ -3,6 +3,10 @@ const router = express.Router();
 const pool = require("../../db"); // your PostgreSQL pool
 const { auth } = require("../middleware/auth");
 
+
+
+
+
 // 🔹 Create or update exercise (upsert)
 router.put("/:id", auth(["admin"]), async (req, res) => {
   try {
@@ -123,6 +127,54 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
   }
 });
 
+// Get all exercise progress
+router.get("/progress", auth(["admin"]), async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+  e.id,
+  e.name,
+  e.audience,
+  e.created_at,
+
+  COUNT(DISTINCT es.user_id) AS attempt_count,
+
+  COALESCE(
+    JSON_AGG(
+      JSON_BUILD_OBJECT(
+        'user_id', es.user_id,
+        'exercise_id', es.exercise_id,
+        'answers', es.answers,
+        'submitted_at', es.submitted_at
+      )
+      ORDER BY es.submitted_at DESC
+    ) FILTER (WHERE es.user_id IS NOT NULL),
+    '[]'
+  ) AS attempts
+
+FROM exercises e
+LEFT JOIN exercise_submissions es
+  ON es.exercise_id = e.id
+
+WHERE e.in_trash = false
+  AND e.status = 'published'
+
+GROUP BY
+  e.id,
+  e.name,
+  e.audience,
+  e.created_at
+
+ORDER BY e.created_at DESC;
+
+    `);
+
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error("❌ Failed to fetch exercise progress:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 
 // 🔹 Get a single exercise by ID

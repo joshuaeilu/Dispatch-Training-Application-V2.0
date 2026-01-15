@@ -101,6 +101,56 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
 // });
 
 
+// 🔹 Get all scenario progress (ADMIN)
+// Get all scenario progress
+router.get("/progress", auth(["admin"]), async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        s.id,
+        s.scenario_data->>'name' AS name,
+        s.scenario_data->>'audience' AS audience,
+        s.created_at,
+
+        COUNT(DISTINCT sc.user_id) AS attempt_count,
+
+        COALESCE(
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'user_id', sc.user_id,
+              'scenario_id', sc.scenario_id,
+              'completed_at', sc.completed_at
+            )
+            ORDER BY sc.completed_at DESC
+          ) FILTER (WHERE sc.user_id IS NOT NULL),
+          '[]'
+        ) AS attempts
+
+      FROM scenarios s
+      LEFT JOIN scenario_completions sc
+        ON sc.scenario_id = s.id
+
+      WHERE s.in_trash = false
+        AND LOWER(s.scenario_data->>'status') = 'published'
+
+      GROUP BY
+        s.id,
+        s.scenario_data,
+        s.created_at
+
+      ORDER BY s.created_at DESC;
+    `);
+
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error("❌ Failed to fetch scenario progress:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
+
 // 🔹 Create or update scenario (UPSERT)
 router.put("/:id", auth(["admin"]), async (req, res) => {
   try {

@@ -1,3 +1,5 @@
+import type { GetUser } from "../types/index.types";
+
 function formatFileSize(bytes: number | string): string {
     const n = typeof bytes === 'string' ? Number(bytes) : bytes;
     if (!Number.isFinite(n) || n <= 0) return '0 MB';
@@ -47,6 +49,29 @@ function removeS(word: string): string {
     return word.slice(0, -1);
   }
   return word;
+}
+export function getAudienceTotal(
+  users: GetUser[],
+  audience: string
+): number {
+  if (!users || users.length === 0) return 0;
+
+  if (audience === "All") {
+    // Exclude admins from training counts
+    return users.filter(
+      u => u.role === "trainee" || u.role === "dispatcher"
+    ).length;
+  }
+
+  if (audience === "Trainees") {
+    return users.filter(u => u.role === "trainee").length;
+  }
+
+  if (audience === "Dispatchers") {
+    return users.filter(u => u.role === "dispatcher").length;
+  }
+
+  return 0;
 }
 
 

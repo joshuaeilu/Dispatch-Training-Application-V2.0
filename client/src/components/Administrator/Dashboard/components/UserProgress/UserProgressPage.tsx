@@ -16,11 +16,11 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
-import { api } from "../../../../utils/api";
-import { addS, toTitleCase } from "../../../../utils/tools";
-import KnowledgeCheckResults from "../../../User/KnowledgeChecks/components/KnowledgeCheckResults";
-import { PageBreadcrumbs } from "../../../Shared/Breadcrumbs";
-import UserProgressHeaderCard from "./UserProgressHeader";
+import { api } from "../../../../../utils/api";
+import { addS, toTitleCase } from "../../../../../utils/tools";
+import KnowledgeCheckResults from "../../../../User/KnowledgeChecks/components/KnowledgeCheckResults";
+import { PageBreadcrumbs } from "../../../../Shared/Breadcrumbs";
+import HeaderSummaryCard from "./HeaderSummaryCard";
 
 const { Panel } = Collapse;
 
@@ -298,13 +298,22 @@ export default function UserProgressPage() {
 
   return (
     <div>
-        <UserProgressHeaderCard
-          avatarUrl={user.avatar}
-          name={user.name}
-          role={user.role}
-          completed={stats.completedExercises + stats.completedScenarios}
-          totalAssigned={stats.totalExercises + stats.totalScenarios}
+      <div className="mx-6 mt-6">
+        <HeaderSummaryCard
+          imageUrl={user.avatar}
+          title={user.name}
+          subtitle={user.role}
+          stats={[
+    { label: "Completed", value: stats.completedExercises + stats.completedScenarios },
+    { label: "Assigned", value: stats.totalExercises + stats.totalScenarios },
+    {
+      label: "Overall Progress",
+      value: `${(stats.completedExercises + stats.completedScenarios) / (stats.totalExercises + stats.totalScenarios) * 100}%`,
+      highlight: true,
+    },
+  ]}
         />
+      </div>
 
       <PageBreadcrumbs
         items={[

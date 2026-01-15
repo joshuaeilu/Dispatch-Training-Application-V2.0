@@ -1,4 +1,4 @@
-import UserProgressSection from "../components/UserProgressSection"
+import UserProgressSection from "./UserProgressSection"
 
 interface UsersPageProps {
     role: "dispatcher" | "trainee";

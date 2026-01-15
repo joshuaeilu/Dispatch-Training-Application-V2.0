@@ -85,22 +85,23 @@ export function TableViewer<T>({
   return (
     <div className="m-6 rounded-lg bg-white px-6 py-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+     { tableType && (
+       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-2xl font-semibold text-brand-maroon">
-            {addS(tableType)}
+            {addS(tableType ?? "")}
           </h3>
           <p className="mt-1 text-sm text-gray-500">
             <span className="font-medium text-gray-700">{totalItems}</span>{' '}
-            {addS(tableType)} found
+            {addS(tableType ?? "")} found
           </p>
         </div>
 
         <button className="inline-flex items-center gap-1 rounded-md bg-brand-maroon-light px-3 py-2 text-sm font-semibold text-white hover:bg-brand-maroon-hover" onClick={onButtonPress}>
           <PlusCircleIcon className="size-5" />
-          Add {tableType}
+          Add {tableType ?? ""}
         </button>
-      </div>
+      </div> )}
 
       {/* Search + Filters */}
 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

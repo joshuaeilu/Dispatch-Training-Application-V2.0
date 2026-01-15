@@ -1,17 +1,14 @@
-import { PageHeader } from "../../../Shared/PageHeader";
-import { PageBreadcrumbs } from "../../../Shared/Breadcrumbs";
-import { getUsers } from "../../../../contexts/UniversalHelpers";
-import UserCard from "../../../Shared/UserCard";
-import UserCardSkeleton from "../components/UserCardSkeleton";
-import { PROFILE_PIC_URL } from "../../../../data/data";
-import { getToken } from "../../../../contexts/AuthProvider";
+import { PageHeader } from "../../../../Shared/PageHeader";
+import { PageBreadcrumbs } from "../../../../Shared/Breadcrumbs";
+import { getUsers } from "../../../../../contexts/UniversalHelpers";
+import UserCard from "../../../../Shared/UserCard";
+import UserCardSkeleton from "./UserCardSkeleton";
 import { Row, Col } from "antd";
 import { useEffect, useState } from "react";
-import { api } from "../../../../utils/api";
-import type { GetUser } from "../../../../types/index.types";
+import { api } from "../../../../../utils/api";
+import type { GetUser } from "../../../../../types/index.types";
 import { useNavigate } from "react-router-dom";
-import { toTitleCase } from "../../../../utils/tools";
-import { DATA_URL } from "../../../../data/data";
+import { toTitleCase } from "../../../../../utils/tools";
 
 type Props = {
   role: "dispatcher" | "trainee";
@@ -27,7 +24,6 @@ export default function UserProgressSection({
   navigateTo,
 }: Props) {
   const { users } = getUsers();
-  const token = getToken();
   const navigate = useNavigate();
 
   const [exerciseTotals, setExerciseTotals] = useState(0);

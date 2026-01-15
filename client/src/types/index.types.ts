@@ -26,7 +26,7 @@ export interface UniversalHelpersCtx {
 
 // Table Viewer Component Types
 export interface TableViewerProps<T> {
-  tableType: string
+  tableType?: string
   columnDefinitions: TableColumnDef<T>[]
   columnData: T[]
   filterOptions?: Record<string, string[]>
@@ -44,6 +44,21 @@ export interface TableColumnDef<T> {
 export type AdminTableProps<T> = {
   columns: TableColumnDef<T>[]
   data: T[]
+}
+
+
+// Table progress Types
+export interface ProgressTableType {
+  id: string;
+  name: string;
+  audience: string;
+  completedAssignments: number;
+  totalAssignments: number;
+  completionPercentage: number;
+  completedUsers: [];
+  exerciseId?: string;
+  userAnswers?: Record<string, any>;
+  createdOn: string;
 }
 
 

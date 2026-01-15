@@ -18,6 +18,8 @@ type Props = {
 
 type Status = "not_answered" | "correct" | "partial" | "incorrect";
 
+
+
 export default function KnowledgeCheckResults({ name, questions, userAnswers }: Props) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
