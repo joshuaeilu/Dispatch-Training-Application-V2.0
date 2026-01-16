@@ -41,7 +41,7 @@ export default function QuestionSection({
   };
 
   return (
-    <Card style={{ marginTop: "1rem", marginBottom: "1.5rem" }}>
+    <Card style={{  marginBottom: "1.5rem" }}>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         {question?.questionCategory && (
       <Tag
