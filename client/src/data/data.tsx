@@ -1,12 +1,7 @@
-import { ApartmentOutlined, AppstoreFilled, AudioOutlined, DeleteColumnOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, SettingOutlined, UserOutlined,} from "@ant-design/icons";
-import type {  ResourceCategory, ResourceKey, Role, MenuItem, Exercise, TableColumnDef, ExerciseTableType, ScenarioTableType } from '../types/index.types';
-import type { ResourceTableType } from "../types/index.types";
-import { removeS } from "../utils/tools";
-import React from "react";
-import { toTitleCase } from "../utils/tools";
-import { TableActionButton } from "../components/Shared/TableActionButton";
+import { ApartmentOutlined, AppstoreFilled, AudioOutlined,  DeleteOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, SettingOutlined, UserOutlined,} from "@ant-design/icons";
+import type {  ResourceCategory, Role, MenuItem,  } from '../types/index.types';
 
-import { ArrowTopRightOnSquareIcon, PencilIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+
   export const exerciseDifficultyOptions = [
     { label: "Easy", value: "easy" },
     { label: "Medium", value: "medium" },
@@ -19,7 +14,7 @@ import { ArrowTopRightOnSquareIcon, PencilIcon, PencilSquareIcon, TrashIcon } fr
 
 
 
-export const DATA_URL = "http://localhost:5000/data";
+export const DATA_URL = "/data";
 type Difficulty = "Easy" | "Medium" | "Hard";
 
 export const DIFFICULTY_STYLES: Record<Difficulty, string> = {
@@ -136,4 +131,4 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
 
 
 export const RESOURCE_URL = "/data";
-export const PROFILE_PIC_URL = "http://localhost:5000/data";
+export const PROFILE_PIC_URL = "/data";

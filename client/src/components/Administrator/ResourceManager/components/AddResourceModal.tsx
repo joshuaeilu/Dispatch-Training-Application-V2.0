@@ -16,7 +16,6 @@ import {
 } from "@ant-design/icons";
 import type { ResourcePayload } from "../../../../types/index.types";
 import { v4 as uuidv4 } from "uuid";
-import { remove } from "lodash";
 import { removeS } from "../../../../utils/tools";
 
 const RESOURCE_OPTIONS = [

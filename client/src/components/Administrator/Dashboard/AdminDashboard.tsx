@@ -1,4 +1,4 @@
-import { ApartmentOutlined, CheckSquareFilled, CheckSquareOutlined, CustomerServiceOutlined, TeamOutlined, UserAddOutlined, UserSwitchOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, CheckSquareOutlined, CustomerServiceOutlined, TeamOutlined, UserAddOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import { PageHeader } from '../../Shared/PageHeader';
 import AdminWelcomeSection from './components/AdminWelcomeSection';
 import DashboardSection from './components/DashboardSection';

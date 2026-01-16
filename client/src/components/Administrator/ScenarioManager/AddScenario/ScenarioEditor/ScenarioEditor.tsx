@@ -3,10 +3,9 @@ import { ArrowLeftOutlined, CheckCircleOutlined, SaveOutlined } from "@ant-desig
 import SceneEditor from "./SceneEditor";
 import SceneOverview from "./SceneOverview";
 
-import { useState, useRef, useContext } from "react";
+import { useState, useRef} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { AuthContext } from "../../../../../contexts/AuthProvider";
 import { api } from "../../../../../utils/api";
 import { toast } from "react-hot-toast";
 
@@ -28,7 +27,6 @@ export default function ScenarioEditor() {
     scenarioDetails,
   });
 
-  const { user } = useContext(AuthContext);
 
   const [, setLastSavedScenario] = useState<Scenario | undefined>(scenario);
 

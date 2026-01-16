@@ -29,7 +29,7 @@ export default function ViewResourcesPage({
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [resourceFiles, setResourceFiles] = useState<ResourceTableType[]>([]);
   const [showResource, setShowResource] = useState(false);
-  const [previewResource, setPreviewResource] = useState<ResourcePreview>({
+  const [previewResource, __] = useState<ResourcePreview>({
     id: "",
     name: "",
     description: "",
@@ -58,17 +58,7 @@ export default function ViewResourcesPage({
     return matchesSearch && matchesType;
   });
 
-  function handleResourcePreview(
-    id: string,
-    name: string,
-    description: string,
-    type: string,
-    mimeType: string,
-    url: string
-  ) {
-    setPreviewResource({ id, name, description, type, mimeType, url });
-    setShowResource(true);
-  }
+  
 
   return (
     <>

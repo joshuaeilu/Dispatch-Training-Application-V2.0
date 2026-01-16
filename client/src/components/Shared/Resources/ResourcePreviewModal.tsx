@@ -1,5 +1,5 @@
 import { Modal, Typography, Button, Skeleton, } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   CloseOutlined,
   PlusCircleFilled,
@@ -32,13 +32,11 @@ export default function ResourcePreviewModal({
   useResource,
   resource,
 }: ResourcePreviewModalProps) {
-  const [numPages, setNumPages] = useState<number>(0);
 
 
   // Refs to control media
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const pdfContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
