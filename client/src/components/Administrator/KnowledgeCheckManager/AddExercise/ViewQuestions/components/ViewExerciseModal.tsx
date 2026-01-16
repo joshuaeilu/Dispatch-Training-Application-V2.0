@@ -174,7 +174,7 @@ export default function ViewExerciseModal({
                                             if (mime === "application/pdf") {
                                                 return (
                                                     <iframe
-                                                        src={secureUrl}
+                                                        src={secureUrl+"#toolbar=0&navpanes=0&scrollbar=0"}
                                                         width="100%"
                                                         height="400px"
                                                         style={{ 

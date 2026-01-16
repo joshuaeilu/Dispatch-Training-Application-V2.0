@@ -9,6 +9,8 @@ const { auth } = require('../middleware/auth');
 const client = new textToSpeech.TextToSpeechClient({
   keyFilename:  __dirname + '../../../google_credentials/dispatch-training-application-69f023e14169.json'
 });
+
+
 router.get("/", auth(["admin"]), async (req, res) => {
   try {
     console.log("TTS request received with query:", req.query);

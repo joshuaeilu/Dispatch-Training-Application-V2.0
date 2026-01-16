@@ -54,6 +54,8 @@ const audioDescriptionRoutes = require('./src/routes/audio');
 app.use('/api/tts', audioDescriptionRoutes);
 app.use('/data/scenario_audios', auth(['admin', 'trainee', 'dispatcher']), express.static('src/scenario_audios'));
 
+
+
   const clientBuildPath = path.join(__dirname, "../client/dist");
   app.use(express.static(clientBuildPath));
 

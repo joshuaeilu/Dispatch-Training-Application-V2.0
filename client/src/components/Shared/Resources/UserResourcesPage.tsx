@@ -216,7 +216,7 @@ export default function UserResourcesPage() {
                 >
                   {/* Cover Image */}
                   <div style={{ backgroundColor: BRAND_MAROON_LIGHT, minHeight: 150, overflow: "hidden" }}>
-                    {["audio", "videos", "documents"].includes(resource.type) ? (
+                    {["audio", "videos", "document"].includes(resource.type) ? (
                       <ResourcePlaceholder type={resource.type} />
                     ) : (
                       <img
