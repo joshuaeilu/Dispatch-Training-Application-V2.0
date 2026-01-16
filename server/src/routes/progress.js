@@ -154,4 +154,65 @@ router.get('/completed', auth(['admin']), async (req, res) => {
   }
 });
 
+// 🔹 GET recent activity for exercises and scenarios
+router.get('/recent-activity', auth(['admin']), async (req, res) => {
+  try {
+    // Get recent exercise submissions with exercise details
+    const exercisesQuery = `
+      SELECT 
+        e.id,
+        e.name,
+        COUNT(DISTINCT es.user_id) as completed_count,
+        COUNT(DISTINCT u.id) as total_users
+      FROM exercises e
+      LEFT JOIN exercise_submissions es ON e.id = es.exercise_id
+      LEFT JOIN users u ON u.role IN ('trainee', 'dispatcher')
+      WHERE e.in_trash = false AND e.status = 'published'
+      GROUP BY e.id, e.name
+      ORDER BY MAX(es.submitted_at) DESC NULLS LAST, e.created_at DESC
+      LIMIT 5
+    `;
+
+    // Get recent scenario completions with scenario details
+    const scenariosQuery = `
+      SELECT 
+        s.id,
+        s.scenario_data->>'name' as name,
+        COUNT(DISTINCT sc.user_id) as completed_count,
+        COUNT(DISTINCT u.id) as total_users
+      FROM scenarios s
+      LEFT JOIN scenario_completions sc ON s.id = sc.scenario_id
+      LEFT JOIN users u ON u.role IN ('trainee', 'dispatcher')
+      WHERE s.in_trash = false AND s.scenario_data->>'status' = 'published'
+      GROUP BY s.id, s.scenario_data->>'name'
+      ORDER BY MAX(sc.completed_at) DESC NULLS LAST, s.created_at DESC
+      LIMIT 5
+    `;
+
+    const [exercisesResult, scenariosResult] = await Promise.all([
+      pool.query(exercisesQuery),
+      pool.query(scenariosQuery)
+    ]);
+
+    const exercises = exercisesResult.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      completed: parseInt(row.completed_count),
+      total: parseInt(row.total_users)
+    }));
+
+    const scenarios = scenariosResult.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      completed: parseInt(row.completed_count),
+      total: parseInt(row.total_users)
+    }));
+
+    res.json({ exercises, scenarios });
+  } catch (err) {
+    console.error("❌ Failed to fetch recent activity:", err);
+    res.status(500).json({ error: 'Failed to fetch recent activity' });
+  }
+});
+
 module.exports = router;

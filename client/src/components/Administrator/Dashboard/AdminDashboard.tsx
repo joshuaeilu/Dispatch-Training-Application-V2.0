@@ -17,7 +17,7 @@ export default function AdminDashboard() {
 
 
   return (
-    <>
+    <div className='mb-6'>
       <PageHeader
         title="Dashboard"
         subtitle="Monitor Training Progress and Platform Activity"
@@ -37,6 +37,6 @@ export default function AdminDashboard() {
       <RecentActivitySection />
       </div>
       </div>
-    </>
+    </div>
   );
 }

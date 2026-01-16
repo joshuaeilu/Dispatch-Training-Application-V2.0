@@ -308,7 +308,7 @@ export default function UserProgressPage() {
     { label: "Assigned", value: stats.totalExercises + stats.totalScenarios },
     {
       label: "Overall Progress",
-      value: `${(stats.completedExercises + stats.completedScenarios) / (stats.totalExercises + stats.totalScenarios) * 100}%`,
+      value: `${Math.round((stats.completedExercises + stats.completedScenarios) / (stats.totalExercises + stats.totalScenarios) * 100)}%`,
       highlight: true,
     },
   ]}

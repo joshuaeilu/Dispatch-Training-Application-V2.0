@@ -15,6 +15,38 @@ import { Dialog, DialogPanel } from "@headlessui/react"
 
 import type { TableViewerProps } from '../../types/index.types'
 
+function TableSkeleton({ columns }: { columns: number }) {
+  return (
+    <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            {Array.from({ length: columns }).map((_, i) => (
+              <th
+                key={i}
+                scope="col"
+                className="px-6 py-3.5 text-left text-sm font-semibold text-gray-900"
+              >
+                <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100 bg-white">
+          {Array.from({ length: 5 }).map((_, rowIdx) => (
+            <tr key={rowIdx} className="hover:bg-gray-50">
+              {Array.from({ length: columns }).map((_, colIdx) => (
+                <td key={colIdx} className="px-6 py-4 text-sm">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
 
 
 export function TableViewer<T>({
@@ -23,6 +55,7 @@ export function TableViewer<T>({
   columnData,
   filterOptions = {},
   onButtonPress,
+  loading = false,
 }: TableViewerProps<T>) {
   const ITEMS_PER_PAGE = 5
 
@@ -83,6 +116,8 @@ export function TableViewer<T>({
   )
 
   return (
+
+    
     <div className="m-6 rounded-lg bg-white px-6 py-5">
       {/* Header */}
      { tableType && (
@@ -258,7 +293,11 @@ export function TableViewer<T>({
       )}
 
       {/* Table */}
-      <AdminTable columns={columnDefinitions} data={paginatedData} />
+      {loading ? (
+        <TableSkeleton columns={columnDefinitions.length} />
+      ) : (
+        <AdminTable columns={columnDefinitions} data={paginatedData} />
+      )}
 
       {/* Pagination */}
       

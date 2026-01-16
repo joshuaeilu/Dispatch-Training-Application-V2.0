@@ -7,6 +7,7 @@ import {
   Typography,
   Upload,
   Image,
+  Card,
 } from 'antd';
 import { ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -110,86 +111,95 @@ const handleFinish = async (values: any) => {
   );
 
   return (
-    <div>
-      <PageHeader title="Create New User" subtitle='Add a new User to the Training System'  />
-      <PageBreadcrumbs items={[{name: 'Create User', current: true}]} />
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ flex: "0 0 auto" }}>
+        <PageHeader title="Create New User" subtitle="Add a new User to the Training System" />
+        <PageBreadcrumbs items={[{ name: 'Create User', current: true }]} />
+      </div>
 
-
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleFinish}
-          style={{ width: '100%' }}
-          autoComplete="off"
-        >
-          <Form.Item
-            label="Role"
-            name="role"
-            rules={[{ required: true, message: 'Please select a role' }]}
+      <div style={{ flex: "1 1 auto", overflowY: "auto", padding: 24 }}>
+        <div style={{ maxWidth: 600, margin: "0 auto" }}>
+          <Card
+            title={<span style={{ color: '#A0453A', fontWeight: 600 }}>Fill in the fields below to create a new user.</span>}
+            style={{ boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" }}
           >
-            <Select placeholder="Select role">
-              {roles.map((role) => (
-                <Select.Option key={role} value={role}>
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: 'Please enter a username' }]}
-          >
-            <Input placeholder="Enter username" autoComplete='new-username' />
-          </Form.Item>
-
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: 'Please enter a password' }]}
-          >
-            <Input.Password placeholder="Enter password" autoComplete='new-password' />
-          </Form.Item>
-
-          <Form.Item label="Profile Image (from your computer)">
-            <Upload
-              accept="image/*"
-              listType="picture-card"
-              fileList={fileList}
-              onPreview={handlePreview}
-              onChange={handleChange}
-              beforeUpload={() => false}
-              maxCount={1}
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleFinish}
+              autoComplete="off"
             >
-              {fileList.length >= 1 ? null : uploadButton}
-            </Upload>
+              <Form.Item
+                label="Role"
+                name="role"
+                rules={[{ required: true, message: 'Please select a role' }]}
+              >
+                <Select placeholder="Select role" size="large">
+                  {roles.map((role) => (
+                    <Select.Option key={role} value={role}>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
-            {previewImage && (
-              <Image
-                wrapperStyle={{ display: 'none' }}
-                preview={{
-                  visible: previewOpen,
-                  onVisibleChange: (visible) => setPreviewOpen(visible),
-                  afterOpenChange: (visible) => !visible && setPreviewImage(''),
-                }}
-                src={previewImage}
-              />
-            )}
-          </Form.Item>
+              <Form.Item
+                label="Username"
+                name="username"
+                rules={[{ required: true, message: 'Please enter a username' }]}
+              >
+                <Input placeholder="Enter username" size="large" autoComplete="new-username" />
+              </Form.Item>
 
-          <Form.Item style={{ marginTop: '2rem' }}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              size="large"
-              block
-            >
-              Create User
-            </Button>
-          </Form.Item>
-        </Form>
+              <Form.Item
+                label="Password"
+                name="password"
+                rules={[{ required: true, message: 'Please enter a password' }]}
+              >
+                <Input.Password placeholder="Enter password" size="large" autoComplete="new-password" />
+              </Form.Item>
+
+              <Form.Item label="Profile Image (from your computer)">
+                <Upload
+                  accept="image/*"
+                  listType="picture-card"
+                  fileList={fileList}
+                  onPreview={handlePreview}
+                  onChange={handleChange}
+                  beforeUpload={() => false}
+                  maxCount={1}
+                >
+                  {fileList.length >= 1 ? null : uploadButton}
+                </Upload>
+
+                {previewImage && (
+                  <Image
+                    wrapperStyle={{ display: 'none' }}
+                    preview={{
+                      visible: previewOpen,
+                      onVisibleChange: (visible) => setPreviewOpen(visible),
+                      afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                    }}
+                    src={previewImage}
+                  />
+                )}
+              </Form.Item>
+
+              <Form.Item style={{ marginTop: '2rem' }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  size="large"
+                  block
+                >
+                  Create User
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

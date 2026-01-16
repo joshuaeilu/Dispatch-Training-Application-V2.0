@@ -31,6 +31,7 @@ export interface TableViewerProps<T> {
   columnData: T[]
   filterOptions?: Record<string, string[]>
   onButtonPress?: () => void
+  loading?: boolean
 }
 export interface TableColumnDef<T> {
   key?: keyof T & string

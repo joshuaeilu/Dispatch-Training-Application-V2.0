@@ -116,6 +116,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { key: '/resource-manager', icon: <FileTextOutlined />, label: 'Resources' },
     { key: '/knowledge-checks', icon: <QuestionCircleOutlined />, label: 'Knowledge Checks' },
     { key: '/scenario-manager', icon: <ApartmentOutlined />, label: 'Scenario Manager' },
+    { key: '/recycle-bin', icon: <DeleteOutlined />, label: 'Recycle Bin' },
   ],
   dispatcher: [
     { key: '/resources', icon: <UserOutlined />, label: 'Resources' },

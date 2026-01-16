@@ -1,25 +1,18 @@
 import { useContext, useEffect, useState } from "react";
 import {
   Input,
-  Dropdown,
-  Menu,
   Typography,
   Avatar,
   Tag,
-  Row,
-  Col,
-  Select,
-  Empty,
   Button,
   Modal,
   Form,
   Upload,
+  Select,
 } from "antd";
 import {
-  MoreOutlined,
   EditOutlined,
   DeleteOutlined,
-  SearchOutlined,
   UploadOutlined,
   LockOutlined,
   UserOutlined,
@@ -27,24 +20,25 @@ import {
 import { toast } from "react-hot-toast";
 import { api } from "../../../../../utils/api";
 import { PageHeader } from "../../../../Shared/PageHeader";
-import { toTitleCase } from "../../../../../utils/tools";
 import { PROFILE_PIC_URL } from "../../../../../data/data";
 import { AuthContext } from "../../../../../contexts/AuthProvider";
 import { getUsers } from "../../../../../contexts/UniversalHelpers";
-import type { GetUser } from "../../../../../types/index.types";
+import type { GetUser, TableColumnDef } from "../../../../../types/index.types";
 import { PageBreadcrumbs } from "../../../../Shared/Breadcrumbs";
+import { TableViewer } from "../../../../Shared/TableViewer";
+import { TableActionButton } from "../../../../Shared/TableActionButton";
+import PencilSquareIcon from "@heroicons/react/20/solid/PencilSquareIcon";
+import TrashIcon from "@heroicons/react/20/solid/TrashIcon";
+import { toTitleCase } from "../../../../../utils/tools";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 export default function ManageUsers() {
   const { token } = useContext(AuthContext);
-  const { users: globalUsers } = getUsers();
+  const { users: globalUsers, setUsers } = getUsers();
 
   const [allUsers, setAllUsers] = useState<GetUser[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<GetUser[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
 
   // === Edit Modal State ===
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,46 +57,73 @@ export default function ManageUsers() {
   useEffect(() => {
     if (Array.isArray(globalUsers)) {
       setAllUsers(globalUsers);
-      setFilteredUsers(globalUsers);
     }
   }, [globalUsers, isModalOpen]);
 
-  // === Search + Role Filter Logic ===
-  useEffect(() => {
-    if (!allUsers.length) return;
-
-    let filtered = [...allUsers];
-
-    if (roleFilter !== "all") {
-      filtered = filtered.filter(
-        (u) => u.role.toLowerCase() === roleFilter.toLowerCase()
-      );
+  // === Table Columns ===
+  const userColumns: TableColumnDef<GetUser>[] = [
+    {
+      key: 'avatar',
+      header: 'User',
+      render: (user: GetUser) => (
+        <div className="flex items-center gap-3">
+          <Avatar
+            src={
+              user.avatar
+                ? `${PROFILE_PIC_URL}${user.avatar}?token=${token}`
+                : undefined
+            }
+            icon={!user.avatar ? <UserOutlined /> : undefined}
+            size={32}
+            style={{ color: "#8C2131" }}
+          />
+          <span className="font-medium text-gray-900">{toTitleCase(user.name)}</span>
+        </div>
+      ),
+      searchable: true,
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      render: (user: GetUser) => {
+        switch (user.role.toLowerCase()) {
+          case "admin":
+            return <Tag color="#8C2131">Admin</Tag>;
+          case "dispatcher":
+            return <Tag color="#F3CD00">Dispatcher</Tag>;
+          case "trainee":
+            return <Tag color="#A2D683">Trainee</Tag>;
+          default:
+            return <Tag>{user.role}</Tag>;
+        }
+      },
+      filterable: true,
+    },
+    {
+      header: 'Actions',
+      align: 'text-center',
+      render: (user: GetUser) => (
+        <div className="flex justify-end gap-2">
+          <TableActionButton
+            icon={PencilSquareIcon}
+            title="Edit"
+            color="blue"
+            onPress={() => handleEdit(user)}
+          />
+          <TableActionButton
+            icon={TrashIcon}
+            title="Delete"
+            color="red"
+            onPress={() => handleDeleteClick(user)}
+          />
+        </div>
+      )
     }
+  ];
 
-    const term = searchTerm.trim().toLowerCase();
-    if (term) {
-      filtered = filtered.filter(
-        (u) =>
-          u.name.toLowerCase().includes(term) ||
-          u.role.toLowerCase().includes(term)
-      );
-    }
-
-    setFilteredUsers(filtered);
-  }, [searchTerm, roleFilter, allUsers]);
-
-  // === Role Tag UI ===
-  const getRoleTag = (role: string) => {
-    switch (role.toLowerCase()) {
-      case "admin":
-        return <Tag color="#8C2131">Admin</Tag>;
-      case "dispatcher":
-        return <Tag color="#F3CD00">Dispatcher</Tag>;
-      case "trainee":
-        return <Tag color="#A2D683">Trainee</Tag>;
-      default:
-        return <Tag>{toTitleCase(role)}</Tag>;
-    }
+  // === Filter Options ===
+  const userFilterOptions = {
+    role: ['admin', 'dispatcher', 'trainee'],
   };
 
   // === Edit Handlers ===
@@ -111,7 +132,7 @@ export default function ManageUsers() {
     setPreview(`${PROFILE_PIC_URL}${user.avatar}?token=${token}`);
     form.setFieldsValue({
       username: toTitleCase(user.name),
-      role: toTitleCase(user.role),
+      role: user.role,
       password: "",
     });
     setImageFile(null);
@@ -133,6 +154,10 @@ export default function ManageUsers() {
       await api.put(`/users/${selectedUser.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      // Refresh the users list
+      const response = await api.get('/users');
+      setUsers(response.data);
 
       toast.success("User updated successfully");
       setIsModalOpen(false);
@@ -169,9 +194,12 @@ export default function ManageUsers() {
         password: deletePassword,
       });
 
+      // Refresh the users list
+      const response = await api.get('/users');
+      setUsers(response.data);
+
       toast.success("User deleted successfully");
       setIsDeleteModalOpen(false);
-      setAllUsers(allUsers.filter((u) => u.id !== selectedUser?.id));
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || "Failed to delete user.";
       toast.error(errorMsg);
@@ -182,133 +210,23 @@ export default function ManageUsers() {
   };
 
   // === Action Menu ===
-  const actionMenu = (user: GetUser) => (
-    <Menu>
-      <Menu.Item
-        key="edit"
-        icon={<EditOutlined />}
-        onClick={() => handleEdit(user)}
-      >
-        Edit User
-      </Menu.Item>
-      <Menu.Item
-        key="delete"
-        icon={<DeleteOutlined />}
-        danger
-        onClick={() => handleDeleteClick(user)}
-      >
-        Delete User
-      </Menu.Item>
-    </Menu>
-  );
+ 
 
   return (
-    <div >
+    <>
       <PageHeader
         title="User Management"
         subtitle="Manage users, roles, and permissions"
-        
       />
       <PageBreadcrumbs items={[{name: 'Users', current: true}]}/>
-      <h1>{token}</h1>
 
-<div style={{ margin: "0 1rem"}}>
-        {/* Search + Filters */}
-      <div className="flex flex-col md:flex-row md:items-center mb-6 gap-3" >
-        <Input
-          placeholder="Search users by name or role..."
-          prefix={<SearchOutlined style={{ color: "#999" }} />}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          allowClear
-          className="flex-1"
-          size="large"
-        />
-        <Select
-          value={roleFilter}
-          onChange={(val) => setRoleFilter(val)}
-          className="w-full md:w-48"
-          size="large"
-        >
-          <Option value="all">All Roles</Option>
-          <Option value="admin">Admin</Option>
-          <Option value="dispatcher">Dispatcher</Option>
-          <Option value="trainee">Trainee</Option>
-        </Select>
-      </div>
-
-      {/* User Cards */}
-      {filteredUsers.length === 0 ? (
-        <Empty
-          description="No users found"
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          style={{ marginTop: "4rem" }}
-        />
-      ) : (
-      <Row gutter={[24, 24]}>
-  {filteredUsers.map((user) => (
-  <Col key={user.id} xs={24} sm={12}>
-  <div className="group relative cursor-pointer overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-200 ease-out hover:-translate-y-1.5 hover:shadow-xl">
-    <div className="px-6 py-6 sm:p-7">
-      <div className="flex items-start justify-between gap-6">
-        
-        {/* Left: Avatar + Text */}
-        <div className="flex items-start gap-5">
-          {/* Avatar */}
-          <Avatar
-            src={
-              user.avatar
-                ? `${PROFILE_PIC_URL}${user.avatar}?token=${token}`
-                : undefined
-            }
-            icon={!user.avatar ? <UserOutlined /> : undefined}
-            size={60}
-            className="shrink-0"
-            style={{ color: "#8C2131" }}
-          />
-
-          {/* Text */}
-          <div className="min-w-0 pt-0.5">
-            <Title
-              level={4}
-              style={{ margin: 0, fontWeight: 600 }}
-              className="truncate"
-            >
-              {toTitleCase(user.name)}
-            </Title>
-
-            <div className="mt-2">
-              {getRoleTag(user.role)}
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Actions */}
-        <div className="flex items-start pt-1">
-          <Dropdown overlay={actionMenu(user)} trigger={['click']}>
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 group-hover:translate-x-0.5"
-              style={{ backgroundColor: "rgba(140, 33, 49, 0.08)" }}
-            >
-              <MoreOutlined
-                className="text-sm"
-                style={{ color: "#8C2131" }}
-              />
-            </div>
-          </Dropdown>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</Col>
-
-  ))}
-</Row>
-
-
-      )}
-</div>
+      <TableViewer
+        tableType="User"
+        columnDefinitions={userColumns}
+        columnData={allUsers}
+        filterOptions={userFilterOptions}
+        onButtonPress={() => {/* Could navigate to create user page */}}
+      />
 
       {/* === Edit Modal === */}
       <Modal
@@ -407,6 +325,6 @@ export default function ManageUsers() {
           </Button>
         </div>
       </Modal>
-    </div>
+    </>
   );
 }

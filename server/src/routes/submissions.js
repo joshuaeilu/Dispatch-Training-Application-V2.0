@@ -32,6 +32,34 @@ router.get("/exercises/:userId", async (req, res) => {
   }
 });
 
+// GET /api/submissions/exercise/:exerciseId
+router.get("/exercise/:exerciseId", auth(["admin"]), async (req, res) => {
+  const { exerciseId } = req.params;
+
+  if (!exerciseId) {
+    return res.status(400).json({ error: "Exercise ID is required" });
+  }
+
+  try {
+    const query = `
+      SELECT 
+        es.user_id,
+        es.answers,
+        es.submitted_at
+      FROM exercise_submissions es
+      WHERE es.exercise_id = $1
+      ORDER BY es.submitted_at DESC
+    `;
+
+    const { rows } = await pool.query(query, [exerciseId]);
+
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.error("Error fetching exercise submissions:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // routes/submissions.js
 router.post("/", auth(["trainee", "dispatcher"]), async (req, res) => {
   const { user } = req;

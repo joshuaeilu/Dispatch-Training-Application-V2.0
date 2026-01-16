@@ -152,7 +152,7 @@ const resourceColumns: TableColumnDef<ResourceTableType>[] = [
 
   async function handleResourceDelete(resourceId: string) {
     try {
-      await api.post('/trash', { trash_item_id: resourceId, who_deleted: user?.id, item_type: 'resource' });
+      await api.post('/trash', { item_name: resourceFiles.find(r => r.id === resourceId)?.name, trash_item_id: resourceId, who_deleted: user?.id, item_type: 'resource' });
       toast.success('Resource moved to trash successfully');
       fetchResources(); // Refresh the resource list
     } catch (error) {

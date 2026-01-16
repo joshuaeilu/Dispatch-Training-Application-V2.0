@@ -22,6 +22,7 @@ import UserProgressPage from './components/Administrator/Dashboard/components/Us
 import UsersPage from './components/Administrator/Dashboard/components/UserProgress/UsersPage'
 import KnowledgeCheckProgress from './components/Administrator/Dashboard/components/UserProgress/KnowledgeCheckProgress'
 import ScenarioProgress from './components/Administrator/Dashboard/components/UserProgress/ScenarioProgress'
+import RecycleBin from './components/Administrator/RecycleBin/RecycleBin'
 
 function App() {
 
@@ -38,6 +39,8 @@ function App() {
 
 
           {/* Administrator Routes */}
+          
+            <Route path="recycle-bin" element={<RecycleBin />} />
 
 
           <Route path="/dashboard" element={<Outlet />} >

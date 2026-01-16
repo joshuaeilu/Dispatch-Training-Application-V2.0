@@ -25,11 +25,6 @@ import { useToast } from "../../../contexts/ToastContext";
 
 
 
-
-
-
-
-
 export default function KnowledgeCheckViewExercises() {
   const navigate = useNavigate();
   const toast = useToast();
@@ -37,6 +32,7 @@ export default function KnowledgeCheckViewExercises() {
   const [exerciseFiles, setExerciseFiles] = useState<ExerciseTableType[]>([]);
   const [viewExerciseModal, setViewExerciseModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [loading, setLoading] = useState(true);
 
 
 
@@ -215,7 +211,7 @@ export default function KnowledgeCheckViewExercises() {
 
   async function handleExerciseDelete(exerciseId: string) {
     try {
-      await api.post('/trash', { trash_item_id: exerciseId, who_deleted: user?.id, item_type: 'exercise' });
+      await api.post('/trash', { item_name: exerciseFiles.find(e => e.id === exerciseId)?.name, trash_item_id: exerciseId, who_deleted: user?.id, item_type: 'exercise' });
       toast.success("Exercise moved to trash");
       setExerciseFiles((prev) =>
         prev.filter((file) => file.id !== exerciseId)
@@ -234,6 +230,8 @@ export default function KnowledgeCheckViewExercises() {
         setExerciseFiles(data);
       } catch (error) {
         console.error("Failed to fetch exercises:", error);
+      } finally {
+        setLoading(false);
       }
 
     }
@@ -261,10 +259,10 @@ export default function KnowledgeCheckViewExercises() {
         title="View Exercises"
         subtitle="Filter, search and manage exercises"
       />
-      <TableViewer tableType="Knowledge Check" columnDefinitions={knowledgeCheckColumns} columnData={exerciseData} filterOptions={knowledgeCheckFilterOptions} onButtonPress={() => navigate("/knowledge-checks/edit-exercise")} />
+      <TableViewer tableType="Knowledge Check" loading={loading} columnDefinitions={knowledgeCheckColumns} columnData={exerciseData} filterOptions={knowledgeCheckFilterOptions} onButtonPress={() => navigate("/knowledge-checks/edit-exercise")} />
     
           {selectedExercise && (
-            <ViewExerciseModal exercise={selectedExercise} setViewExerciseModal={setViewExerciseModal} viewExerciseModal={viewExerciseModal} />
+            <ViewExerciseModal exercise={selectedExercise}  setViewExerciseModal={setViewExerciseModal} viewExerciseModal={viewExerciseModal} />
           )}
 
 

@@ -22,8 +22,7 @@ export default function ViewScenarios() {
   const [scenarioFiles, setScenarioFiles] = useState<ScenarioTableType[]>([]);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<ScenarioTableType | undefined>(undefined);
-
-
+  const [loading, setLoading] = useState(true);
 
 
 
@@ -32,6 +31,7 @@ export default function ViewScenarios() {
   useEffect(() => {
     async function fetchScenarios() {
       try {
+        
         const { data } = await api.get('/scenarios');
         setScenarioFiles(data.scenarios.map((scenario: any) => ({
           id: scenario.id,
@@ -54,6 +54,8 @@ export default function ViewScenarios() {
       } catch (error) {
         console.error("❌ Failed to fetch scenarios:", error);
         toast.error("Failed to load scenarios");
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -63,7 +65,7 @@ export default function ViewScenarios() {
 
   async function handleDeleteScenario(scenarioId: string) {
     try {
-      await api.post('/trash', { trash_item_id: scenarioId, who_deleted: user?.id, item_type: 'scenario' });
+      await api.post('/trash', { item_name: scenarioFiles.find(s => s.id === scenarioId)?.name, trash_item_id: scenarioId, who_deleted: user?.id, item_type: 'scenario' });
 
       toast.success("Scenario moved to trash");
       setScenarioFiles((prev) =>
@@ -258,7 +260,7 @@ export default function ViewScenarios() {
       {/* Fixed Page Header */}
       <PageHeader title="View Scenarios" subtitle="Filter, search and manager scenarios"  />
 
-      <TableViewer tableType="Scenario" columnDefinitions={scenarioTableColumns} columnData={scenarioData} filterOptions={scenarioFilterOptions} onButtonPress={() => navigate("/scenario-manager/add-scenario")} />
+      <TableViewer tableType="Scenario" loading={loading} columnDefinitions={scenarioTableColumns} columnData={scenarioData} filterOptions={scenarioFilterOptions} onButtonPress={() => navigate("/scenario-manager/add-scenario")} />
 
       <ViewScenarioModal
         open={viewModalOpen}
