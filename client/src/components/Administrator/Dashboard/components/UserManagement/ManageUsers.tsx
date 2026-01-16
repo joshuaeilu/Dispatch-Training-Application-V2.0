@@ -14,7 +14,6 @@ import {
   EditOutlined,
   UploadOutlined,
   LockOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-hot-toast";
 import { api } from "../../../../../utils/api";
@@ -72,7 +71,16 @@ export default function ManageUsers() {
                 ? `${PROFILE_PIC_URL}${user.avatar}?token=${token}`
                 : undefined
             }
-            icon={!user.avatar ? <UserOutlined /> : undefined}
+            icon={!user.avatar ? <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-brand-maroon-light/10 border border-brand-maroon-light/30">
+      <span className="text-lg sm:text-xl font-semibold text-brand-maroon">
+        {user.name
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()}
+      </span>
+    </div> : undefined}
             size={32}
             style={{ color: "#8C2131" }}
           />
