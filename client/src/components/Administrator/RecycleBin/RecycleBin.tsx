@@ -174,7 +174,7 @@ render: (item: RecycleBinItemType) =>
         return(
             <>
               <PageHeader title="Recycle Bin" subtitle="Items here can be restored or permanently deleted." />
-                    <TableViewer tableType="Recycable Items" loading={loading} columnDefinitions={recycleBinColumns} columnData={recycleBinItems}/>
+                    <TableViewer tableType="Recycable Item" loading={loading} columnDefinitions={recycleBinColumns} columnData={recycleBinItems} />
         </>
         
     );

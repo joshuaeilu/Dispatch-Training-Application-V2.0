@@ -135,7 +135,7 @@ export default function SettingsPage() {
             <div style={{ flex: "0 0 auto" }}>
                 <PageHeader
                     title="System Settings"
-                    subtitle="Manage types and upload procedures"
+                    subtitle="Manage exercise and scenario types."
                 />
             </div>
 

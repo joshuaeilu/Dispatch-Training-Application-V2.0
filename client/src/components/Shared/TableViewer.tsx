@@ -132,10 +132,12 @@ export function TableViewer<T>({
           </p>
         </div>
 
-        <button className="inline-flex items-center gap-1 rounded-md bg-brand-maroon-light px-3 py-2 text-sm font-semibold text-white hover:bg-brand-maroon-hover" onClick={onButtonPress}>
-          <PlusCircleIcon className="size-5" />
-          Add {tableType ?? ""}
-        </button>
+        {onButtonPress && (
+          <button className="inline-flex items-center gap-1 rounded-md bg-brand-maroon-light px-3 py-2 text-sm font-semibold text-white hover:bg-brand-maroon-hover" onClick={onButtonPress}>
+            <PlusCircleIcon className="size-5" />
+            Add {tableType ?? ""}
+          </button>
+        )}
       </div> )}
 
       {/* Search + Filters */}

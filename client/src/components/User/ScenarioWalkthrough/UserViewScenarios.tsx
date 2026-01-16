@@ -1,36 +1,25 @@
 import {
-  Button,
-  Col,
-  Row,
-  Select,
-  Form,
-  Input,
-  Typography,
-  Skeleton,
-  Empty,
+  Tag,
 } from "antd";
-import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, ClockCircleOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
-import ScenarioCard from "../../Shared/ListCard";
-import { UniversalContext } from "../../../contexts/UniversalHelpers";
 import { api } from "../../../utils/api";
-import type { Scenario } from "../../../types/index.types";
+import type { Scenario, TableColumnDef } from "../../../types/index.types";
 import { useNavigate } from "react-router-dom";
 import UserPageHeader from "../../Shared/UserPageHeader";
-import { AuthContext} from "../../../contexts/AuthProvider";
-const { Title, Text } = Typography;
+import { AuthContext } from "../../../contexts/AuthProvider";
+import { TableViewer } from "../../Shared/TableViewer";
+
+interface ScenarioTableData extends Scenario {
+  completed: boolean;
+  sceneCount: number;
+}
 
 export default function UserViewScenarios() {
-  const [form] = Form.useForm();
-  const { preferences } = useContext(UniversalContext);
   const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
-  const [selectedScenarioType, setSelectedScenarioType] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
-
-  const scenarioTypes = preferences?.scenario_types || ["No types found"];
   const navigate = useNavigate();
 
   // Fetch scenarios
@@ -66,189 +55,159 @@ export default function UserViewScenarios() {
   }, [user?.id]);
 
   // Apply filters
-  const filteredScenarios = scenarios.filter((s) => {
-    const matchesType =
-      selectedScenarioType === "All" || s.type === selectedScenarioType;
-    const matchesSearch =
-      searchQuery === "" ||
-      s.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
-  });
+  const filteredScenarios = scenarios;
 
-  // Group by type
-  const grouped = filteredScenarios.reduce(
-    (acc: Record<string, Scenario[]>, scenario) => {
-      if (!acc[scenario.type]) acc[scenario.type] = [];
-      acc[scenario.type].push(scenario);
-      return acc;
+  // Prepare table data
+  const tableData: ScenarioTableData[] = filteredScenarios.map((s) => ({
+    ...s,
+    completed: completedMap[s.id] || false,
+    sceneCount: s.scenes?.length || 0,
+  }));
+
+  // Handle Row Click
+  const handleRowClick = (scenario: ScenarioTableData) => {
+    navigate("view-scenario", { state: { scenario } });
+  };
+
+  // Get unique scenario types
+  const scenarioTypes = Array.from(
+    new Set(tableData.map((s) => s.type).filter(Boolean))
+  );
+
+  const filterOptions = {
+    type: scenarioTypes,
+  };
+
+  // Define table columns
+  const scenarioColumns: TableColumnDef<ScenarioTableData>[] = [
+    {
+      key: "name",
+      header: "Name",
+      align: "text-left",
+      render: (s: ScenarioTableData) => (
+        <span className="font-medium text-gray-900 text-base">{s.name}</span>
+      ),
+      searchable: true,
+      filterable: false,
     },
-    {}
-  );
-
-  const sortedTypes = Object.keys(grouped).sort();
-
-  // Skeleton for scenario cards
-  const renderScenarioSkeletons = () => (
-    <div style={{ marginBottom: "1.5rem" }}>
-      <Skeleton.Input
-        active
-        size="default"
-        style={{ width: 200, marginBottom: 16 }}
-      />
-      <Row gutter={[16, 16]}>
-        {[1, 2, 3, 4].map((i) => (
-          <Col xs={24} sm={12} md={8} lg={6} key={i}>
-            <div
-              style={{
-                padding: "1.5rem",
-                background: "#fff",
-                borderRadius: 12,
-                border: "1px solid #f0f0f0",
-              }}
-            >
-              <Skeleton active paragraph={{ rows: 3 }} />
-            </div>
-          </Col>
-        ))}
-      </Row>
-    </div>
-  );
+    {
+      key: "type",
+      header: "Type",
+      align: "text-left",
+      render: (s: ScenarioTableData) => <span className="text-base">{s.type}</span>,
+      searchable: false,
+      filterable: true,
+    },
+    {
+      key: "sceneCount",
+      header: "Scenes",
+      align: "text-center",
+      render: (s: ScenarioTableData) => (
+        <span className="inline-flex items-center rounded-md bg-gray-50 px-2.5 py-0.5 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+          {s.sceneCount} {s.sceneCount === 1 ? "scene" : "scenes"}
+        </span>
+      ),
+      searchable: false,
+      filterable: false,
+    },
+    {
+      key: "difficulty",
+      header: "Difficulty",
+      align: "text-center",
+      render: (s: ScenarioTableData) => (
+        <span className="inline-flex items-center rounded-md bg-gray-50 px-2.5 py-0.5 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+          {s.difficulty}
+        </span>
+      ),
+      searchable: false,
+      filterable: false,
+    },
+    {
+      key: "completed",
+      header: "Status",
+      align: "text-center",
+      render: (s: ScenarioTableData) =>
+        s.completed ? (
+          <Tag
+            icon={<CheckCircleOutlined />}
+            style={{
+              borderRadius: "999px",
+              padding: "4px 12px",
+              fontSize: 13,
+              height: "auto",
+              lineHeight: "20px",
+              backgroundColor: "#F0FDF4",
+              color: "#15803D",
+              border: "1px solid #4ADE80",
+              fontWeight: 500,
+            }}
+          >
+            Completed
+          </Tag>
+        ) : (
+          <Tag
+            icon={<ClockCircleOutlined />}
+            style={{
+              borderRadius: "999px",
+              padding: "4px 12px",
+              fontSize: 13,
+              height: "auto",
+              lineHeight: "20px",
+              backgroundColor: "#FEF3C7",
+              color: "#92400E",
+              border: "1px solid #FBBF24",
+              fontWeight: 500,
+            }}
+          >
+            In Progress
+          </Tag>
+        ),
+      searchable: false,
+      filterable: false,
+    },
+    {
+      header: "Action",
+      align: "text-center",
+      render: (s: ScenarioTableData) => (
+        <button
+          onClick={() => handleRowClick(s)}
+          className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-base font-semibold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
+          style={{
+            backgroundColor: s.completed ? "#FED7AA" : "#EFF6FF",
+            color: s.completed ? "#92400E" : "#0369A1",
+            border: `1.5px solid ${s.completed ? "#F59E0B" : "#0EA5E9"}`,
+          }}
+        >
+          {s.completed ? (
+            <>
+              See Results
+            </>
+          ) : (
+            <>
+              <PlayCircleOutlined style={{ fontSize: 16 }} />
+              Start
+            </>
+          )}
+        </button>
+      ),
+      searchable: false,
+      filterable: false,
+    },
+  ];
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="bg-gray-100 min-h-screen">
       <UserPageHeader
         title="Scenarios"
         subtitle="Explore and complete available training scenarios."
       />
 
-      {/* Filters */}
-      <div
-        style={{
-          padding: "1rem 1.5rem",
-          background: "#fff",
-          borderBottom: "1px solid #f0f0f0",
-          top: 0,
-          zIndex: 2,
-        }}
-      >
-        <Form form={form} layout="vertical">
-          <Row gutter={[16, 12]}>
-            <Col xs={24} sm={12} md={6}>
-              <Form.Item name="type" style={{ marginBottom: 16 }}>
-                <Select
-                  size="large"
-                  placeholder="Select Scenario type"
-                  options={[
-                    { label: "All", value: "All" },
-                    ...scenarioTypes.map((type) => ({
-                      label: type,
-                      value: type,
-                    })),
-                  ]}
-                  value={selectedScenarioType}
-                  onChange={(value) => setSelectedScenarioType(value)}
-                  disabled={loading}
-                />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={12} md={10}>
-              <Form.Item name="q" style={{ marginBottom: 0 }}>
-                <Input
-                  size="large"
-                  prefix={<SearchOutlined />}
-                  placeholder="Search by scenario name..."
-                  allowClear
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  disabled={loading}
-                />
-              </Form.Item>
-            </Col>
-
-            {/* {!checkIsMobile() && (
-              <Col xs={24} md={4}>
-                <Button
-                  size="large"
-                  className="border-btn"
-                  icon={<ReloadOutlined />}
-                  onClick={() => {
-                    form.resetFields();
-                    setSelectedScenarioType("All");
-                    setSearchQuery("");
-                  }}
-                  disabled={loading}
-                >
-                  Reset
-                </Button>
-              </Col>
-            )} */}
-          </Row>
-        </Form>
-
-        {loading ? (
-          <Skeleton.Input
-            active
-            size="small"
-            style={{ width: 150, marginTop: 8 }}
-          />
-        ) : (
-          <Text type="secondary">
-            {filteredScenarios.length} scenario{filteredScenarios.length !== 1 ? "s" : ""} found
-          </Text>
-        )}
-      </div>
-
-      {/* Scrollable scenarios area */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "1rem 1.5rem",
-        }}
-      >
-        {loading ? (
-          <>
-            {renderScenarioSkeletons()}
-            {renderScenarioSkeletons()}
-          </>
-        ) : sortedTypes.length === 0 ? (
-          <Empty
-            description="No scenarios found"
-            style={{ padding: "60px 0" }}
-          />
-        ) : (
-          sortedTypes.map((type) => (
-            <div key={type} style={{ marginBottom: "1.5rem" }}>
-              <Title level={4} style={{ marginBottom: 16 }}>
-                {type}
-              </Title>
-              <Row gutter={[16, 16]}>
-                {grouped[type].map((scenario) => (
-                  <ScenarioCard
-                    key={scenario.id}
-                    name={scenario.name}
-                    type={"scenario"}
-                    completed={completedMap[scenario.id] || false}
-                    description={scenario.description || "No description provided."}
-                    questionCount={scenario.scenes?.length || 0}
-                    onClick={() =>
-                      navigate("view-scenario", { state: { scenario } })
-                    }
-                  />
-                ))}
-              </Row>
-            </div>
-          ))
-        )}
-      </div>
+      <TableViewer
+        columnDefinitions={scenarioColumns}
+        columnData={tableData}
+        filterOptions={filterOptions}
+        loading={loading}
+      />
     </div>
   );
 }

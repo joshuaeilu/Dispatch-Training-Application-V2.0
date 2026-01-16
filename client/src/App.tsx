@@ -41,6 +41,7 @@ function App() {
           {/* Administrator Routes */}
           
             <Route path="recycle-bin" element={<RecycleBin />} />
+            <Route path="settings" element={<SettingsPage />} />
 
 
           <Route path="/dashboard" element={<Outlet />} >

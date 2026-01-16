@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, type JSX } from "react";
 import {
   Input,
   Button,
-  Card,
   Typography,
   Row,
   Col,
@@ -21,6 +20,7 @@ import {
   UnorderedListOutlined,
   FileTextOutlined,
   FileImageOutlined,
+  ArrowRightOutlined,
 } from "@ant-design/icons";
 import type { ResourceTableType } from "../../../types/index.types";
 import UserPageHeader from "../UserPageHeader";
@@ -32,6 +32,16 @@ import { singularize } from "../../../utils/tools";
 const { Title, Paragraph, Text } = Typography;
 
 type ResourceCategory = "all" | "audio" | "videos" | "documents" | "images";
+const BRAND_MAROON = "#8C2131";
+const BRAND_MAROON_LIGHT = "rgba(140, 33, 49, 0.08)";
+
+const resourceTypeColors: Record<string, { bg: string; text: string }> = {
+  images: { bg: "#FFF7E6", text: "#FF7A45" },
+  audio: { bg: "#E6F7FF", text: "#1890FF" },
+  videos: { bg: "#F6E7FF", text: "#722ED1" },
+  documents: { bg: "#F0F5FF", text: "#1DA1F2" },
+  default: { bg: BRAND_MAROON_LIGHT, text: BRAND_MAROON },
+};
 
 const categories = [
   { id: "all" as const, label: "All Resources", icon: <AppstoreOutlined /> },
@@ -50,11 +60,11 @@ interface ResourcePreview {
 
 const ResourcePlaceholder: React.FC<{ type: string }> = ({ type }) => {
   const iconMap: Record<string, JSX.Element> = {
-    videos: <VideoCameraOutlined style={{ fontSize: 36, color: "#8C2131" }} />,
-    audio: <AudioOutlined style={{ fontSize: 48, color: "#8C2131" }} />,
-    documents: <FileTextOutlined style={{ fontSize: 48, color: "#8C2131" }} />,
-    images: <FileImageOutlined style={{ fontSize: 48, color: "#8C2131" }} />,
-    default: <FolderOpenOutlined style={{ fontSize: 48, color: "#8C2131" }} />,
+    videos: <VideoCameraOutlined style={{ fontSize: 36, color: BRAND_MAROON }} />,
+    audio: <AudioOutlined style={{ fontSize: 48, color: BRAND_MAROON }} />,
+    documents: <FileTextOutlined style={{ fontSize: 48, color: BRAND_MAROON }} />,
+    images: <FileImageOutlined style={{ fontSize: 48, color: BRAND_MAROON }} />,
+    default: <FolderOpenOutlined style={{ fontSize: 48, color: BRAND_MAROON }} />,
   };
 
   return (
@@ -63,8 +73,10 @@ const ResourcePlaceholder: React.FC<{ type: string }> = ({ type }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f5f5f5",
+        backgroundColor: BRAND_MAROON_LIGHT,
         borderRadius: 8,
+        width: "100%",
+        minHeight: 150,
       }}
     >
       {iconMap[type] || iconMap.default}
@@ -111,79 +123,67 @@ export default function UserResourcesPage() {
   }, [resources, selectedCategory, searchQuery]);
 
   return (
-    <div className="bg-white" >
+    <div className="bg-white min-h-screen">
       <UserPageHeader
         title="Campus Safety Resources"
         subtitle="Your guide to staying safe and informed on the Calvin University campus"
       />
 
-      {/* Top Section (Sticky on desktop, normal on mobile) */}
-      <div
-        style={{
-          flexShrink: 0,
-          background: "#fff",
-          padding:" 1.5rem",
-          borderBottom: "1px solid #f0f0f0",
-        }}
-      >
-          <Row gutter={[16, 16]} align="middle" justify="space-between">
-            <Col xs={24} md={18}>
-              <Input
-                prefix={<SearchOutlined />}
-                placeholder="Search resources..."
-                value={searchQuery}
-                size="large"
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </Col>
-            <Col xs={24} md={6}>
-              <Space wrap style={{ justifyContent: "flex-end", width: "100%" }}>
-                <Segmented
-                  value={viewMode}
-                  onChange={(value) => setViewMode(value as "grid" | "list")}
-                  options={[
-                    { label: "Grid", value: "grid", icon: <AppstoreOutlined /> },
-                    { label: "List", value: "list", icon: <UnorderedListOutlined /> },
-                  ]}
-                />
-              </Space>
-            </Col>
-          </Row>
+      {/* Controls Section */}
+      <div className="px-6 py-6 border-b border-gray-100">
+        <Row gutter={[16, 16]} align="middle" justify="space-between" style={{ marginBottom: 16 }}>
+          <Col xs={24} md={18}>
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="Search resources..."
+              value={searchQuery}
+              size="large"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                borderRadius: 8,
+              }}
+            />
+          </Col>
+          <Col xs={24} md={6} style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Segmented
+              value={viewMode}
+              onChange={(value) => setViewMode(value as "grid" | "list")}
+              options={[
+                { label: "Grid", value: "grid", icon: <AppstoreOutlined /> },
+                { label: "List", value: "list", icon: <UnorderedListOutlined /> },
+              ]}
+            />
+          </Col>
+        </Row>
 
-          {/* Filter Buttons */}
-          <div style={{ overflowX: "auto", marginTop: 16 }}>
-            <Space style={{ display: "inline-flex", gap: 8, paddingBottom: 4 }}>
-              {categories.map((cat) => (
-                <Button
-                  key={cat.id}
-                  type={selectedCategory === cat.id ? "primary" : "default"}
-                  icon={cat.icon}
-                  onClick={() => setSelectedCategory(cat.id)}
-                >
-                  {cat.label}
-                </Button>
-              ))}
-               <div>
-          <Text type="secondary" style={{  fontSize: 14 , marginLeft: 16 }}>
-              {filteredResources.length}{" "}
-              {filteredResources.length === 1 ? "resource" : "resources"} found
-            </Text>
+        {/* Category Filter */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+          <Space style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {categories.map((cat) => (
+              <Button
+                key={cat.id}
+                type={selectedCategory === cat.id ? "primary" : "default"}
+                icon={cat.icon}
+                onClick={() => setSelectedCategory(cat.id)}
+                style={{
+                  borderRadius: 6,
+                  backgroundColor: selectedCategory === cat.id ? BRAND_MAROON : undefined,
+                  borderColor: selectedCategory === cat.id ? BRAND_MAROON : "#d9d9d9",
+                  color: selectedCategory === cat.id ? "white" : undefined,
+                }}
+              >
+                {cat.label}
+              </Button>
+            ))}
+          </Space>
+          <Text type="secondary" style={{ fontSize: 14, marginLeft: 16 }}>
+            {filteredResources.length}{" "}
+            {filteredResources.length === 1 ? "resource" : "resources"} found
+          </Text>
         </div>
-            </Space>
-            
-             
-
-        
-        </div>
-       
       </div>
-      {/* Scrollable Resource Area */}
-      <div
-        style={{
-          flex: 1,
-          padding: "1.5rem",
-        }}
-      >
+      {/* Content Section */}
+      <div className="px-6 py-6">
         {loading ? (
           <div style={{ textAlign: "center", marginTop: 64 }}>
             <Spin tip="Loading resources..." size="large" />
@@ -197,8 +197,8 @@ export default function UserResourcesPage() {
           <Row gutter={[24, 24]}>
             {filteredResources.map((resource) => (
               <Col key={resource.id} xs={24} sm={12} md={8} lg={6}>
-                <Card
-                  hoverable
+                <div
+                  className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
                   onClick={() => {
                     setPreviewResource({
                       name: resource.name,
@@ -212,8 +212,11 @@ export default function UserResourcesPage() {
                     });
                     setPreviewOpen(true);
                   }}
-                  cover={
-                    ["audio", "videos", "documents"].includes(resource.type) ? (
+                  style={{ height: "100%", display: "flex", flexDirection: "column" }}
+                >
+                  {/* Cover Image */}
+                  <div style={{ backgroundColor: BRAND_MAROON_LIGHT, minHeight: 150, overflow: "hidden" }}>
+                    {["audio", "videos", "documents"].includes(resource.type) ? (
                       <ResourcePlaceholder type={resource.type} />
                     ) : (
                       <img
@@ -226,37 +229,54 @@ export default function UserResourcesPage() {
                         }
                         style={{
                           objectFit: "cover",
-                          borderRadius: "8px 8px 0 0",
+                          width: "100%",
+                          height: "100%",
                         }}
                       />
-                    )
-                  }
-                >
-                  <Title level={5} style={{ marginBottom: 6 }}>
-                    {resource.name}
-                  </Title>
-                  {resource.description && (
-                    <Paragraph
-                      type="secondary"
-                      ellipsis={{ rows: 2 }}
-                      style={{ marginBottom: 8 }}
-                    >
-                      {resource.description}
-                    </Paragraph>
-                  )}
-                  <Tag color="geekblue" style={{ fontSize: 11, textTransform: "uppercase" }}>
-                    {singularize(resource.type)}
-                  </Tag>
-                </Card>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column" }}>
+                    <Title level={5} style={{ margin: 0, marginBottom: 8, fontWeight: 600, color: "#262626" }}>
+                      {resource.name}
+                    </Title>
+                    {resource.description && (
+                      <Paragraph
+                        type="secondary"
+                        ellipsis={{ rows: 2 }}
+                        style={{ marginBottom: 12, flex: 1, fontSize: 14, color: "#666" }}
+                      >
+                        {resource.description}
+                      </Paragraph>
+                    )}
+                    <div>
+                      <Tag
+                        style={{
+                          backgroundColor: resourceTypeColors[resource.type]?.bg || resourceTypeColors.default.bg,
+                          color: resourceTypeColors[resource.type]?.text || resourceTypeColors.default.text,
+                          border: "none",
+                          borderRadius: 4,
+                          fontSize: 12,
+                          fontWeight: 500,
+                          textTransform: "uppercase",
+                          padding: "4px 8px",
+                        }}
+                      >
+                        {singularize(resource.type)}
+                      </Tag>
+                    </div>
+                  </div>
+                </div>
               </Col>
             ))}
           </Row>
         ) : (
           <Space direction="vertical" size="large" style={{ width: "100%" }}>
             {filteredResources.map((resource) => (
-              <Card
+              <div
                 key={resource.id}
-                hoverable
+                className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-200 ease-out hover:shadow-lg"
                 onClick={() => {
                   setPreviewResource({
                     name: resource.name,
@@ -270,12 +290,13 @@ export default function UserResourcesPage() {
                   });
                   setPreviewOpen(true);
                 }}
-                bodyStyle={{ padding: 12 }}
               >
-                <Row gutter={16} align="middle">
+                <Row gutter={16} align="middle" style={{ padding: 16 }}>
                   <Col xs={10} md={4}>
                     {["audio", "videos", "documents"].includes(resource.type) ? (
-                      <ResourcePlaceholder type={resource.type} />
+                      <div style={{ backgroundColor: BRAND_MAROON_LIGHT, borderRadius: 6, overflow: "hidden" }}>
+                        <ResourcePlaceholder type={resource.type} />
+                      </div>
                     ) : (
                       <img
                         alt={resource.name}
@@ -295,20 +316,50 @@ export default function UserResourcesPage() {
                     )}
                   </Col>
                   <Col xs={14} md={20}>
-                    <Title level={5} style={{ marginBottom: 4 }}>
-                      {resource.name}
-                    </Title>
-                    {resource.description && (
-                      <Paragraph type="secondary" ellipsis={{ rows: 2 }}>
-                        {resource.description}
-                      </Paragraph>
-                    )}
-                    <Tag color="geekblue" style={{ textTransform: "uppercase" }}>
-                      {resource.type}
-                    </Tag>
+                    <Row justify="space-between" align="top">
+                      <Col style={{ flex: 1 }}>
+                        <Title level={5} style={{ margin: 0, marginBottom: 6, fontWeight: 600, color: "#262626" }}>
+                          {resource.name}
+                        </Title>
+                        {resource.description && (
+                          <Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ margin: 0, marginBottom: 10, fontSize: 14, color: "#666" }}>
+                            {resource.description}
+                          </Paragraph>
+                        )}
+                        <Tag
+                          style={{
+                            backgroundColor: resourceTypeColors[resource.type]?.bg || resourceTypeColors.default.bg,
+                            color: resourceTypeColors[resource.type]?.text || resourceTypeColors.default.text,
+                            border: "none",
+                            borderRadius: 4,
+                            fontSize: 12,
+                            fontWeight: 500,
+                            textTransform: "uppercase",
+                            padding: "4px 8px",
+                          }}
+                        >
+                          {singularize(resource.type)}
+                        </Tag>
+                      </Col>
+                      <Col style={{ marginLeft: 16 }}>
+                        <div
+                          className="flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 group-hover:translate-x-0.5"
+                          style={{
+                            backgroundColor: BRAND_MAROON_LIGHT,
+                          }}
+                        >
+                          <ArrowRightOutlined
+                            className="text-[12px] transition-colors duration-200"
+                            style={{
+                              color: BRAND_MAROON,
+                            }}
+                          />
+                        </div>
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
-              </Card>
+              </div>
             ))}
           </Space>
         )}

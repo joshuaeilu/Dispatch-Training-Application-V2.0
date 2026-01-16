@@ -1,29 +1,22 @@
 import {
   Button,
-  Col,
-  Row,
-  Select,
-  Form,
-  Input,
-  Typography,
   Modal,
   Skeleton,
   Empty,
+  Tag,
 } from "antd";
-import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, ClockCircleOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../../utils/api";
 import { AuthContext } from "../../../contexts/AuthProvider";
-import { UniversalContext } from "../../../contexts/UniversalHelpers";
 import UserPageHeader from "../../Shared/UserPageHeader";
-import KnowledgeCheckCard from "../../Shared/ListCard";
+import { TableViewer } from "../../Shared/TableViewer";
 import dayjs from "dayjs";
 
-import type { Exercise } from "../../../types/index.types";
+import type { Exercise, TableColumnDef } from "../../../types/index.types";
 import KnowledgeCheckResults from "./components/KnowledgeCheckResults";
 
-const { Title, Text } = Typography;
 type Submission = {
   id: string;
   exerciseId: string;
@@ -32,23 +25,22 @@ type Submission = {
   createdAt: string;
 };
 
+interface ExerciseTableData extends Exercise {
+  completed: boolean;
+  questionCount: number;
+}
+
 export default function UserViewKnowledgeChecks() {
-  const [form] = Form.useForm();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-  const { preferences } = useContext(UniversalContext);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [loadingSubmission, setLoadingSubmission] = useState(false);
   const [loadingExercises, setLoadingExercises] = useState(true);
 
-  const [selectedExerciseType, setSelectedExerciseType] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [submittedMap, setSubmittedMap] = useState<Record<string, boolean>>({});
-
-  const exerciseTypes = preferences?.exercise_types || ["No types found"];
 
   // Fetch exercises + completed
   useEffect(() => {
@@ -81,7 +73,7 @@ export default function UserViewKnowledgeChecks() {
     fetchExercises();
   }, [user]);
 
-  // Filter + group exercises
+  // Filter exercises
   const userRole = user?.role?.toLowerCase() + "s";
 
   const filteredExercises = exercises.filter((e) => {
@@ -89,28 +81,20 @@ export default function UserViewKnowledgeChecks() {
     const matchesAudience =
       e.audience === "All" ||
       (userRole && e.audience?.toLowerCase() === userRole);
-    const matchesType =
-      selectedExerciseType === "All" || e.type === selectedExerciseType;
-    const matchesSearch =
-      searchQuery.trim() === "" ||
-      e.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return isVisible && matchesAudience && matchesType && matchesSearch;
+    return isVisible && matchesAudience;
   });
 
-  const grouped = filteredExercises.reduce(
-    (acc: Record<string, Exercise[]>, exercise) => {
-      if (!acc[exercise.type]) acc[exercise.type] = [];
-      acc[exercise.type].push(exercise);
-      return acc;
-    },
-    {}
-  );
-  const sortedTypes = Object.keys(grouped).sort();
+  // Prepare table data
+  const tableData: ExerciseTableData[] = filteredExercises.map((e) => ({
+    ...e,
+    completed: submittedMap[e.id] || false,
+    questionCount: e.questions?.length || 0,
+  }));
 
-  // Handle Card Click
-  const handleCardClick = async (exercise: Exercise) => {
-    if (submittedMap[exercise.id]) {
+  // Handle Row Click
+  const handleRowClick = async (exercise: ExerciseTableData) => {
+    if (exercise.completed) {
       setLoadingSubmission(true);
       try {
         const res = await api.get(`/submissions/${exercise.id}`, {
@@ -119,7 +103,7 @@ export default function UserViewKnowledgeChecks() {
         setSelectedSubmission({
           ...res.data,
         });
-        setSelectedExercise(exercise);
+        setSelectedExercise(exercise as Exercise);
         setShowResultModal(true);
       } catch (err) {
         console.error("❌ Failed to fetch previous submission:", err);
@@ -131,170 +115,144 @@ export default function UserViewKnowledgeChecks() {
     }
   };
 
-  // Skeleton for exercise cards
-  const renderExerciseSkeletons = () => (
-    <div style={{ marginBottom: "1.5rem" }}>
-      <Skeleton.Input
-        active
-        size="default"
-        style={{ width: 200, marginBottom: 16 }}
-      />
-      <Row gutter={[16, 16]}>
-        {[1, 2, 3, 4].map((i) => (
-          <Col xs={24} sm={12} md={8} lg={6} key={i}>
-            <div
-              style={{
-                padding: "1.5rem",
-                background: "#fff",
-                borderRadius: 12,
-                border: "1px solid #f0f0f0",
-              }}
-            >
-              <Skeleton active paragraph={{ rows: 3 }} />
-            </div>
-          </Col>
-        ))}
-      </Row>
-    </div>
+  // Get unique exercise types
+  const exerciseTypes = Array.from(
+    new Set(tableData.map((e) => e.type).filter(Boolean))
   );
 
+  const filterOptions = {
+    type: exerciseTypes,
+  };
+
+  // Define table columns
+  const knowledgeCheckColumns: TableColumnDef<ExerciseTableData>[] = [
+    {
+      key: "name",
+      header: "Name",
+      align: "text-left",
+      render: (e: ExerciseTableData) => (
+        <span className="font-medium text-gray-900 text-base">{e.name}</span>
+      ),
+      searchable: true,
+      filterable: false,
+    },
+    {
+      key: "type",
+      header: "Type",
+      align: "text-left",
+      render: (e: ExerciseTableData) => <span className="text-base">{e.type}</span>,
+      searchable: false,
+      filterable: true,
+    },
+    {
+      key: "questionCount",
+      header: "Questions",
+      align: "text-center",
+      render: (e: ExerciseTableData) => (
+        <span className="inline-flex items-center rounded-md bg-gray-50 px-2.5 py-0.5 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+          {e.questionCount} {e.questionCount === 1 ? "question" : "questions"}
+        </span>
+      ),
+      searchable: false,
+      filterable: false,
+    },
+    {
+      key: "completed",
+      header: "Status",
+      align: "text-center",
+      render: (e: ExerciseTableData) =>
+        e.completed ? (
+          <Tag
+            icon={<CheckCircleOutlined />}
+            style={{
+              borderRadius: "999px",
+              padding: "4px 12px",
+              fontSize: 13,
+              height: "auto",
+              lineHeight: "20px",
+              backgroundColor: "#F0FDF4",
+              color: "#15803D",
+              border: "1px solid #4ADE80",
+              fontWeight: 500,
+            }}
+          >
+            Completed
+          </Tag>
+        ) : (
+          <Tag
+            icon={<ClockCircleOutlined />}
+            style={{
+              borderRadius: "999px",
+              padding: "4px 12px",
+              fontSize: 13,
+              height: "auto",
+              lineHeight: "20px",
+              backgroundColor: "#FEF3C7",
+              color: "#92400E",
+              border: "1px solid #FBBF24",
+              fontWeight: 500,
+            }}
+          >
+            Not Started
+          </Tag>
+        ),
+      searchable: false,
+      filterable: false,
+    },
+    {
+      key: "created_at",
+      header: "Created",
+      align: "text-center",
+      render: (e: ExerciseTableData) => (
+        <span className="text-base text-gray-600">
+          {dayjs(e.created_at).format("MMM D, YYYY")}
+        </span>
+      ),
+      searchable: false,
+      filterable: false,
+    },
+    {
+      header: "Action",
+      align: "text-center",
+      render: (e: ExerciseTableData) => (
+        <button
+          onClick={() => handleRowClick(e)}
+          className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-base font-semibold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
+          style={{
+            backgroundColor: e.completed ? "#FED7AA" : "#EFF6FF",
+            color: e.completed ? "#92400E" : "#0369A1",
+            border: `1.5px solid ${e.completed ? "#F59E0B" : "#0EA5E9"}`,
+          }}
+        >
+          {e.completed ? (
+            <>
+              See Results
+            </>
+          ) : (
+            <>
+              <PlayCircleOutlined style={{ fontSize: 16 }} />
+              Start
+            </>
+          )}
+        </button>
+      ),
+      searchable: false,
+      filterable: false,
+    },
+  ];
+
   return (
-    <div
-      style={{
-        height: "100vh",
-        background: "#fff",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="bg-gray-100 min-h-screen">
       <UserPageHeader
         title="Knowledge Checks"
         subtitle="Complete knowledge checks to test your understanding."
       />
-      <div
-        style={{
-          overflowY: "auto",
-        }}
-      >
-        {/* Filter section (sticky) */}
-        <div
-          style={{
-            padding: "1rem 1.5rem",
-            background: "#fff",
-            borderBottom: "1px solid #f0f0f0",
-            top: 0,
-            zIndex: 2,
-          }}
-        >
-          <Form form={form} layout="vertical">
-            <Row gutter={[16, 12]}>
-              <Col xs={24} sm={12} md={6}>
-                <Form.Item name="type" style={{ marginBottom: 16 }}>
-                  <Select
-                    size="large"
-                    placeholder="Select Exercise type"
-                    options={[
-                      { label: "All", value: "All" },
-                      ...exerciseTypes.map((type) => ({
-                        label: type,
-                        value: type,
-                      })),
-                    ]}
-                    value={selectedExerciseType}
-                    onChange={(value) => setSelectedExerciseType(value)}
-                    disabled={loadingExercises}
-                  />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} sm={12} md={10}>
-                <Form.Item name="q" style={{ marginBottom: 0 }}>
-                  <Input
-                    size="large"
-                    prefix={<SearchOutlined />}
-                    placeholder="Search by exercise name..."
-                    allowClear
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    disabled={loadingExercises}
-                  />
-                </Form.Item>
-              </Col>
-
-              {/* {!checkIsMobile() && (
-                <Col xs={24} md={4}>
-                  <Button
-                    size="large"
-                    className="border-btn"
-                    icon={<ReloadOutlined />}
-                    onClick={() => {
-                      form.resetFields();
-                      setSelectedExerciseType("All");
-                      setSearchQuery("");
-                    }}
-                    disabled={loadingExercises}
-                  >
-                    Reset
-                  </Button>
-                </Col>
-              )} */}
-            </Row>
-          </Form>
-
-          {loadingExercises ? (
-            <Skeleton.Input
-              active
-              size="small"
-              style={{ width: 150, marginTop: 8 }}
-            />
-          ) : (
-            <Text type="secondary">
-              {filteredExercises.length} exercises found
-            </Text>
-          )}
-        </div>
-
-        {/* Scrollable grouped exercises */}
-        <div
-          style={{
-            flex: 1,
-            padding: "1rem 1.5rem",
-          }}
-        >
-          {loadingExercises ? (
-            <>
-              {renderExerciseSkeletons()}
-              {renderExerciseSkeletons()}
-            </>
-          ) : sortedTypes.length === 0 ? (
-            <Empty
-              description="No exercises found"
-              style={{ padding: "60px 0" }}
-            />
-          ) : (
-            sortedTypes.map((type) => (
-              <div key={type} style={{ marginBottom: "1.5rem" }}>
-                <Title level={4} style={{ marginBottom: 16 }}>
-                  {type}
-                </Title>
-                <Row gutter={[16, 16]}>
-                  {grouped[type].map((exercise) => (
-                    <KnowledgeCheckCard
-                      key={exercise.id}
-                      type={"exercise"}
-                      name={exercise.name}
-                      date={dayjs(exercise.created_at).format("MMM D, YYYY")}
-                      completed={submittedMap[exercise.id]}
-                      questionCount={exercise.questions?.length || 0}
-                      onClick={() => handleCardClick(exercise)}
-                    />
-                  ))}
-                </Row>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      <TableViewer
+        columnDefinitions={knowledgeCheckColumns}
+        columnData={tableData}
+        filterOptions={filterOptions}
+        loading={loadingExercises}
+      />
 
       {/* Result Modal */}
       <Modal

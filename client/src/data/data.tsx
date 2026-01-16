@@ -1,4 +1,4 @@
-import { ApartmentOutlined, AppstoreFilled, AudioOutlined, DeleteColumnOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, UserOutlined,} from "@ant-design/icons";
+import { ApartmentOutlined, AppstoreFilled, AudioOutlined, DeleteColumnOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, PictureOutlined, PlaySquareOutlined, QuestionCircleFilled, QuestionCircleOutlined, SettingOutlined, UserOutlined,} from "@ant-design/icons";
 import type {  ResourceCategory, ResourceKey, Role, MenuItem, Exercise, TableColumnDef, ExerciseTableType, ScenarioTableType } from '../types/index.types';
 import type { ResourceTableType } from "../types/index.types";
 import { removeS } from "../utils/tools";
@@ -117,6 +117,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { key: '/knowledge-checks', icon: <QuestionCircleOutlined />, label: 'Knowledge Checks' },
     { key: '/scenario-manager', icon: <ApartmentOutlined />, label: 'Scenario Manager' },
     { key: '/recycle-bin', icon: <DeleteOutlined />, label: 'Recycle Bin' },
+    { key: '/settings', icon: <SettingOutlined />, label: 'Settings'}
   ],
   dispatcher: [
     { key: '/resources', icon: <UserOutlined />, label: 'Resources' },
