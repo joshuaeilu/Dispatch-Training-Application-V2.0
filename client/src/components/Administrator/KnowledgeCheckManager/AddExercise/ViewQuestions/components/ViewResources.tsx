@@ -29,7 +29,7 @@ export default function ViewResourcesPage({
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [resourceFiles, setResourceFiles] = useState<ResourceTableType[]>([]);
   const [showResource, setShowResource] = useState(false);
-  const [previewResource, __] = useState<ResourcePreview>({
+  const [previewResource, setPreviewResource] = useState<ResourcePreview>({
     id: "",
     name: "",
     description: "",
@@ -58,7 +58,17 @@ export default function ViewResourcesPage({
     return matchesSearch && matchesType;
   });
 
-  
+  function handleResourcePreview(
+    id: string,
+    name: string,
+    description: string,
+    type: string,
+    mimeType: string,
+    url: string
+  ) {
+    setPreviewResource({ id, name, description, type, mimeType, url });
+    setShowResource(true);
+  }
 
   return (
     <>
@@ -113,16 +123,16 @@ export default function ViewResourcesPage({
                     type={file.type}
                     title={file.name}
                     description={file.description}
-                    // onClick={() =>
-                    //   handleResourcePreview(
-                    //     file.id,
-                    //     file.name,
-                    //     file.description,
-                    //     file.type,
-                    //     file.mime_type,
-                    //     file.url
-                    //   )
-                    // }
+                    onClick={() =>
+                      handleResourcePreview(
+                        file.id,
+                        file.name,
+                        file.description,
+                        file.type,
+                        file.mime_type,
+                        file.url
+                      )
+                    }
                   />
                 </div>
               </div>
