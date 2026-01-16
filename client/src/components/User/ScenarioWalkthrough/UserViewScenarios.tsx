@@ -180,7 +180,7 @@ export default function UserViewScenarios() {
         >
           {s.completed ? (
             <>
-              See Results
+              Replay Walkthrough
             </>
           ) : (
             <>

@@ -59,7 +59,6 @@ export default function AssignmentDrawer({
     setOpen,
 }: AssignmentDrawerProps) {
     const { users } = getUsers();
-
     const [view, setView] = useState<DrawerView>("overview");
     const [selectedExercise, setSelectedExercise] = useState<any>(null);
     const [answers, setAnswers] = useState<any>(null);

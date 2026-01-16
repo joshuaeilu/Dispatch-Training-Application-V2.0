@@ -169,8 +169,8 @@ router.get('/recent-activity', auth(['admin']), async (req, res) => {
       LEFT JOIN users u ON u.role IN ('trainee', 'dispatcher')
       WHERE e.in_trash = false AND e.status = 'published'
       GROUP BY e.id, e.name
-      ORDER BY MAX(es.submitted_at) DESC NULLS LAST, e.created_at DESC
-      LIMIT 5
+      ORDER BY  e.created_at DESC
+      LIMIT 4
     `;
 
     // Get recent scenario completions with scenario details
@@ -185,8 +185,8 @@ router.get('/recent-activity', auth(['admin']), async (req, res) => {
       LEFT JOIN users u ON u.role IN ('trainee', 'dispatcher')
       WHERE s.in_trash = false AND s.scenario_data->>'status' = 'published'
       GROUP BY s.id, s.scenario_data->>'name'
-      ORDER BY MAX(sc.completed_at) DESC NULLS LAST, s.created_at DESC
-      LIMIT 5
+      ORDER BY s.created_at DESC
+      LIMIT 4
     `;
 
     const [exercisesResult, scenariosResult] = await Promise.all([

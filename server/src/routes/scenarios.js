@@ -28,6 +28,7 @@ router.get("/", auth(["admin", "trainee", "dispatcher"]), async (req, res) => {
       FROM scenarios s
       JOIN users u ON u.id = s.author_id
       WHERE s.in_trash = FALSE
+      AND s.visibility = TRUE
     `;
 
     const params = [];
@@ -119,7 +120,7 @@ router.get("/progress", auth(["admin"]), async (req, res) => {
             JSON_BUILD_OBJECT(
               'user_id', sc.user_id,
               'scenario_id', sc.scenario_id,
-              'completed_at', sc.completed_at
+              'submitted_at', sc.completed_at
             )
             ORDER BY sc.completed_at DESC
           ) FILTER (WHERE sc.user_id IS NOT NULL),

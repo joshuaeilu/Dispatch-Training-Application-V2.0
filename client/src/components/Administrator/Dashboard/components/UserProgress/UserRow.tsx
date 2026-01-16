@@ -1,3 +1,5 @@
+import { PROFILE_PIC_URL } from "../../../../../data/data";
+import { getToken } from "../../../../../contexts/AuthProvider";
 export default function UserRow({
   avatar,
   name,
@@ -7,7 +9,7 @@ export default function UserRow({
   canViewResponse,
 }: {
   avatar?: string;
-  name?: string;
+  name: string;
   role?: string;
   completedAt: {
   date: string;
@@ -17,15 +19,28 @@ canViewResponse?: boolean;
 
   onView: () => void;
 }) {
+  const token = getToken();
   return (
     <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
       <div className="flex items-center gap-4">
-        <img
-          src={avatar}
+        {
+          avatar ?  <img
+          src={`${PROFILE_PIC_URL}${avatar}?token=${token}`}
           alt={name}
-          className="h-9 w-9 rounded-full object-cover"
+          className="h-12 w-12 rounded-full object-cover"
         />
-
+ : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-maroon-light/10 border border-brand-maroon-light/30">
+      <span className="text-lg sm:text-xl font-semibold text-brand-maroon">
+        {name
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()}
+      </span>
+    </div>
+        }
+       
         <div className="flex flex-col">
           <span className="text-base font-medium text-gray-900">
             {name}

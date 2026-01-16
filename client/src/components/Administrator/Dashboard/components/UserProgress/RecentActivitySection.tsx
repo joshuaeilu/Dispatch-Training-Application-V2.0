@@ -60,7 +60,7 @@ const RecentActivitySection = () => {
           completedUsers = scenarioProgress.attempts.map((attempt: any) => ({
             user_id: attempt.user_id,
             answers: {}, // Scenarios might not have detailed answers
-            submitted_at: attempt.completed_at
+            submitted_at: attempt.submitted_at
           }));
         }
       }

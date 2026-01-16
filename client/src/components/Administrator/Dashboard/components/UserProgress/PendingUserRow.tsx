@@ -1,12 +1,15 @@
+import { PROFILE_PIC_URL } from "../../../../../data/data";
+import { getToken } from "../../../../../contexts/AuthProvider";
 export function PendingUserRow({
   avatar,
   name,
   role,
 }: {
   avatar?: string;
-  name?: string;
+  name: string;
   role?: string;
 }) {
+  const token = getToken();
   return (
     <div
       className="
@@ -16,11 +19,23 @@ export function PendingUserRow({
       "
     >
       <div className="flex items-center gap-4 min-w-0">
-        <img
-          src={avatar}
-          alt={name}
-          className="h-9 w-9 rounded-full object-cover opacity-80"
-        />
+        {
+                  avatar ?  <img
+                  src={`${PROFILE_PIC_URL}${avatar}?token=${token}`}
+                  alt={name}
+                  className="h-12 w-12 rounded-full object-cover"
+                />
+         : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-maroon-light/10 border border-brand-maroon-light/30">
+              <span className="text-lg sm:text-xl font-semibold text-brand-maroon">
+                {name
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </span>
+            </div>
+                }
 
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-sm font-medium text-gray-800">
