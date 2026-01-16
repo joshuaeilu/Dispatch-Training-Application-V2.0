@@ -166,6 +166,7 @@ export default function AssignmentDrawer({
                                 <HeaderSummaryCard
                                     title={drawerData.name}
                                     subtitle={`Assigned to ${drawerData.audience}`}
+                                    isDrawer={true}
                                     stats={[
                                         { label: "Completed", value: completedCount },
                                         { label: "Assigned", value: totalEligible },

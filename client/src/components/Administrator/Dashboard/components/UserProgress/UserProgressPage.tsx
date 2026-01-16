@@ -301,6 +301,7 @@ export default function UserProgressPage() {
       <div className="mx-6 mt-6">
         <HeaderSummaryCard
           imageUrl={user.avatar}
+          imageAlt={user.name}
           title={user.name}
           subtitle={user.role}
           stats={[

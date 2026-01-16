@@ -39,7 +39,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8">
+    <div className="flex min-h-screen flex-col justify-start px-6 pt-24 pb-16 lg:px-8">
 
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img src={CSLOGO} alt="CS Logo" className="mx-auto h-30 w-auto" />
