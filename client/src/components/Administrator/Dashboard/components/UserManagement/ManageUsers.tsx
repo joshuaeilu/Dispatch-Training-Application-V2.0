@@ -224,7 +224,6 @@ export default function ManageUsers() {
         columnDefinitions={userColumns}
         columnData={allUsers}
         filterOptions={userFilterOptions}
-        onButtonPress={() => {/* Could navigate to create user page */}}
       />
 
       {/* === Edit Modal === */}
