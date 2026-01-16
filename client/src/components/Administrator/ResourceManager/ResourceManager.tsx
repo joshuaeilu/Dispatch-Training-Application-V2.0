@@ -132,7 +132,7 @@ const resourceColumns: TableColumnDef<ResourceTableType>[] = [
               name: e.name,
               description: e.description,
               type: e.mime_type,
-              url: "http://localhost:5000/data" + e.url + "?token=" + token,
+              url: "/data" + e.url + "?token=" + token,
             }
           )}
         />

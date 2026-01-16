@@ -12,7 +12,6 @@ import {
 } from "antd";
 import {
   EditOutlined,
-  DeleteOutlined,
   UploadOutlined,
   LockOutlined,
   UserOutlined,
