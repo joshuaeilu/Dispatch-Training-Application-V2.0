@@ -57,7 +57,7 @@ export function TableViewer<T>({
   onButtonPress,
   loading = false,
 }: TableViewerProps<T>) {
-  const ITEMS_PER_PAGE = 5
+  const ITEMS_PER_PAGE = 10
 
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)

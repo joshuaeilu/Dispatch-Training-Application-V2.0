@@ -58,7 +58,7 @@ router.get('/', auth(['admin']), async (req, res) => {
       avatar,
       role
    FROM users
-   ORDER BY username ASC`
+   ORDER BY username DESC`
 );
 
     res.json(result.rows);
