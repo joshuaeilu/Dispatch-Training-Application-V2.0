@@ -82,7 +82,13 @@ export default function KnowledgeCheckProgress() {
         {
             key: "completionPercentage",
             header: "Completion Rate %",
-            render: (row: any) => <span>{(row.completedAssignments / row.totalAssignments * 100)}%</span>,
+render: (row: any) => (
+  <span>
+    {row.totalAssignments > 0
+      ? `${Math.round((row.completedAssignments / row.totalAssignments) * 100)}%`
+      : "0%"}
+  </span>
+),
             align: "text-center",
             searchable: false,
             filterable: false,
