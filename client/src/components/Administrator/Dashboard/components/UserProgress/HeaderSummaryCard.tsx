@@ -12,6 +12,7 @@ type HeaderStat = {
 type HeaderSummaryCardProps = {
   imageUrl?: string;
   imageAlt?: string;
+  isDrawer?: boolean;
 
   title: string;
   subtitle?: string;
@@ -25,20 +26,36 @@ export default function HeaderSummaryCard({
   title,
   subtitle,
   stats = [],
+  isDrawer = false
 }: HeaderSummaryCardProps) {
   const token = getToken();
 
   return (
-      <div className={`${imageUrl && " flex flex-col"} gap-6 lg:flex-row lg:items-center lg:justify-between bg-white px-6 py-6 sm:px-8`}>
+      <div className={`${!isDrawer && " flex flex-col"} gap-6 lg:flex-row lg:items-center lg:justify-between bg-white px-6 py-6 sm:px-8`}>
         {/* LEFT */}
         <div className="flex items-center gap-5">
-          {imageUrl && (
-            <img
-              src={`${DATA_URL}${imageUrl}?token=${token}`}
-              alt={imageAlt ?? `${title} avatar`}
-              className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover"
-            />
-          )}
+        {!isDrawer && (
+  imageUrl ? (
+    <img
+      src={`${DATA_URL}${imageUrl}?token=${token}`}
+      alt={imageAlt ?? `${title} avatar`}
+      className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover border border-gray-200"
+    />
+  ) : (
+    <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-brand-maroon-light/10 border border-brand-maroon-light/30">
+      <span className="text-lg sm:text-xl font-semibold text-brand-maroon">
+        {title
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()}
+      </span>
+    </div>
+  )
+)}
+
+
 
           <div className="flex min-w-0 flex-col">
             <span className="whitespace-nowrap text-2xl font-semibold text-brand-maroon">
@@ -47,7 +64,7 @@ export default function HeaderSummaryCard({
 
             {subtitle && (
               <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
-               {imageUrl && ( <ShieldCheckIcon className="h-4 w-4 text-brand-maroon-light" /> )}
+               {isDrawer && ( <ShieldCheckIcon className="h-4 w-4 text-brand-maroon-light" /> )}
                 {toTitleCase(subtitle)}
               </div>
             )}
@@ -56,7 +73,7 @@ export default function HeaderSummaryCard({
 
         {/* RIGHT */}
         {stats.length > 0 && (
-          <dl className={`${imageUrl && " sm:justify-end mt-0 border-none "} flex w-full mt-4 border-y border-gray-200 py-4 justify-between gap-4 sm:gap-0 sm:divide-x sm:divide-gray-200`}>
+          <dl className={`${!isDrawer && " sm:justify-end mt-0 border-none "} flex w-full mt-4 border-y border-gray-200 py-4 justify-between gap-4 sm:gap-0 sm:divide-x sm:divide-gray-200`}>
             {stats.map((stat, idx) => (
               <Stat
                 key={idx}
