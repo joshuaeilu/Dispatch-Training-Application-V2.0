@@ -278,12 +278,16 @@ export default function KnowledgeCheckResults({ name, questions, userAnswers }: 
                       <List.Item style={isNoAnswer ? listItemStyle("neutral") : listItemStyle(isCorrectPick ? "good" : "bad")}>
                         <span>{ans}</span>
                         {!isNoAnswer && (
+                          <>
                           <Tag
                             color={isCorrectPick ? "green" : "red"}
                             style={{ borderRadius: 999, fontWeight: 600 }}
                           >
-                            {isCorrectPick ? "Correct pick" : "Wrong pick"}
+                           
+                            {q.answerType !== "text-area" ?  (isCorrectPick ? "Correct pick" : "Wrong pick"): "See correct answer!"}
+
                           </Tag>
+                          </>
                         )}
                       </List.Item>
                     );

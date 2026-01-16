@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
 import type { Exercise } from "../../../types/index.types";
 import KnowledgeCheckHeader from "./components/KnowledgeCheckHeader";
 import QuestionSection from "./components/QuestionSection";
 import QuestionNavigation from "./components/QuestionNavigation";
 import KnowledgeCheckResults from "./components/KnowledgeCheckResults";
-import { useLocation } from "react-router-dom";
 import { api } from "../../../utils/api";
 
 export default function KnowledgeCheckPage() {
@@ -17,37 +17,34 @@ export default function KnowledgeCheckPage() {
   const [showResults, setShowResults] = useState(false);
   const [exercise, setExercise] = useState<Exercise>();
 
-  const currentQuestion = exercise?.questions[currentIndex];
-  const isAnswered = currentQuestion ? !!userAnswers[currentQuestion.id] : false;
-
-  // get exercise ID from URL params
   const location = useLocation();
   const { exerciseId } = location.state || {};
 
-  // fetch questions based on exerciseId
-  useEffect(() => {
-    if (exerciseId) {
-      const fetchQuestions = async () => {
-        try {
-          const res = await api.get(`/exercises/${exerciseId}`);
-          setExercise(res.data);
-        } catch (err) {
-          console.error("❌ Error fetching questions:", err);
-        }
-      };
+  const currentQuestion = exercise?.questions[currentIndex];
+  const isAnswered = currentQuestion ? !!userAnswers[currentQuestion.id] : false;
 
-      fetchQuestions();
-    }
+  useEffect(() => {
+    if (!exerciseId) return;
+
+    const fetchExercise = async () => {
+      try {
+        const res = await api.get(`/exercises/${exerciseId}`);
+        setExercise(res.data);
+      } catch (err) {
+        console.error("Error fetching exercise:", err);
+      }
+    };
+
+    fetchExercise();
   }, [exerciseId]);
 
   const handleAnswer = (value: any) => {
-    if (currentQuestion) {
-      setUserAnswers((prev) => ({ ...prev, [currentQuestion.id]: value }));
-    }
+    if (!currentQuestion) return;
+    setUserAnswers((prev) => ({ ...prev, [currentQuestion.id]: value }));
   };
 
   const handleNext = () => {
-    if (currentIndex < (exercise?.questions.length || 0) - 1) {
+    if (currentIndex < (exercise?.questions.length ?? 0) - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
       handleSubmit();
@@ -60,57 +57,33 @@ export default function KnowledgeCheckPage() {
     }
   };
 
-  // Submit answers
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      await api.post(`/submissions`, { exerciseId, answers: userAnswers });
+      await api.post(`/submissions`, {
+        exerciseId,
+        answers: userAnswers,
+      });
       setShowResults(true);
-      setIsSubmitting(false);
     } catch (err) {
       console.error(err);
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleFinish = () => {
-    // go to the knowledge checks list page
-    window.history.back();
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#f5f7fa",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 750,
-          margin: "0 auto",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+    <div className="min-h-screen bg-[#F7F8FA] px-4 py-8">
+      <div className="mx-auto flex w-full max-w-3xl flex-col">
         <AnimatePresence mode="wait">
           {!showResults ? (
-            <motion.div
-              key="quiz"
-              initial={{ opacity: 0, y: 20 }}
+            <motion.section
+              key="questions"
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.25rem",
-                paddingBottom: "1.5rem",
-              }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="flex flex-col gap-6"
             >
               <KnowledgeCheckHeader
                 current={currentIndex + 1}
@@ -118,21 +91,16 @@ export default function KnowledgeCheckPage() {
                 answeredCount={Object.keys(userAnswers).length}
               />
 
-              <div
-                style={{
-                  backgroundColor: "#ffffff",
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
+              {/* Question Card */}
+              <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <QuestionSection
                   question={currentQuestion}
                   index={currentIndex}
                   total={exercise?.questions.length}
                   userAnswer={
-                    currentQuestion ? userAnswers[currentQuestion.id] : undefined
+                    currentQuestion
+                      ? userAnswers[currentQuestion.id]
+                      : undefined
                   }
                   setUserAnswer={handleAnswer}
                 />
@@ -146,28 +114,17 @@ export default function KnowledgeCheckPage() {
                 onPrev={handlePrev}
                 isSubmitting={isSubmitting}
               />
-            </motion.div>
+            </motion.section>
           ) : (
-            <motion.div
+            <motion.section
               key="results"
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.5rem",
-                paddingBottom: "1.5rem",
-              }}
+              exit={{ opacity: 0, y: -24 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="flex flex-col gap-8"
             >
-              <div
-                style={{
-                  backgroundColor: "#ffffff",
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                }}
-              >
+              <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <KnowledgeCheckResults
                   name={exercise?.name}
                   questions={exercise?.questions || []}
@@ -175,60 +132,27 @@ export default function KnowledgeCheckPage() {
                 />
               </div>
 
-              <div
-                style={{
-                  textAlign: "center",
-                }}
-              >
+              <div className="flex justify-center">
                 <Button
                   size="large"
-                  type="primary"
-                  className="regular-btn"
-                  style={{
-                    borderRadius: 10,
-                    padding: "0 2.5rem",
-                    fontWeight: 500,
-                    boxShadow: "0 4px 12px rgba(24, 144, 255, 0.25)",
-                  }}
-                  onClick={() => handleFinish()}
+                  className="
+                    regular-btn
+                    px-12
+                    py-2.5
+                    text-base
+                    rounded-lg
+                    shadow-sm
+                    hover:shadow-md
+                  "
+                  onClick={() => window.history.back()}
                 >
                   Finish
                 </Button>
               </div>
-            </motion.div>
+            </motion.section>
           )}
         </AnimatePresence>
       </div>
-
-      {/* Responsive styles */}
-      <style>{`
-        @media (max-width: 768px) {
-          .ant-btn-lg {
-            width: 100%;
-            max-width: 280px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ant-btn-lg {
-            max-width: 100%;
-          }
-        }
-
-        /* Smooth transitions for all interactive elements */
-        .regular-btn {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .regular-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(24, 144, 255, 0.35) !important;
-        }
-
-        .regular-btn:active {
-          transform: translateY(0);
-        }
-      `}</style>
     </div>
   );
 }
